@@ -114,7 +114,9 @@ app.get('/manager', function(request, response) {
 
 exports.getUserInfo = function() {
     return {
-
+      username: username,
+      staffID: staffID,
+      staffType: staffType
     };
 };
 
