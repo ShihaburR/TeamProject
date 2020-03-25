@@ -35,7 +35,7 @@ class Login extends Component {
           staffdata.push(response.data.staffType);
           staffdata.push(response.data.username);
           staffdata.push(response.data.staffID);
-          //setStaffInfo(staffdata);
+          this.props.setStaffInfo(staffdata);
           this.setState({signedIn: true});
         }
       })
@@ -51,9 +51,9 @@ class Login extends Component {
   //display the front end for us
   render(){
     if(this.state.signedIn){
-      return <Redirect to = {{pathname: "/mainMenu"}}>
-        <MainMenu staffType={staffdata[0]} staffName={staffdata[1]} staffID={staffdata[2]}/>
-      </Redirect>;
+      return <Redirect to = {{pathname: "/mainMenu"}}/>
+        {/*<MainMenu staffType={staffdata[0]} staffName={staffdata[1]} staffID={staffdata[2]}/>
+    </Redirect>;*/}
     } else {
       return (
       <div class = "background">

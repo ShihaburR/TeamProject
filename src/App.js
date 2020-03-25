@@ -35,7 +35,7 @@ import ViewStaff from './components/viewStaff';
 import Login from './components/login';
 
 let paymentAmount = 3000;
-let staffName = '', staffID = '', staffType = 1;
+//let staffName = '', staffID = '', staffType = 1;
 
 class App extends Component {
   constructor(props){
@@ -46,6 +46,7 @@ class App extends Component {
         staffType: 1
     }
   }
+  
     setStaffInfo(param) {
      this.staffType = param[0];
      this.staffName = param[1];
@@ -57,7 +58,7 @@ class App extends Component {
        <div className="App">
            <Router>
              <Switch>
-               <Route path="/" component={Login} exact/>
+               <Route path="/" component={Login} exact setStaffInfo={setStaffInfo}/>
                <Route exact path="/viewBlank">
                  <ViewBlank staffType={staffType} staffName="Placeholder Name" staffID="Placeholder ID"/>
                </Route>
