@@ -1,8 +1,9 @@
 import React, { useState, Component, useEffect } from 'react';
 import planeheader from './planeheader.jpg';
 import moment from 'moment';
-
-
+import {NavLink, Redirect} from "react-router-dom";
+import Login from './login';
+import axios from 'axios';
 
 function Header(props) {
     //const [dateTime, setDateTime] = useState(new Date());
@@ -21,6 +22,15 @@ function Header(props) {
             return () => clearInterval(interval);
     },[])
 
+    const logout = () => {
+      alert("Signing out of System, Goodbye " + props.staffName);
+        axios.get('http://localhost:5000/logout')
+          .then(response => {})
+          .catch(function(error) {
+            console.log(error);
+          });
+    }
+
   return (
     <div id="header-wrapper">
         <div id="header-details">
@@ -28,7 +38,7 @@ function Header(props) {
                 <li><a><b>{props.staffType}</b></a></li>
                 <li><a>Name: {props.staffName}</a></li>
                 <li><a>Staff ID: {props.staffID}</a></li>
-                <li><button type="button" class="logout-button">Log out</button></li>
+                <li><NavLink to="/"><button type="button" class="logout-button" onClick ={logout}>Log out</button></NavLink></li>
             </ul>
         </div>
         <div id="datetime">

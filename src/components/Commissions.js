@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import Header from "./header";
+import {NavLink} from 'react-router-dom';
 
 function Commissions(props) {
   // Creating states and setter methods
@@ -58,6 +59,7 @@ function Commissions(props) {
             <button type ="button" class="page-button"
             onClick={handleClick.bind(this)}>Submit</button>
           </form>
+          <NavLink to="/mainMenu"><button type="button" class="menu-button">Cancel</button></NavLink>
       </div>
       </body>
   )

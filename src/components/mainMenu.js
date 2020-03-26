@@ -79,23 +79,23 @@ function ManagerMenu() {
 function MainMenu(props) {
 
     switch (props.staffType) {
-        case 1:
+        case "Advisor":
             return (
                 <body>
                     <Header staffType={props.staffType} staffName={props.staffName} staffID={props.staffID}/>
                     <AdvisorMenu />
                 </body>
                 );
-        
-        case 2:
+
+        case "Admin":
             return (
                 <body>
                     <Header staffType={props.staffType} staffName={props.staffName} staffID={props.staffID}/>
                     <AdminMenu />
                 </body>
                 );
-        
-        case 3:
+
+        case "Office Manager":
             return (
                 <body>
                     <Header staffType={props.staffType} staffName={props.staffName} staffID={props.staffID}/>
@@ -106,6 +106,7 @@ function MainMenu(props) {
             return (
                 <h1>ERROR, NO STAFFTYPE FOUND</h1>
             )
+
     }
 }
 

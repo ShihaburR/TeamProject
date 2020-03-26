@@ -38,16 +38,18 @@ import Login from './components/login';
 // No props are being passed into this component so there's no need to pass in a props param.
 function App() {
   // This useState hook takes in an array of 2, the first value being the state and the second being the function used to change the value of the state, the useState() function sets the state and passes the states initial value.
-  const [staffName, setStaffName] = useState('');
-  const [staffID, setStaffID] = useState('');
-  const [staffType, setStaffType] = useState(1);
-  const [paymentAmount, setPaymentAmount] = useState(3000);
+  let [staffName, setStaffName] = useState('');
+  let [staffID, setStaffID] = useState('');
+  let [staffType, setStaffType] = useState('');
+  let [paymentAmount, setPaymentAmount] = useState(3000);
+  let [staffData, setData] = useState('');
 
   // This is a the callback function used to retrieve the staffInfo Array which contains the staff information displayed on the top of every page.
-  const setStaffInfo = (param) => {
-    setStaffType(param[0]);
-    setStaffName(param[1]);
-    setStaffID(param[2]);
+  const getStaffInfo = (data) => {
+    setData(data);
+    setStaffType(data[0]);
+    setStaffID(data[2]);
+    setStaffName(data[1]);
   }
 
   return (
@@ -55,7 +57,7 @@ function App() {
         <Router>
           <Switch>
             <Route exact path="/">
-              <Login setStaffInfo={setStaffInfo}/>
+              <Login getStaffInfo={getStaffInfo}/>
             </Route>
             <Route exact path="/viewBlank">
               <ViewBlank staffType={staffType} staffName={staffName} staffID={staffID}/>

@@ -41,7 +41,7 @@ app.post('/login', function(request, response) {
   username = request.body.username;
   var password = request.body.password;
   console.log("Request recieved to server");
-  var sql = "SELECT * FROM staff WHERE email = ? AND password = ?"
+  var sql = "SELECT * FROM staff WHERE email = ? AND password = ? AND Active = 'yes'";
 	if (username && password) {
 		db.query(sql, [username, password], (error, result) => {
     //console.log(result);
@@ -63,7 +63,6 @@ app.post('/login', function(request, response) {
 });
 //check what type of user we have
 app.get('/auth', function(request, response) {
-  console.log(email);
   var sql = "(SELECT staffType FROM staff S, staffType ST WHERE " +
   "S.staffTypeID = ST.staffTypeID AND email = ?)"
   console.log("Authenticating");
@@ -92,33 +91,22 @@ app.get('/auth', function(request, response) {
 
 // these gets will load the designated home pages
 app.get('/advisor', function(request, response) {
-  console.log("Welcome " + username + " Title: " + staffType);
   response.status(200).send({username: username,
   staffID: staffID, staffType: staffType})
 	response.end();
 });
 
 app.get('/admin', function(request, response) {
-  console.log("Welcome " + username + " Title: " + staffType);
   response.status(200).send({username: username,
   staffID: staffID, staffType: staffType})
 	response.end();
 });
 
 app.get('/manager', function(request, response) {
-  console.log("Welcome " + username + " Title: " + staffType);
   response.status(200).send({username: username,
   staffID: staffID, staffType: staffType})
 	response.end();
 });
-
-exports.getUserInfo = function() {
-    return {
-      username: username,
-      staffID: staffID,
-      staffType: staffType
-    };
-};
 
 //rates section
 app.post('/commissions', function(request, response) {
@@ -213,6 +201,12 @@ app.post('/removeExchangeRate', function(request, response) {
       });
     }
   });
+});
+
+app.get('/logout', function(request, response) {
+  console.log("Logout initiatied for User: " + username + "- redirecting to login");
+  username = ""; staffType = ""; staffID = ""; email="";
+  response.sendStatus(200);
 });
 
 app.listen(port, () => console.log(`Backend app started on port ${port}!`));

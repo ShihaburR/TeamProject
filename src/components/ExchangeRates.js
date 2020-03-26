@@ -1,6 +1,8 @@
 import React, {Component, useState} from 'react';
 import axios from 'axios';
 import Header from "./header";
+import {NavLink} from "react-router-dom";
+
 
 function ExchangeRates(props) {
   const [eCode, setECode] = useState('');
@@ -150,11 +152,11 @@ function ExchangeRates(props) {
       <div>
         <Header staffType={props.staffType} staffName={props.staffName} staffID={props.staffID}/>
         <h1> Exchange Rates </h1>
-        <button onClick={handleUpdate}>Update an existing Exchange Rate</button>
+        <button onClick={handleUpdate} class="menu-button">Update an existing Exchange Rate</button>
+        <button onClick={handleInsert} class="menu-button">Insert an Exchange Rate</button>
+        <button onClick={handleDelete} class="menu-button">Delete an existing Exchange Rate</button>
         <br/> <br/>
-        <button onClick={handleInsert}>Insert an Exchange Rate</button>
-        <br/> <br/>
-        <button onClick={handleDelete}>Delete an existing Exchange Rate</button>
+        <NavLink to="/mainMenu"><button type="button" class="menu-button">Cancel</button></NavLink>
       </div>)
    } else if(insert){
      return (

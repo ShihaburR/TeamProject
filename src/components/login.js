@@ -3,7 +3,6 @@ import axios from 'axios';
 import Background from './loginBK.jpg';
 //mainMenu imports
 import {Redirect} from "react-router-dom";
-import Header from "./header";
 //staff data syntax [staffType, staff's name, staffID]
 
 let staffdata = [];
@@ -25,11 +24,11 @@ function Login(props) {
         console.log(response);
         //if the login was successful it will return a 200 code which means OK
         if (response.status === 200) {
-          alert("Welcome")
+          alert("Welcome " + response.data.username);
           staffdata.push(response.data.staffType);
           staffdata.push(response.data.username);
           staffdata.push(response.data.staffID);
-          props.setStaffInfo(staffdata);
+          props.getStaffInfo(staffdata);
           setSignedIn(true);
         }
       })
@@ -40,6 +39,7 @@ function Login(props) {
     setUsername('');
     setPassword('');
     console.log(staffdata);
+    staffdata = [];
   }
 
   //display the front end for us
