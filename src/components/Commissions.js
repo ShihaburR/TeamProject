@@ -1,20 +1,19 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 import styles from './default.css';
+import Header from "./header";
 
-class Commissions extends Component {
-  constructor(props){
-    super(props);
-    //this is where the username and password is stored for the backend
-    this.state = {salesID: '', cRate: 0.0};
-  }
+function Commissions(props) {
+  // Creating states and setter methods
+  const [salesID, setSalesID] = useState('');
+  const [cRate, setCRate] = useState(0.0);
 
   //this click event will do a post request for the server
-  handleClick(e) {
+  const handleClick = (e) => {
     e.preventDefault();
     axios.post('http://localhost:5000/commissions', {
-        salesID: this.ID.value,
-        cRate: this.rate.value
+        salesID: salesID,
+        cRate: cRate
     })
       .then(response => {
         console.log(response);
@@ -35,8 +34,9 @@ class Commissions extends Component {
   }
 
   //display the front end for us
-  render(){
-    return (
+  return (
+      <body>
+      <Header staffType={props.staffType} staffName={props.staffName} staffID={props.staffID}/>
       <div class = "indexbody">
         <h1>Change Commission Rates</h1>
           <form class = "mainmenu">
@@ -45,7 +45,7 @@ class Commissions extends Component {
                 type="number"
                 name="salesID"
                 id ="salesID"
-                ref = { inputid => this.ID = inputid}/>
+                value={salesID} required onChange={(e) => setSalesID(e.target.value)}/>
             </label>
             <br/>
             <label> Commission Rate:
@@ -53,14 +53,15 @@ class Commissions extends Component {
                 type="double"
                 name="commission"
                 id ="commission"
-                ref = {inrate => this.rate = inrate}/>
+                value={cRate} required onChange={(e) => setCRate(e.target.valueAsNumber)}/>
             </label>
             <br/> <br/>
             <button type ="button" class="page-button"
-            onClick={this.handleClick.bind(this)}>Submit</button>
+            onClick={handleClick.bind(this)}>Submit</button>
           </form>
       </div>
-    )
-  }
+      </body>
+  )
 }
+
 export default Commissions;

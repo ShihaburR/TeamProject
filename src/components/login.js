@@ -1,31 +1,25 @@
-import React, {Component} from 'react';
+import React, {useState} from 'react';
 import axios from 'axios';
 import Background from './loginBK.jpg';
 //mainMenu imports
-import setStaffInfo from '../App.js';
-import ReactDOM from "react-dom";
 import {Redirect} from "react-router-dom";
-import MainMenu from './mainMenu';
+import Header from "./header";
 //staff data syntax [staffType, staff's name, staffID]
-var staffdata = [];
 
-class Login extends Component {
-  constructor(props){
-    super(props);
-    //this is where the username and password is stored for the backend
-    this.state = {
-      username: '',
-      password: '',
-      signedIn: false
-    };
-  }
+let staffdata = [];
+
+function Login(props) {
+  // Creating states and setter methods
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [signedIn, setSignedIn] = useState(false);
 
   //this click event will do a post request for the server
-  handleClick(e) {
+  const handleClick = (e) => {
     e.preventDefault();
     axios.post('http://localhost:5000/login', {
-        username: this.inputuser.value,
-        password: this.inputpassword.value
+        username: username,
+        password: password
     })
       .then(response => {
         console.log(response);
@@ -35,51 +29,50 @@ class Login extends Component {
           staffdata.push(response.data.staffType);
           staffdata.push(response.data.username);
           staffdata.push(response.data.staffID);
-          this.props.setStaffInfo(staffdata);
-          this.setState({signedIn: true});
+          props.setStaffInfo(staffdata);
+          setSignedIn(true);
         }
       })
       .catch(function(error) {
         console.log(error);
         alert("Login failed please try again");
     });
-    this.inputuser.value = '';
-    this.inputpassword.value = '';
+    setUsername('');
+    setPassword('');
     console.log(staffdata);
   }
 
   //display the front end for us
-  render(){
-    if(this.state.signedIn){
-      return <Redirect to = {{pathname: "/mainMenu"}}/>
-        {/*<MainMenu staffType={staffdata[0]} staffName={staffdata[1]} staffID={staffdata[2]}/>
-    </Redirect>;*/}
-    } else {
+  if(signedIn){
+    return <Redirect to = {{pathname: "/mainMenu"}}/>
+  } else {
       return (
-      <div class = "background">
-          <form class = "loginForm">
-            <label> Username:
-              <input
-                type="text"
-                name="username"
-                id ="username"
-                ref = { inuser => this.inputuser = inuser}/>
-            </label>
-            <br/>
-            <label> Password:
-              <input
-                type="password"
-                name="password"
-                id ="password"
-                ref = {inpass => this.inputpassword = inpass}/>
-            </label>
-          </form>
-          <button type ="button" class="loginButton"
-          onClick={this.handleClick.bind(this)}>Login</button>
-        <img class="logo" src ={require("./logo.jpg")} alt =""/>
-      </div>
-    )
-    }
+          <body>
+            <Header staffType={props.staffType} staffName={props.staffName} staffID={props.staffID}/>
+            <div class = "background">
+                  <form class = "loginForm">
+                    <label> Username:
+                      <input
+                        type="text"
+                        name="username"
+                        id ="username"
+                        value={username} required onChange={(e) => setUsername(e.target.value)}/>
+                    </label>
+                    <br/>
+                    <label> Password:
+                      <input
+                        type="password"
+                        name="password"
+                        id ="password"
+                        value={password} required onChange={(e) => setPassword(e.target.value)}/>
+                    </label>
+                  </form>
+                  <button type ="button" class="loginButton"
+                  onClick={handleClick.bind(this)}>Login</button>
+                <img class="logo" src ={require("./logo.jpg")} alt =""/>
+              </div>
+          </body>
+  )
   }
 }
 
