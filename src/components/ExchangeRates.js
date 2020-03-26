@@ -1,25 +1,21 @@
-import React, { Component } from 'react';
+import React, {Component, useState} from 'react';
 import axios from 'axios';
 
-class ExchangeRates extends Component {
-  constructor(props){
-    super(props);
-    //this is where the username and password is stored for the backend
-    this.state = {
-      eCode: '',
-      eRate: 0.0,
-      eName: '',
-      visible: true,
-      mainMenu: true,
-      insert: false,
-      update: false,
-      delete: false
-    };
-  }
+function ExchangeRates() {
+  const [eCode, setECode] = useState('');
+  const [eRate, setERate] = useState(0.0);
+  const [eName, setEName] = useState('');
+  const [visible, setVisible] = useState(true);
+  const [mainMenu, setMainMenu] = useState(true);
+  const [insert, setInsert] = useState(false);
+  const [update, setUpdate] = useState(false);
+  const [dlt, setDlt] = useState(false);
+
 
   //these handle requests allow the change of renders on the same component
-  handleInsert = () => {
-    this.setState({insert: true, mainMenu: false})
+  const handleInsert = () => {
+    setInsert(true);
+    setMainMenu(false);
     return (
       <div>
         <h1>Change Exchange Rates</h1>
@@ -30,7 +26,8 @@ class ExchangeRates extends Component {
                 name="exchangeCode"
                 id ="exchangeCode"
                 maxLength="3"
-                ref = { inputCode => this.code = inputCode}/>
+                value={eCode}
+                required onChange={(e) => setECode(e.target.value)}/>
             </label>
             <br/>
             <label> Exchange Rate:
@@ -39,7 +36,8 @@ class ExchangeRates extends Component {
                 name="value"
                 id ="value"
                 step ="0.01"
-                ref = {invalue => this.rate = invalue}/>
+                value={eRate}
+                required onChange={(e) => setERate(e.target.valueAsNumber)}/>
             </label>
             <br/>
             <label> Country Name:
@@ -47,35 +45,41 @@ class ExchangeRates extends Component {
                 type="text"
                 name="country"
                 id ="country"
-                ref = {incountry => this.name = incountry}/>
+                value={eName}
+                required onChange={(e) => setEName(e.target.value)}/>
             </label>
             <br/>
-            <input type="submit" value="Enter" onClick={this.handleClick.bind(this)}/>
+            <input type="submit" value="Enter" onClick={handleClick.bind(this)}/>
           </form>
       </div>
     )
   }
 
-  handleUpdate = () => {
-    this.setState({update: true, mainMenu: false})
+  const handleUpdate = () => {
+    setUpdate(true);
+    setMainMenu(false);
   }
 
-  handleDelete = () => {
-    this.setState({delete: true, mainMenu: false})
+  const handleDelete = () => {
+    setDlt(true);
+    setMainMenu(false);
   }
 
-  handleMainMenu = () => {
-    this.setState({insert: false, update: false, delete: false, mainMenu: true})
+  const handleMainMenu = () => {
+    setInsert(false);
+    setUpdate(false);
+    setDlt(false);
+    setMainMenu(true);
   }
 
   //this click event will do a post request for the server
-  handleClick(e) {
+  const handleClick = (e) => {
     e.preventDefault();
-    if(this.state.insert){
+    if(insert){
       axios.post('http://localhost:5000/addExchangeRate', {
-          eCode: this.code.value,
-          eRate: this.rate.value,
-          eName: this.name.value
+          eCode: eCode,
+          eRate: eRate,
+          eName: eName
       })
         .then(response => {
           console.log(response);
@@ -90,11 +94,11 @@ class ExchangeRates extends Component {
             "Either update or enter a different Exchange Code");
           } else {alert("Error please enter your details again");}
       });
-    } else if(this.state.update){
+    } else if(update){
       axios.post('http://localhost:5000/updateExchangeRate', {
-          eCode: this.code.value,
-          eRate: this.rate.value,
-          eName: this.name.value
+          eCode: eCode,
+          eRate: eRate,
+          eName: eName
       })
         .then(response => {
           console.log(response);
@@ -111,9 +115,9 @@ class ExchangeRates extends Component {
           alert("Error please enter your details again");
           }
       });
-    } else if(this.state.delete){
+    } else if(dlt){
       axios.post('http://localhost:5000/removeExchangeRate', {
-          eCode: this.code.value
+          eCode: eCode
       })
         .then(response => {
           console.log(response);
@@ -134,117 +138,121 @@ class ExchangeRates extends Component {
         }
       });
     }
-    this.code.value = '';
-    this.rate.value = 0.0;
-    this.name.value = '';
+    setECode('');
+    setERate(0.0);
+    setEName('');
   }
 
-  render() {
-    if(this.state.mainMenu) {
-        return (
-        <div>
-          <h1> Exchange Rates </h1>
-          <button onClick={this.handleUpdate}>Update an existing Exchange Rate</button>
-          <br/> <br/>
-          <button onClick={this.handleInsert}>Insert an Exchange Rate</button>
-          <br/> <br/>
-          <button onClick={this.handleDelete}>Delete an existing Exchange Rate</button>
-        </div>)
-     } else if(this.state.insert){
-       return (
-         <div>
-           <h1>Insert Exchange Rates</h1>
-             <form>
-               <label> Exchange Rate Code:
-                 <input
-                   type="text"
-                   name="exchangeCode"
-                   id ="exchangeCode"
-                   maxLength="3"
-                   ref = { inputCode => this.code = inputCode}/>
-               </label>
-               <br/>
-               <label> Exchange Rate:
-                 <input
-                   type="number"
-                   name="value"
-                   id ="value"
-                   step ="0.01"
-                   ref = {invalue => this.rate = invalue}/>
-               </label>
-               <br/>
-               <label> Country Name:
-                 <input
-                   type="text"
-                   name="country"
-                   id ="country"
-                   ref = {incountry => this.name = incountry}/>
-               </label>
-               <br/>
-               <input type="submit" value="Enter" onClick={this.handleClick.bind(this)}/>
-             </form>
-           <button onClick={this.handleMainMenu}>Return to Main Menu</button>
-         </div>
-       )
-     } else if(this.state.update){
-       return (
-         <div>
-           <h1>Update Exchange Rates</h1>
-             <form>
-               <label> Exchange Rate Code:
-                 <input
-                   type="text"
-                   name="exchangeCode"
-                   id ="exchangeCode"
-                   maxLength="3"
-                   ref = { inputCode => this.code = inputCode}/>
-               </label>
-               <br/>
-               <label> Exchange Rate:
-                 <input
-                   type="number"
-                   name="value"
-                   id ="value"
-                   step ="0.01"
-                   ref = {invalue => this.rate = invalue}/>
-               </label>
-               <br/>
-               <label> Country Name:
-                 <input
-                   type="text"
-                   name="country"
-                   id ="country"
-                   ref = {incountry => this.name = incountry}/>
-               </label>
-               <br/>
-               <input type="submit" value="Update" onClick={this.handleClick.bind(this)}/>
-             </form>
-           <button onClick={this.handleMainMenu}>Return to Main Menu</button>
-         </div>
-       )
-     } else if(this.state.delete){
-       return (
-         <div>
-           <h1>Delete Exchange Rates</h1>
-             <form>
-               <label> Exchange Rate Code:
-                 <input
-                   type="text"
-                   name="exchangeCode"
-                   id ="exchangeCode"
-                   maxLength="3"
-                   ref = { inputCode => this.code = inputCode}/>
-               </label>
-               <label ref = {inR => this.rate = inR}></label>
-               <label ref = {inC => this.name = inC}></label>
-               <br/>
-               <input type="submit" value="Delete" onClick={this.handleClick.bind(this)}/>
-             </form>
-           <button onClick={this.handleMainMenu}>Return to Main Menu</button>
 
-         </div>
-       )
-     }
+  if(mainMenu) {
+      return (
+      <div>
+        <h1> Exchange Rates </h1>
+        <button onClick={handleUpdate}>Update an existing Exchange Rate</button>
+        <br/> <br/>
+        <button onClick={handleInsert}>Insert an Exchange Rate</button>
+        <br/> <br/>
+        <button onClick={handleDelete}>Delete an existing Exchange Rate</button>
+      </div>)
+   } else if(insert){
+     return (
+       <div>
+         <h1>Insert Exchange Rates</h1>
+           <form>
+             <label> Exchange Rate Code:
+               <input
+                 type="text"
+                 name="exchangeCode"
+                 id ="exchangeCode"
+                 maxLength="3"
+                 value={eCode}
+                 required onChange={(e) => setECode(e.target.value)}/>
+             </label>
+             <br/>
+             <label> Exchange Rate:
+               <input
+                 type="number"
+                 name="value"
+                 id ="value"
+                 step ="0.01"
+                 value={eRate}
+                 required onChange={(e) => setERate(e.target.valueAsNumber)}/>
+             </label>
+             <br/>
+             <label> Country Name:
+               <input
+                 type="text"
+                 name="country"
+                 id ="country"
+                 value={eName}
+                 required onChange={(e) => setEName(e.target.value)}/>
+             </label>
+             <br/>
+             <input type="submit" value="Enter" onClick={handleClick.bind(this)}/>
+           </form>
+         <button onClick={handleMainMenu}>Return to Main Menu</button>
+       </div>
+     )
+   } else if(update){
+     return (
+       <div>
+         <h1>Update Exchange Rates</h1>
+           <form>
+             <label> Exchange Rate Code:
+               <input
+                 type="text"
+                 name="exchangeCode"
+                 id ="exchangeCode"
+                 maxLength="3"
+                 value={eCode}
+                 required onChange={(e) => setECode(e.target.value)}/>
+             </label>
+             <br/>
+             <label> Exchange Rate:
+               <input
+                 type="number"
+                 name="value"
+                 id ="value"
+                 step ="0.01"
+                 value={eRate}
+                 required onChange={(e) => setERate(e.target.valueAsNumber)}/>
+             </label>
+             <br/>
+             <label> Country Name:
+               <input
+                 type="text"
+                 name="country"
+                 id ="country"
+                 value={eName}
+                 required onChange={(e) => setEName(e.target.value)}/>
+             </label>
+             <br/>
+             <input type="submit" value="Update" onClick={handleClick.bind(this)}/>
+           </form>
+         <button onClick={handleMainMenu}>Return to Main Menu</button>
+       </div>
+     )
+   } else if(dlt){
+     return (
+       <div>
+         <h1>Delete Exchange Rates</h1>
+           <form>
+             <label> Exchange Rate Code:
+               <input
+                 type="text"
+                 name="exchangeCode"
+                 id ="exchangeCode"
+                 maxLength="3"
+                 value={eCode} required onChange={(e) => setECode(e.target.value)}/>
+             </label>
+             <label value={eRate} required onChange={(e) => setERate(e.target.valueAsNumber)}></label>
+             <label value={eName} required onChange={(e) => setEName(e.target.value)}></label>
+             <br/>
+             <input type="submit" value="Delete" onClick={handleClick.bind(this)}/>
+           </form>
+         <button onClick={handleMainMenu}>Return to Main Menu</button>
+       </div>
+     )
    }
  }
 
