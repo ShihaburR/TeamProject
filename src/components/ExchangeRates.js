@@ -1,7 +1,8 @@
 import React, {Component, useState} from 'react';
 import axios from 'axios';
+import Header from "./header";
 
-function ExchangeRates() {
+function ExchangeRates(props) {
   const [eCode, setECode] = useState('');
   const [eRate, setERate] = useState(0.0);
   const [eName, setEName] = useState('');
@@ -147,6 +148,7 @@ function ExchangeRates() {
   if(mainMenu) {
       return (
       <div>
+        <Header staffType={props.staffType} staffName={props.staffName} staffID={props.staffID}/>
         <h1> Exchange Rates </h1>
         <button onClick={handleUpdate}>Update an existing Exchange Rate</button>
         <br/> <br/>
@@ -157,6 +159,7 @@ function ExchangeRates() {
    } else if(insert){
      return (
        <div>
+         <Header staffType={props.staffType} staffName={props.staffName} staffID={props.staffID}/>
          <h1>Insert Exchange Rates</h1>
            <form>
              <label> Exchange Rate Code:
@@ -196,6 +199,7 @@ function ExchangeRates() {
    } else if(update){
      return (
        <div>
+         <Header staffType={props.staffType} staffName={props.staffName} staffID={props.staffID}/>
          <h1>Update Exchange Rates</h1>
            <form>
              <label> Exchange Rate Code:
@@ -235,6 +239,7 @@ function ExchangeRates() {
    } else if(dlt){
      return (
        <div>
+         <Header staffType={props.staffType} staffName={props.staffName} staffID={props.staffID}/>
          <h1>Delete Exchange Rates</h1>
            <form>
              <label> Exchange Rate Code:

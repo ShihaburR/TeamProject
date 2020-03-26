@@ -48,7 +48,6 @@ function Login(props) {
   } else {
       return (
           <body>
-            <Header staffType={props.staffType} staffName={props.staffName} staffID={props.staffID}/>
             <div class = "background">
                   <form class = "loginForm">
                     <label> Username:

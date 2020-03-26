@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import styles from './default.css';
 import Header from "./header";
 
 function Commissions(props) {
