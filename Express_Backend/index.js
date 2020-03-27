@@ -88,8 +88,14 @@ app.get('/auth', function(request, response) {
   }
   });
 });
+//clears staff info and logouts user
+app.get('/logout', function(request, response) {
+  console.log("Logout initiatied for User: " + username + "- redirecting to login");
+  username = ""; staffType = ""; staffID = ""; email="";
+  response.sendStatus(200);
+});
 
-// these gets will load the designated home pages
+// these gets will send the staff info to designate home pages
 app.get('/advisor', function(request, response) {
   response.status(200).send({username: username,
   staffID: staffID, staffType: staffType})
@@ -108,6 +114,49 @@ app.get('/manager', function(request, response) {
 	response.end();
 });
 
+
+//createCustomer
+app.post('/createCustomer', function(request, response) {
+    var firstname = request.body.firstname;
+    var lastname = request.body.lastname;
+    var address = request.body.address;
+    var email = request.body.email;
+    var valued = request.body.valued;
+    var insert = "INSERT INTO customer(`name`, `surname`, `address`, `email`,`customerTypeId`," +
+    "`discountAmount` , `discountType`) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    //discount values in a seperate sql command
+    var drate = request.body.discountrate;
+    var dtype = request.body.discounttype;
+    var drateID = request.body.drateID;
+    var dtypeID = request.body.dtypeID;
+    var createDiscountType = "INSERT INTO discounttype(`discountTypeID`,`discountType`) VALUES (?,?)";
+    var createDiscountAmount = "INSERT INTO discountamount(`discountId`,`discountPercent`) VALUES (?,?)";
+
+    db.query(createDiscountType, [dtypeID, dtype], (error, result) => {
+        var string = JSON.stringify(result);
+        db.query(createDiscountAmount, [drateID, drate], (error, result) => {
+          var string = JSON.stringify(result);
+          db.query(insert, [firstname,lastname,address,email,valued,drateID,dtypeID], (error,result) => {
+             var string = JSON.stringify(result);
+             if(string.includes('"affectedRows":1')){
+               console.log("Customer created");
+               response.sendStatus(200);
+             }
+          })
+        });
+    });
+});
+
+app.get('/customers', function(request, response) {
+  var get = "SELECT * FROM customer"
+    db.query(get, (error,result) =>{
+      console.log(JSON.stringify(result));
+      response.status(200).send(JSON.stringify(result));
+      response.end();
+    });
+});
+
+
 //rates section
 app.post('/commissions', function(request, response) {
   var saleID = request.body.salesID;
@@ -125,7 +174,6 @@ app.post('/commissions', function(request, response) {
     }
   });
 });
-
 
 app.post('/updateExchangeRate', function(request, response) {
   var exchangeCode = request.body.eCode;
@@ -203,10 +251,5 @@ app.post('/removeExchangeRate', function(request, response) {
   });
 });
 
-app.get('/logout', function(request, response) {
-  console.log("Logout initiatied for User: " + username + "- redirecting to login");
-  username = ""; staffType = ""; staffID = ""; email="";
-  response.sendStatus(200);
-});
 
 app.listen(port, () => console.log(`Backend app started on port ${port}!`));
