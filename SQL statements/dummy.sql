@@ -42,3 +42,8 @@ INSERT INTO sales(`staffID`,`customerID`,`blankNumber`,`amount`,`amountUSD`,`tax
 VALUES ('3','2','404',640,654,10,'no','2020-03-24',1,1,'yes',4,'SWE', '2021-03-04');
 INSERT INTO sales(`staffID`,`customerID`,`blankNumber`,`amount`,`amountUSD`,`tax`,`isRefunded`,`payByDate`,`paymentTypeID`,`typeofFlightID`,`isPaid`,`commisionRate`,`exchangeRateCode`, `transactionDate`)
 VALUES ('4','2','204',115,130,10,'no','2020-03-24',1,1,'yes',4,'GBR', '2021-03-04');
+
+-----------------------------------------------------------------------------------------------
+INSERT INTO status(`statusID`,`status`) VALUES (1,'new');
+INSERT INTO blanktype(`blankTypeID`,`blankType`)
+VALUES (1, 444), (2, 440), (3, 420), (4, 201), (5,101)

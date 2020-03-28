@@ -117,6 +117,7 @@ app.get('/manager', function(request, response) {
 
 //createCustomer
 app.post('/createCustomer', function(request, response) {
+    //issue if discount id is the same it breaks.
     var firstname = request.body.firstname;
     var lastname = request.body.lastname;
     var address = request.body.address;
@@ -134,10 +135,13 @@ app.post('/createCustomer', function(request, response) {
 
     db.query(createDiscountType, [dtypeID, dtype], (error, result) => {
         var string = JSON.stringify(result);
+        console.log(string);
         db.query(createDiscountAmount, [drateID, drate], (error, result) => {
           var string = JSON.stringify(result);
+          console.log(string);
           db.query(insert, [firstname,lastname,address,email,valued,drateID,dtypeID], (error,result) => {
              var string = JSON.stringify(result);
+             console.log(string);
              if(string.includes('"affectedRows":1')){
                console.log("Customer created");
                response.sendStatus(200);
@@ -156,6 +160,79 @@ app.get('/customers', function(request, response) {
     });
 });
 
+//add a single blank
+app.post('/addBlank', function(request, response) {
+    var date = request.body.bDate;
+    var type = request.body.bType;
+    var n = request.body.bNumber;
+    var s = type.toString() + n
+    var num = parseInt(s);
+
+    var insert = "INSERT INTO blank(`blankNumber`,`couponAmount`,`statusID`,`recievedDate`," +
+    "`blankTypeID`, `isAssigned`, `assignedDate`)" +
+    "VALUES (?,1,1,?,?,'no',NULL)"
+    //console.log("Date: " + date);
+    //console.log("Type: " + type);
+    //console.log("Num: " + num);
+    var checkType = "SELECT blankTypeID FROM blanktype WHERE blankType = ?";
+    var exists = "SELECT * FROM blank WHERE blankNumber = ?"
+    db.query(checkType, [type], (error, result) => {
+      var packet = JSON.parse(JSON.stringify(result));
+      var bTypeID = packet[0].blankTypeID;
+
+      if(bTypeID > 0){
+        db.query(exists, [num], (error, result) => {
+          var string = JSON.stringify(result);
+          console.log(string);
+          if(string.length < 3){
+            db.query(insert, [num,date,bTypeID], (error, result) => {
+              var string = JSON.stringify(result);
+              if(string.includes('"affectedRows":1')){
+                console.log("Blank inserted");
+                response.sendStatus(200);
+              }
+            });
+          } else {
+            console.log("Blank already exists");
+            response.sendStatus(401);
+          }
+        });
+      }
+    });
+  });
+
+//add a bulk of blanks
+app.post('/addBulk', function(request, response) {
+  var date = request.body.bDate;
+  var type = request.body.bType;
+  var min = request.body.bMin;
+  var max = request.body.bMax;
+  var range = (max - min) + 1;
+  var values = []
+  var strType = type.toString();
+  var insert = "INSERT INTO blank(`blankNumber`,`couponAmount`,`statusID`,`recievedDate`," +
+  "`blankTypeID`, `isAssigned`) VALUES ?";
+  var checkType = "SELECT blankTypeID FROM blanktype WHERE blankType = ?";
+  db.query(checkType, [type], (error, result) => {
+    var packet = JSON.parse(JSON.stringify(result));
+    var bTypeID = packet[0].blankTypeID;
+    //creating the bulk to push to database
+    for(let n = 0; n < range; n++){
+      strN = min.toString();
+      values.push([parseInt(strType + strN.padStart(6,'0')), 1, 1, date, bTypeID,'no'])
+      parseInt(min);
+      min++;
+    }
+    db.query(insert, [values], (error, result) => {
+      var string = JSON.stringify(result);
+      var packet = JSON.parse(string);
+      console.log(string);
+      console.log("Blanks inserted");
+      response.sendStatus(200);
+    });
+    console.log(values);
+  });
+});
 
 //rates section
 app.post('/commissions', function(request, response) {

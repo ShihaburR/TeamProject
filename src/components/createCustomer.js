@@ -59,7 +59,7 @@ function CreateCustomer(props) {
         </ul>
         <ul>
           <li>
-            <label> Valued Customer (0 for valued, 1 for non-valued):</label>
+            <label> Valued Customer (1 for valued, 2 for non-valued):</label>
             <input value={valued} required onChange={(e) => setValue(e.target.value)}/>
           </li>
           <li>
