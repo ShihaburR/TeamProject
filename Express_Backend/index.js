@@ -153,14 +153,13 @@ app.post('/createCustomer', function(request, response) {
 
 app.get('/customers', function(request, response) {
   var get = "SELECT * FROM customer"
-    db.query(get, (error,result) =>{
-      console.log(JSON.stringify(result));
-      response.status(200).send(JSON.stringify(result));
+    db.query(get, (error,result) => {
+      response.status(200).send(result);
       response.end();
     });
 });
 
-//add a single blank
+//blanks
 app.post('/addBlank', function(request, response) {
     var date = request.body.bDate;
     var type = request.body.bType;
@@ -187,6 +186,8 @@ app.post('/addBlank', function(request, response) {
           if(string.length < 3){
             db.query(insert, [num,date,bTypeID], (error, result) => {
               var string = JSON.stringify(result);
+              console.log(error);
+              console.log(result);
               if(string.includes('"affectedRows":1')){
                 console.log("Blank inserted");
                 response.sendStatus(200);
@@ -201,7 +202,6 @@ app.post('/addBlank', function(request, response) {
     });
   });
 
-//add a bulk of blanks
 app.post('/addBulk', function(request, response) {
   var date = request.body.bDate;
   var type = request.body.bType;
@@ -232,6 +232,25 @@ app.post('/addBulk', function(request, response) {
     });
     console.log(values);
   });
+});
+
+app.post('/removeBlank', function(request, response) {
+  var number = request.body.bNumber;
+  console.log(number);
+  var del = "DELETE FROM blank WHERE blankNumber = ?"
+  db.query(del, [number], (error,result) => {
+    console.log("Error: " + error);
+    console.log("Result: " + result);
+    response.sendStatus(200);
+  });
+});
+
+app.get('/blanks', function(request, response) {
+  var get = "SELECT * FROM blank";
+    db.query(get, (error,result) => {
+      response.status(200).send(result);
+      response.end();
+    });
 });
 
 //rates section

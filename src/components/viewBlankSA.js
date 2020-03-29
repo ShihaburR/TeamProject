@@ -5,7 +5,6 @@ import { NavLink } from 'react-router-dom';
 
 function ViewBlankSA(props) {
   const [addblank , setBlankMenu] = useState(false);
-  const [removeblanks , setRemoveMenu] = useState(false);
   const [addbulk , setBulkMenu] = useState(false);
   const [mainMenu, setMainMenu] = useState(true);
   const [date, setDate] = useState("");
@@ -13,11 +12,11 @@ function ViewBlankSA(props) {
   const [bNumber, setNumber] = useState(0);
   const [bMin, setMin] = useState(0);
   const [bMax, setMax] = useState(0);
+  const [blanksData, setData] = useState("");
 
   //menu's navigation
   const showBlankMenu = () => {
       setBlankMenu(true);
-      setRemoveMenu(false);
       setBulkMenu(false);
       setMainMenu(false);
   }
@@ -25,14 +24,6 @@ function ViewBlankSA(props) {
   const showBulkMenu = () => {
       setBulkMenu(true);
       setBlankMenu(false);
-      setRemoveMenu(false);
-      setMainMenu(false);
-  }
-
-  const showRemoveMenu = () => {
-      setRemoveMenu(true);
-      setBlankMenu(false);
-      setBulkMenu(false);
       setMainMenu(false);
   }
 
@@ -40,9 +31,9 @@ function ViewBlankSA(props) {
       setMainMenu(true);
       setBlankMenu(false);
       setBulkMenu(false);
-      setRemoveMenu(false);
   }
 
+  //functions that access the database
   const addBlank = () => {
     console.log(date);
     axios.post('http://localhost:5000/addBlank', {
@@ -85,42 +76,68 @@ function ViewBlankSA(props) {
       });
   }
 
+  const getBlanks = () => {
+    axios.get('http://localhost:5000/blanks')
+      .then(response => {
+        console.log(response.data);
+        setData(response.data);
+      })
+      .catch(function(error) {
+        console.log(error);
+      });
+  }
+
+  const removeBlank = (number) => {
+    axios.post('http://localhost:5000/removeBlank', {
+      bNumber : number
+    })
+    .then(response => {
+      if(response.status === 200){
+        alert("Blank deleted");
+      }
+    })
+    .catch(function(error) {
+      console.log(error)
+    });
+  }
 
   if(mainMenu) {
     return (
       <body class="indexbody">
-
       <Header staffType={props.staffType} staffName={props.staffName} staffID={props.staffID}/>
-
       <div id="mainmenu">
-
-          <button type="button" class="page-button">View Blank Stock</button>
-
+          <button type="button" class="page-button" onClick={getBlanks}>View Blank Stock</button>
       </div>
-
       <div id="tablecontainerrefund">
-          <table align="center">
-              <tr>
-                  <th>List of Blanks</th>
-              </tr>
-              <tr>
-                  <td>test placeholder</td>
-              </tr>
-              <tr>
-                  <td>test placeholder</td>
-              </tr>
-              <tr>
-                  <td>test placeholder</td>
-              </tr>
-              <tr>
-                  <td>test placeholder</td>
-              </tr>
+        <table className="striped responsive-table">
+          <thead>
+            <tr>
+              <th>Blank Number</th>
+              <th>Recieved Date</th>
+              <th>Blank Type</th>
+              <th>Blank Assigned?</th>
+              <th>Assigned Date</th>
+              <th>Delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Array.isArray(blanksData) && blanksData.length > 0 && blanksData.map(r => (
+            <tr key={r.blankNumber} id={r.blankNumber}>
+              <td>{r.blankNumber}</td>
+              <td>{(r.recievedDate.toString()).slice(0,10)}</td>
+              <td align="center">{(r.blankNumber.toString()).slice(0,3)}</td>
+              <td align="center">{r.isAssigned}</td>
+              <td>{r.assignedDate}</td>
+              <td align="center"><button type="button" value={r.blankNumber}
+               onClick ={() => {removeBlank(r.blankNumber); getBlanks();}}>Delete</button></td>
+            </tr>
+            ))}
+          </tbody>
+        </table>
 
-          </table>
-          <button type="button" class="small-button" onClick= {showBlankMenu}>Add a Blank</button>
-          <button type="button" class="small-button" onClick = {showBulkMenu}>Add bulk of Blanks</button>
-          <button type="button" class="small-button" onclick = {showRemoveMenu}>Remove Unused</button>
-          <NavLink to="/mainMenu"><button type="button" class="small-button-right">Done</button></NavLink>
+        <button type="button" class="small-button" onClick= {showBlankMenu}>Add a Blank</button>
+        <button type="button" class="small-button" onClick = {showBulkMenu}>Add bulk of Blanks</button>
+        <NavLink to="/mainMenu"><button type="button" class="small-button-right">Done</button></NavLink>
       </div>
       </body>
     );
@@ -147,11 +164,12 @@ function ViewBlankSA(props) {
               </select>
             </li>
             <li>
+            //limit is 6
               <label>Blank Number:</label>
               <input type="text" pattern="{6,}"  value={bNumber} required onChange={(e) => setNumber(e.target.value)}/>
               <br/>
               <button type="button" class="small-button" onClick={addBlank}>Add</button>
-              <button type="button" class="small-button" onClick={showMainMenu}>Cancel</button>
+              <button type="button" class="small-button" onClick={() => {showMainMenu(); getBlanks()}}>Cancel</button>
             </li>
           </ul>
         </div>
@@ -188,14 +206,12 @@ function ViewBlankSA(props) {
              <input type="number" value={bMax} required onChange={(e) => setMax(e.target.value)}/>
                <br/>
                <button type="button" class="small-button" onClick={addBulk}>Add</button>
-               <button type="button" class="small-button" onClick={showMainMenu}>Cancel</button>
+               <button type="button" class="small-button" onClick={() => {showMainMenu(); getBlanks()}}>Cancel</button>
            </li>
          </ul>
        </div>
        </body>
      )
-  } else if(removeblanks){
-
   }
 }
 
