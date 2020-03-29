@@ -1,4 +1,4 @@
-import React, {Component, useState} from 'react';
+import React, {Component, useState, useEffect} from 'react';
 import axios from 'axios';
 import Header from './header';
 import { NavLink } from 'react-router-dom';
@@ -13,6 +13,11 @@ function ViewBlankSA(props) {
   const [bMin, setMin] = useState(0);
   const [bMax, setMax] = useState(0);
   const [blanksData, setData] = useState("");
+
+  //on startup will load blanks into table
+  useEffect(() => {
+    getBlanks();
+  }, []);
 
   //menu's navigation
   const showBlankMenu = () => {
@@ -101,6 +106,15 @@ function ViewBlankSA(props) {
     });
   }
 
+  const displayDate = (date) => {
+    if(date != null) {
+      date = date.toString().slice(0,10);
+      return (date);
+    } else {
+      return(date);
+    }
+  }
+
   if(mainMenu) {
     return (
       <body class="indexbody">
@@ -127,7 +141,7 @@ function ViewBlankSA(props) {
               <td>{(r.recievedDate.toString()).slice(0,10)}</td>
               <td align="center">{(r.blankNumber.toString()).slice(0,3)}</td>
               <td align="center">{r.isAssigned}</td>
-              <td>{r.assignedDate}</td>
+              <td>{displayDate(r.assignedDate)}</td>
               <td align="center"><button type="button" value={r.blankNumber}
                onClick ={() => {removeBlank(r.blankNumber); getBlanks();}}>Delete</button></td>
             </tr>

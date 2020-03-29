@@ -114,6 +114,13 @@ app.get('/manager', function(request, response) {
 	response.end();
 });
 
+app.get('/advisors', function(request, response) {
+  var get = "SELECT * FROM staff where staffTypeID = 1";
+  db.query(get, (error,result) => {
+    response.status(200).send(result);
+    response.end();
+  });
+});
 
 //createCustomer
 app.post('/createCustomer', function(request, response) {
@@ -247,6 +254,86 @@ app.post('/removeBlank', function(request, response) {
 
 app.get('/blanks', function(request, response) {
   var get = "SELECT * FROM blank";
+    db.query(get, (error,result) => {
+      response.status(200).send(result);
+      response.end();
+    });
+});
+
+app.post('/assignBlank', function(request, response) {
+  var id = request.body.id;
+  var number = request.body.bNumber;
+  //current date
+  let date = new Date().toISOString().slice(0, 10);
+
+  var assign = "INSERT INTO blankallocation(`staffID`,`blankNumber`) VALUES (?,?)";
+  var check = "SELECT * FROM blankallocation WHERE blankNumber = ?"
+  var update = "UPDATE blank SET ? WHERE ?"
+  db.query(check, [number], (error, result) => {
+    var string = JSON.stringify(result);
+    if(string.length < 3){
+      db.query(assign, [id,number], (error,result) => {
+        var string = JSON.stringify(result);
+        if(string.includes('"affectedRows":1')){
+          console.log("Blank assigned");
+          db.query(update, [{isAssigned : 'yes', assignedDate : date}, {blankNumber: number}],
+          (error, result) => {
+            var string = JSON.stringify(result);
+            if(string.includes('"affectedRows":1')){
+              response.sendStatus(200);
+            }
+          });
+        }
+      });
+    } else {
+      console.log("Blank already assigned");
+      response.sendStatus(401);
+    }
+  });
+});
+
+app.post('/reAssignBlank', function(request, response) {
+  var id = request.body.id;
+  var num = request.body.num;
+  var newID = request.body.newID;
+  let date = new Date().toISOString().slice(0, 10);
+
+  var reAssign = "UPDATE blankallocation SET staffID = ? WHERE blankAllocationId = ?";
+  var checkAssign = "SELECT blankAllocationId FROM blankallocation WHERE blankNumber = ?" +
+  "AND staffID = ?";
+  var updateBlank = "UPDATE blank SET ? WHERE ?";
+
+  db.query(checkAssign, [num, id], (error, result) => {
+      var string = JSON.stringify(result);
+      console.log("String: " + string);
+      if(string.length < 3){
+        response.sendStatus(401);
+      }
+      else {
+        var packet = JSON.parse(string);
+        console.log("Packet: " + packet);
+        var blankID = packet[0].blankAllocationId;
+        console.log("BlankID: " + blankID);
+        db.query(reAssign, [newID, blankID], (error, result) => {
+          console.log(error);
+          console.log("Reassign String: " + JSON.stringify(result));
+          console.log("Blank Reassigned");
+
+          db.query(updateBlank,[{assignedDate: date}, {blankNumber: num}], (error, result) => {
+            console.log(error);
+            var string = JSON.stringify(result);
+            console.log("updateBlank String: " + string);
+            if(string.includes('"affectedRows":1')){
+              response.sendStatus(200);
+            }
+          });
+        });
+      }
+    });
+});
+
+app.get('/assigns', function(request, response) {
+  var get = "SELECT * FROM blankallocation";
     db.query(get, (error,result) => {
       response.status(200).send(result);
       response.end();

@@ -12,6 +12,11 @@ VALUES ('Marc','Guggenheim','42 Westbrook Ave NG2 7YG',2,'mg@live.com','marc',1,
 INSERT INTO staff(`name`,`surname`,`address`,`staffTypeID`,`email`,`password`,`agencyID`,`active`)
 VALUES ('Dave','Santos','12 Kalandin Ave FH3 C32',3,'ds@live.com','dave',1,'yes');
 
+/* adding many advisors */
+INSERT INTO staff(`name`,`surname`,`address`,`staffTypeID`,`email`,`password`,`agencyID`,`active`)
+VALUES ('S','R','54 East Side Ave E1 3G4',1,'S','R',1,'yes'), ('John','Travolta','54 Eastbrook Ave NY 1154',1,'J','T',1,'yes'),
+('Mike','Walzowski','54 Bishop Ave NY 2254 IL',1,'M','W',1,'yes')
+
 ------------------------------------------------------------------------------------------------
 INSERT INTO exchangerate(`exchangeRateCode`, `exchangeRate`,`currencyName`) VALUES ('ABC', '10.25' ,'test');
 INSERT INTO exchangerate(`exchangeRateCode`, `exchangeRate`,`currencyName`) VALUES ('GBR', '33' ,'Great Britain');

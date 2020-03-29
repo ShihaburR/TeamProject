@@ -1,10 +1,14 @@
-import React, {Component, useState} from 'react';
+import React, {Component, useState, useEffect} from 'react';
 import Header from './header';
 import { NavLink } from 'react-router-dom';
 import axios from 'axios';
 
 function ViewCustomer(props) {
   const [customers, setData] = useState('');
+
+  useEffect(() => {
+    getCustomers();
+  }, []);
 
   const getCustomers = () => {
     axios.get('http://localhost:5000/customers')
