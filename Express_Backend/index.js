@@ -292,6 +292,41 @@ app.post('/assignBlank', function(request, response) {
   });
 });
 
+app.post('/assignBulk', function(request, response) {
+  var id = request.body.id;
+  var type = request.body.type;
+  var min = request.body.min;
+  var max = request.body.max;
+  var range = (max - min) + 1;
+  var assigns = [];
+  var blanks = [];
+  let date = new Date().toISOString().slice(0, 10);
+  var strType = type.toString();
+
+  var assign = "INSERT INTO blankallocation(`staffID`,`blankNumber`) VALUES ?";
+  var update = "UPDATE blank SET ? WHERE blankNumber = ?";
+  //bulk creation
+  for(let n = 0; n < range; n++){
+      strN = min.toString();
+      assigns.push([id , parseInt(strType + strN.padStart(6,'0'))]);
+      blanks.push([parseInt(strType + strN.padStart(6,'0'))]);
+      parseInt(min);
+      min++;
+  }
+  db.query(assign, [assigns], (error, result) => {
+    var string = JSON.stringify(result);
+    console.log("String: " + string);
+    if(string.length > 3){
+      for(let r = 0; r < range; r++){
+        db.query(update,[{isAssigned: 'yes', assignedDate: date},blanks[r]], (error, result) => {
+          var string = JSON.stringify(result);
+        });
+      }
+      response.sendStatus(200);
+    }
+  });
+});
+
 app.post('/reAssignBlank', function(request, response) {
   var id = request.body.id;
   var num = request.body.num;

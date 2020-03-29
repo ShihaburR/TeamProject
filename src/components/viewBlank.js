@@ -9,22 +9,33 @@ function ViewBlank(props) {
   const [assignData, setAssignData] = useState('');
   const [assign, setAssign] = useState(false);
   const [reassign, setReAssign] = useState(false);
+  const [bulkassign, setBulkAssign] = useState(false);
   const [main, setMain] = useState(true);
 
   const showMainMenu = () => {
     setMain(true);
     setAssign(false);
     setReAssign(false);
+    setBulkAssign(false);
   }
 
   const showAssignMenu = () => {
     setAssign(true);
     setMain(false);
     setReAssign(false);
+    setBulkAssign(false);
   }
 
   const showReAssignMenu = () => {
     setReAssign(true);
+    setAssign(false);
+    setMain(false);
+    setBulkAssign(false);
+  }
+
+  const showBulkMenu = () => {
+    setBulkAssign(true);
+    setReAssign(false);
     setAssign(false);
     setMain(false);
   }
@@ -33,6 +44,9 @@ function ViewBlank(props) {
   const [id, setID] = useState('');
   const [num, setNum] = useState('');
   const [newID, setNewID] = useState('');
+  const [min, setMin] = useState(0);
+  const [max, setMax] = useState(0);
+  const [type, setType] = useState(0);
 
   const getBlanks = () => {
     axios.get('http://localhost:5000/blanks')
@@ -92,6 +106,27 @@ function ViewBlank(props) {
       });
   }
 
+  const assignBulk = () => {
+    axios.post('http://localhost:5000/assignBulk', {
+        id: id,
+        type: type,
+        min : min,
+        max : max
+    })
+      .then(response => {
+        if(response.status === 200){
+          alert("Blanks successfully added");
+        }
+      })
+      .catch(function(error) {
+        console.log(error);
+        if(error.response.status === 401){
+          alert("The range adds a blank that already exists. " +
+                "Please enter a different range");
+        }
+      });
+  }
+
   const reassignBlank = () => {
     axios.post('http://localhost:5000/reAssignBlank', {
         id : id,
@@ -125,8 +160,11 @@ function ViewBlank(props) {
     return (
       <body class="indexbody">
         <Header staffType={props.staffType} staffName={props.staffName} staffID={props.staffID}/>
-        <div id="mainmenu">
-            <button type="button" class="page-button">View Refund-Log</button>
+        <div align="center">
+          <button align="center" type="button" class="small-button" onClick={showAssignMenu}>Assign</button>
+          <button align="center" type="button" class="small-button" onClick={showBulkMenu}>Bulk-assign</button>
+          <button align="center" type="button" class="small-button" onClick={showReAssignMenu}>Re-assign</button>
+          <NavLink to="/mainMenu"><button type="button" class="small-button-right">Done</button></NavLink>
         </div>
         <div id="mainmenu">
           <div id="tablecontainerrefund" style={{display : "inline-block"}}>
@@ -179,11 +217,6 @@ function ViewBlank(props) {
               </tbody>
             </table>
           </div>
-          <div>
-            <button align="center" type="button" class="small-button" onClick={showAssignMenu}>Assign</button>
-            <button align="center" type="button" class="small-button" onClick={showReAssignMenu}>Re-assign</button>
-            <NavLink to="/mainMenu"><button type="button" class="small-button-right">Done</button></NavLink>
-          </div>
         </div>
       </body>
     );
@@ -210,7 +243,7 @@ function ViewBlank(props) {
       </body>
     )
   } else if(reassign) {
-    return (
+      return (
       <body>
       <Header staffType={props.staffType} staffName={props.staffName} staffID={props.staffID}/>
       <div id="menubox">
@@ -235,6 +268,43 @@ function ViewBlank(props) {
       </div>
     </body>
   )
+  } else if(bulkassign){
+    return (
+      <body>
+        <Header staffType={props.staffType} staffName={props.staffName} staffID={props.staffID}/>
+        <div id="menubox">
+        <h2 align="center">Assign Blanks in Bulk</h2>
+          <ul>
+            <li>
+              <label>Advisor ID:</label>
+              <input type="number" value={id} required onChange={(e) => setID(e.target.value)}/>
+            </li>
+            <li>
+              <label>Blank Type:</label>
+              <select value = {type} required onChange={(e) => setType(e.target.value)}>
+                <option value = "0">Select one</option>
+                <option value = "444">444</option>
+                <option value = "440">440</option>
+                <option value = "420">420</option>
+                <option value = "201">201</option>
+                <option value = "101">101</option>
+              </select>
+            </li>
+            <li>
+              <label>Blank Min Number:</label>
+              <input type="number" pattern="{6,}"  value={min} required onChange={(e) => setMin(e.target.value)}/>
+            </li>
+            <li>
+              <label>Blank Max Number:</label>
+              <input type="number" pattern="{6,}"  value={max} required onChange={(e) => setMax(e.target.value)}/>
+              <br/>
+              <button type="button" class="small-button" onClick={assignBulk}>Add</button>
+              <button type="button" class="small-button" onClick={() => {showMainMenu(); getBlanks(); getAdvisors(); getAssigns();}}>Cancel</button>
+            </li>
+          </ul>
+        </div>
+      </body>
+    )
   }
 }
 

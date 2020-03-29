@@ -120,7 +120,9 @@ function ViewBlankSA(props) {
       <body class="indexbody">
       <Header staffType={props.staffType} staffName={props.staffName} staffID={props.staffID}/>
       <div id="mainmenu">
-          <button type="button" class="page-button" onClick={getBlanks}>View Blank Stock</button>
+        <button type="button" class="page-button" onClick= {showBlankMenu}>Add a Blank</button>
+        <button type="button" class="page-button" onClick = {showBulkMenu}>Add bulk of Blanks</button>
+        <NavLink to="/mainMenu"><button type="button" class="page-button">Done</button></NavLink>
       </div>
       <div id="tablecontainerrefund">
         <table className="striped responsive-table">
@@ -148,10 +150,6 @@ function ViewBlankSA(props) {
             ))}
           </tbody>
         </table>
-
-        <button type="button" class="small-button" onClick= {showBlankMenu}>Add a Blank</button>
-        <button type="button" class="small-button" onClick = {showBulkMenu}>Add bulk of Blanks</button>
-        <NavLink to="/mainMenu"><button type="button" class="small-button-right">Done</button></NavLink>
       </div>
       </body>
     );
