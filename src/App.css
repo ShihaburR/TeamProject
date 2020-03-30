@@ -7,6 +7,12 @@
   overflow: hidden;
 }
 
+.mainSize {
+  font-family: Agency FB;
+  overflow: hidden;
+  font-size: 1.4em
+}
+
 button:hover {
     cursor:pointer;
 }

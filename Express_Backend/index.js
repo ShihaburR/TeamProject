@@ -142,13 +142,13 @@ app.post('/createCustomer', function(request, response) {
 
     db.query(createDiscountType, [dtypeID, dtype], (error, result) => {
         var string = JSON.stringify(result);
-        console.log(string);
+        //console.log(string);
         db.query(createDiscountAmount, [drateID, drate], (error, result) => {
           var string = JSON.stringify(result);
-          console.log(string);
+          //console.log(string);
           db.query(insert, [firstname,lastname,address,email,valued,drateID,dtypeID], (error,result) => {
              var string = JSON.stringify(result);
-             console.log(string);
+             //console.log(string);
              if(string.includes('"affectedRows":1')){
                console.log("Customer created");
                response.sendStatus(200);
@@ -189,12 +189,12 @@ app.post('/addBlank', function(request, response) {
       if(bTypeID > 0){
         db.query(exists, [num], (error, result) => {
           var string = JSON.stringify(result);
-          console.log(string);
+          //console.log(string);
           if(string.length < 3){
             db.query(insert, [num,date,bTypeID], (error, result) => {
               var string = JSON.stringify(result);
-              console.log(error);
-              console.log(result);
+              //console.log(error);
+              //console.log(result);
               if(string.includes('"affectedRows":1')){
                 console.log("Blank inserted");
                 response.sendStatus(200);
@@ -233,11 +233,11 @@ app.post('/addBulk', function(request, response) {
     db.query(insert, [values], (error, result) => {
       var string = JSON.stringify(result);
       var packet = JSON.parse(string);
-      console.log(string);
+      //console.log(string);
       console.log("Blanks inserted");
       response.sendStatus(200);
     });
-    console.log(values);
+    //console.log(values);
   });
 });
 
@@ -246,8 +246,8 @@ app.post('/removeBlank', function(request, response) {
   console.log(number);
   var del = "DELETE FROM blank WHERE blankNumber = ?"
   db.query(del, [number], (error,result) => {
-    console.log("Error: " + error);
-    console.log("Result: " + result);
+    //console.log("Error: " + error);
+    //console.log("Result: " + result);
     response.sendStatus(200);
   });
 });
@@ -259,6 +259,14 @@ app.get('/blanks', function(request, response) {
       response.end();
     });
 });
+
+app.get('/advisorBlanks', function(request, response){
+  var get = "SELECT * FROM blankallocation WHERE staffID = ?";
+  db.query(get,[staffID] ,(error,result) => {
+    response.status(200).send(result);
+    response.end();
+  });
+})
 
 app.post('/assignBlank', function(request, response) {
   var id = request.body.id;
@@ -315,7 +323,7 @@ app.post('/assignBulk', function(request, response) {
   }
   db.query(assign, [assigns], (error, result) => {
     var string = JSON.stringify(result);
-    console.log("String: " + string);
+    //console.log("String: " + string);
     if(string.length > 3){
       for(let r = 0; r < range; r++){
         db.query(update,[{isAssigned: 'yes', assignedDate: date},blanks[r]], (error, result) => {
@@ -340,24 +348,24 @@ app.post('/reAssignBlank', function(request, response) {
 
   db.query(checkAssign, [num, id], (error, result) => {
       var string = JSON.stringify(result);
-      console.log("String: " + string);
+      //console.log("String: " + string);
       if(string.length < 3){
         response.sendStatus(401);
       }
       else {
         var packet = JSON.parse(string);
-        console.log("Packet: " + packet);
+        //console.log("Packet: " + packet);
         var blankID = packet[0].blankAllocationId;
-        console.log("BlankID: " + blankID);
+        //console.log("BlankID: " + blankID);
         db.query(reAssign, [newID, blankID], (error, result) => {
-          console.log(error);
-          console.log("Reassign String: " + JSON.stringify(result));
+          //console.log(error);
+          //console.log("Reassign String: " + JSON.stringify(result));
           console.log("Blank Reassigned");
 
           db.query(updateBlank,[{assignedDate: date}, {blankNumber: num}], (error, result) => {
-            console.log(error);
+            //console.log(error);
             var string = JSON.stringify(result);
-            console.log("updateBlank String: " + string);
+            //console.log("updateBlank String: " + string);
             if(string.includes('"affectedRows":1')){
               response.sendStatus(200);
             }
@@ -382,7 +390,7 @@ app.post('/commissions', function(request, response) {
   var update = "UPDATE sales SET ? WHERE ?";
   db.query(update, [{commisionRate: cRate}, {saleID: saleID}], (error, result) => {
     var string = JSON.stringify(result);
-    console.log("String results: " + string);
+    //console.log("String results: " + string);
     if(string.includes('"affectedRows":0')){
       console.log("Rate not found");
       response.sendStatus(404);
@@ -403,7 +411,6 @@ app.post('/updateExchangeRate', function(request, response) {
     var string = JSON.stringify(result);
     console.log(string);
     if(string.length < 3){
-      flag = false;
       console.log("ExchangeCode not in database");
       response.sendStatus(401);
     } else {
@@ -429,13 +436,13 @@ app.post('/addExchangeRate', function(request, response) {
   //console.log(exchangeName);
   db.query(check, [exchangeCode], (error, result) => {
     var string = JSON.stringify(result);
-    console.log(string);
+    //console.log(string);
     if(string.length > 3){
       console.log("ExchangeCode exists");
       response.sendStatus(401);
     } else {
         db.query(insert, [exchangeCode, exchangeRate, exchangeName],(error, result) => {
-          console.log(result);
+          //console.log(result);
           console.log("ExchangeRate added to database");
           response.sendStatus(200);
         });
@@ -450,7 +457,7 @@ app.post('/removeExchangeRate', function(request, response) {
   db.query(check, (error, result) => {
     var packet = JSON.parse(JSON.stringify(result));
     //console.log(packet.length);
-    if(packet.length < 4){
+    if(packet.length < 14){
       console.log("Failed: trying to delete below threshold");
       response.sendStatus(401);
     } else {

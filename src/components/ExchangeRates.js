@@ -19,43 +19,6 @@ function ExchangeRates(props) {
   const handleInsert = () => {
     setInsert(true);
     setMainMenu(false);
-    return (
-      <div>
-        <h1>Change Exchange Rates</h1>
-          <form>
-            <label> Exchange Rate Code:
-              <input
-                type="text"
-                name="exchangeCode"
-                id ="exchangeCode"
-                maxLength="3"
-                value={eCode}
-                required onChange={(e) => setECode(e.target.value)}/>
-            </label>
-            <br/>
-            <label> Exchange Rate:
-              <input
-                type="number"
-                name="value"
-                id ="value"
-                step ="0.01"
-                value={eRate}
-                required onChange={(e) => setERate(e.target.valueAsNumber)}/>
-            </label>
-            <br/>
-            <label> Country Name:
-              <input
-                type="text"
-                name="country"
-                id ="country"
-                value={eName}
-                required onChange={(e) => setEName(e.target.value)}/>
-            </label>
-            <br/>
-            <input type="submit" value="Enter" onClick={handleClick.bind(this)}/>
-          </form>
-      </div>
-    )
   }
 
   const handleUpdate = () => {
@@ -148,22 +111,32 @@ function ExchangeRates(props) {
 
 
   if(mainMenu) {
-      return (
-      <div>
-        <Header staffType={props.staffType} staffName={props.staffName} staffID={props.staffID}/>
-        <h1> Exchange Rates </h1>
-        <button onClick={handleUpdate} class="menu-button">Update an existing Exchange Rate</button>
-        <button onClick={handleInsert} class="menu-button">Insert an Exchange Rate</button>
-        <button onClick={handleDelete} class="menu-button">Delete an existing Exchange Rate</button>
-        <br/> <br/>
-        <NavLink to="/mainMenu"><button type="button" class="menu-button">Cancel</button></NavLink>
-      </div>)
+    return (
+      <body class="indexbody">
+        <div>
+          <Header staffType={props.staffType} staffName={props.staffName} staffID={props.staffID}/>
+          <h1 align="center"> Exchange Rates </h1>
+        </div>
+        <div id="mainmenu">
+          <div id="menubox">
+            <br/><br/><br/><br/><br/>
+            <button onClick={handleUpdate} class="menu-button">Update Exchange Rate</button>
+            <button onClick={handleInsert} class="menu-button">Insert Exchange Rate</button>
+            <button onClick={handleDelete} class="menu-button">Delete Exchange Rate</button>
+            <br/><br/>
+            <NavLink to="/mainMenu"><button type="button" class="menu-button">Cancel</button></NavLink>
+          </div>
+        </div>
+      </body>
+    )
    } else if(insert){
      return (
-       <div>
-         <Header staffType={props.staffType} staffName={props.staffName} staffID={props.staffID}/>
-         <h1>Insert Exchange Rates</h1>
-           <form>
+       <body class="indexbody">
+        <Header staffType={props.staffType} staffName={props.staffName} staffID={props.staffID}/>
+        <h1 align="center">Insert Exchange Rates</h1>
+        <div id="menubox" align="center" class="mainSize">
+         <ul>
+           <li>
              <label> Exchange Rate Code:
                <input
                  type="text"
@@ -173,7 +146,8 @@ function ExchangeRates(props) {
                  value={eCode}
                  required onChange={(e) => setECode(e.target.value)}/>
              </label>
-             <br/>
+           </li>
+           <li>
              <label> Exchange Rate:
                <input
                  type="number"
@@ -183,7 +157,8 @@ function ExchangeRates(props) {
                  value={eRate}
                  required onChange={(e) => setERate(e.target.valueAsNumber)}/>
              </label>
-             <br/>
+           </li>
+           <li>
              <label> Country Name:
                <input
                  type="text"
@@ -192,28 +167,33 @@ function ExchangeRates(props) {
                  value={eName}
                  required onChange={(e) => setEName(e.target.value)}/>
              </label>
-             <br/>
-             <input type="submit" value="Enter" onClick={handleClick.bind(this)}/>
-           </form>
-         <button onClick={handleMainMenu}>Return to Main Menu</button>
-       </div>
+           </li>
+          <button type="submit" value="Enter" class= "small-button"
+          onClick={handleClick.bind(this)}>Enter</button>
+          <button class="small-button" onClick={handleMainMenu}>Go Back</button>
+         </ul>
+        </div>
+       </body>
      )
    } else if(update){
      return (
-       <div>
+       <body class="indexbody">
          <Header staffType={props.staffType} staffName={props.staffName} staffID={props.staffID}/>
-         <h1>Update Exchange Rates</h1>
-           <form>
-             <label> Exchange Rate Code:
-               <input
-                 type="text"
-                 name="exchangeCode"
-                 id ="exchangeCode"
-                 maxLength="3"
-                 value={eCode}
-                 required onChange={(e) => setECode(e.target.value)}/>
-             </label>
-             <br/>
+         <h1 align="center">Update Exchange Rates</h1>
+         <div id="menubox" align="center" class="mainSize">
+           <ul>
+            <li>
+               <label> Exchange Rate Code:
+                 <input
+                   type="text"
+                   name="exchangeCode"
+                   id ="exchangeCode"
+                   maxLength="3"
+                   value={eCode}
+                   required onChange={(e) => setECode(e.target.value)}/>
+               </label>
+            </li>
+            <li>
              <label> Exchange Rate:
                <input
                  type="number"
@@ -223,7 +203,8 @@ function ExchangeRates(props) {
                  value={eRate}
                  required onChange={(e) => setERate(e.target.valueAsNumber)}/>
              </label>
-             <br/>
+            </li>
+            <li>
              <label> Country Name:
                <input
                  type="text"
@@ -232,33 +213,42 @@ function ExchangeRates(props) {
                  value={eName}
                  required onChange={(e) => setEName(e.target.value)}/>
              </label>
-             <br/>
-             <input type="submit" value="Update" onClick={handleClick.bind(this)}/>
-           </form>
-         <button onClick={handleMainMenu}>Return to Main Menu</button>
-       </div>
+            </li>
+            <button type="submit" value="Update" class="small-button"
+            onClick={handleClick.bind(this)}>Update</button>
+            <button class="small-button" onClick={handleMainMenu}>Go Back</button>
+           </ul>
+         </div>
+       </body>
      )
    } else if(dlt){
      return (
-       <div>
-         <Header staffType={props.staffType} staffName={props.staffName} staffID={props.staffID}/>
-         <h1>Delete Exchange Rates</h1>
-           <form>
-             <label> Exchange Rate Code:
-               <input
-                 type="text"
-                 name="exchangeCode"
-                 id ="exchangeCode"
-                 maxLength="3"
-                 value={eCode} required onChange={(e) => setECode(e.target.value)}/>
-             </label>
+       <body class="indexbody">
+        <Header staffType={props.staffType} staffName={props.staffName} staffID={props.staffID}/>
+        <h1 align="center">Delete Exchange Rates</h1>
+         <div id="menubox" align="center" class="mainSize">
+           <ul>
+           <br/><br/><br/><br/>
+            <li>
+              <label> Exchange Rate Code:
+                <input
+                   type="text"
+                   name="exchangeCode"
+                   id ="exchangeCode"
+                   maxLength="3"
+                   value={eCode} required onChange={(e) => setECode(e.target.value)}/>
+              </label>
+            </li>
+            <li>
              <label value={eRate} required onChange={(e) => setERate(e.target.valueAsNumber)}></label>
              <label value={eName} required onChange={(e) => setEName(e.target.value)}></label>
-             <br/>
-             <input type="submit" value="Delete" onClick={handleClick.bind(this)}/>
-           </form>
-         <button onClick={handleMainMenu}>Return to Main Menu</button>
-       </div>
+            </li>
+           </ul>
+           <button type="submit" value="Delete" onClick={handleClick.bind(this)}
+           class="small-button">Delete</button>
+           <button class="small-button" onClick={handleMainMenu}>Go Back</button>
+         </div>
+       </body>
      )
    }
  }

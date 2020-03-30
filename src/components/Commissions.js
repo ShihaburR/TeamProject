@@ -35,32 +35,37 @@ function Commissions(props) {
 
   //display the front end for us
   return (
-      <body>
-      <Header staffType={props.staffType} staffName={props.staffName} staffID={props.staffID}/>
-      <div class = "indexbody">
-        <h1>Change Commission Rates</h1>
-          <form class = "mainmenu">
-            <label> Sales ID:
-              <input
-                type="number"
-                name="salesID"
-                id ="salesID"
-                value={salesID} required onChange={(e) => setSalesID(e.target.value)}/>
-            </label>
-            <br/>
-            <label> Commission Rate:
-              <input
-                type="double"
-                name="commission"
-                id ="commission"
-                value={cRate} required onChange={(e) => setCRate(e.target.valueAsNumber)}/>
-            </label>
-            <br/> <br/>
-            <button type ="button" class="page-button"
+      <body class="indexbody">
+        <div>
+          <Header staffType={props.staffType} staffName={props.staffName} staffID={props.staffID}/>
+          <h1 align="center">Change Commission Rates</h1>
+        </div>
+        <div id="menubox" align="center" class="mainSize">
+          <ul>
+          <br/>
+            <li>
+              <label> Sales ID:
+                <input
+                  type="number"
+                  name="salesID"
+                  id ="salesID"
+                  value={salesID} required onChange={(e) => setSalesID(e.target.value)}/>
+              </label>
+            </li>
+            <li>
+              <label> Commission Rate:
+                <input
+                  type="double"
+                  name="commission"
+                  id ="commission"
+                  value={cRate} required onChange={(e) => setCRate(e.target.valueAsNumber)}/>
+              </label>
+            </li>
+            <button type ="button" class="small-button"
             onClick={handleClick.bind(this)}>Submit</button>
-          </form>
-          <NavLink to="/mainMenu"><button type="button" class="menu-button">Cancel</button></NavLink>
-      </div>
+            <NavLink to="/mainMenu"><button type="button" class="small-button">Cancel</button></NavLink>
+          </ul>
+        </div>
       </body>
   )
 }
