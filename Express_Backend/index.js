@@ -322,8 +322,9 @@ app.post('/assignBulk', function(request, response) {
       min++;
   }
   db.query(assign, [assigns], (error, result) => {
+    console.log(error);
     var string = JSON.stringify(result);
-    //console.log("String: " + string);
+    console.log("String: " + string);
     if(string.length > 3){
       for(let r = 0; r < range; r++){
         db.query(update,[{isAssigned: 'yes', assignedDate: date},blanks[r]], (error, result) => {

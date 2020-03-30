@@ -4,21 +4,25 @@ import { NavLink } from 'react-router-dom';
 import axios from 'axios';
 
 function CardPayment(props) {
-    const [cardNum,setCardNum] = useState(""); 
+    const [cardNum,setCardNum] = useState("");
     const [nameOnCard,setNameOnCard] = useState("");
     const [expiryDate,setExpiryDate] = useState("");
     const [securityCode,setSecurityCode] = useState("");
 
     const handleSubmit = () => {
         console.log(cardNum + " " + nameOnCard + " " + expiryDate + " " + securityCode);
-        axios.post('/cardPayment', {
+        axios.post('http://localhost:5000/cardPayment', {
             cardNum: cardNum,
-            nameOnCard: nameOnCard,
-            expiryDate: expiryDate,
-            securityCode: setSecurityCode
+            nCard: nameOnCard,
+            date: expiryDate,
+            ccv: setSecurityCode
         })
-        .then((response) => console.log(response))
-        .catch((error) => console.log(error));
+        .then(response => {
+          console.log(response);
+        })
+        .catch(error => {
+          console.log(error);
+        });
     }
 
 

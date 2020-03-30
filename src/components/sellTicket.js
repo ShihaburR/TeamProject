@@ -1,7 +1,9 @@
 import React, {useEffect, useState} from 'react';
 import Header from './header';
-import { NavLink } from 'react-router-dom';
+import { NavLink, Redirect } from 'react-router-dom';
 import axios from 'axios';
+import CardPayment from './cardPayment';
+
 
 function SellTicket(props) {
   //page naviagation
@@ -9,22 +11,23 @@ function SellTicket(props) {
   const [main, setMain] = useState(true);
   const [domestic, setDomestic] = useState(false);
   const [interline, setInterline] = useState(false);
+  const [card, setCard] = useState(false);
 
-  //sale data
+  //sale details
   const [num, setNum] = useState(0);
   const [origin, setOrigin] = useState('');
   const [destination, setDestination] = useState('');
   const [local, setLocal] = useState(0);
   const [usd, setUSD] = useState(0);
-  const [pType, setPType] = useState(0);
+  const [pType, setPType] = useState("");
   const [customer, setCustomer] = useState('');
 
   //card details
-  const [cardName, setCardName] = useState('');
-  const [cardNum, setCardNum] = useState(0);
-  const [cardCCV, setCardCCV] = useState(0);
-  const [cardDate, setCardDate] = useState('');
-
+  const [cardNum,setCardNum] = useState("");
+  const [nameOnCard,setNameOnCard] = useState("");
+  const [expiryDate,setExpiryDate] = useState("");
+  const [securityCode,setSecurityCode] = useState("");
+  const [converter, setConverter] = useState("");
   const getBlanks = () => {
     axios.get('http://localhost:5000/advisorBlanks')
       .then(response => {
@@ -36,30 +39,73 @@ function SellTicket(props) {
       });
   }
 
+  //page render
   useEffect(() => {
     getBlanks();
   }, []);
 
+  //add Details
+  const addCard = () => {
+      console.log(cardNum + " " + nameOnCard + " " + expiryDate + " " + securityCode);
+      axios.post('http://localhost:5000/cardPayment', {
+          cardNum: cardNum,
+          nCard: nameOnCard,
+          date: expiryDate,
+          ccv: setSecurityCode
+      })
+      .then(response => {
+        if(response.status === 200){
+          alert("Payment has been made. Returning to Main Menu");
+        }
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  }
+  const handleClick = () => {
+    /*axios.post('https://localhost:5000/addSale',{
+
+    })
+      .then(response => {
+
+      })
+      */
+      console.log("Actions run here");
+    }
+
+  //menu navigation
   const getDomesticMenu = () => {
     setDomestic(true);
     setMain(false);
     setInterline(false);
+    setCard(false);
   }
-
   const getInterlineMenu = () => {
     setInterline(true);
     setDomestic(false);
     setMain(false);
+    setCard(false);
   }
-
   const getMainMenu = () => {
     setMain(true);
     setDomestic(false);
     setInterline(false);
+    setCard(false);
   }
-
-  const handleClick = () => {
-
+  const getCardMenu = () => {
+    setCard(true);
+    setMain(false);
+    setDomestic(false);
+    setInterline(false);
+  }
+  const getCardInput = (pType) => {
+    if(pType.includes("Card")) {
+      handleClick();
+      console.log("Made it");
+      getCardMenu();
+    } else {
+      alert()
+    }
   }
 
   if(main){
@@ -136,18 +182,18 @@ function SellTicket(props) {
             <label> Amount in USD:
               <input
                 type="number"
-                value={usd}
-                required onChange={(e) => setUSD(e.target.value)}/>
+                value={converter}
+                required onChange={(e) => setConverter(e.target.value)}/>
+              <label>{usd}</label>
             </label>
           </li>
           <li>
-          <label>Payment Type:
+          <label>Payment Type:</label>
           <select value = {pType} required onChange={(e) => setPType(e.target.value)}>
             <option value = "0">Select one</option>
             <option value = "Cash">Cash</option>
             <option value = "Card">Card</option>
           </select>
-          </label>
           </li>
           <li>
             <label>Customer:
@@ -156,7 +202,7 @@ function SellTicket(props) {
             </label>
           </li>
          <button type="submit" value="Enter" class= "small-button"
-         onClick={handleClick.bind(this)}>Enter</button>
+         onClick={() => {getCardInput(pType);}}>Enter</button>
          <button class="small-button" onClick={getMainMenu}>Go Back</button>
         </ul>
        </div>
@@ -210,13 +256,12 @@ function SellTicket(props) {
             </label>
           </li>
           <li>
-          <label>Payment Type:
+          <label>Payment Type:</label>
           <select value = {pType} required onChange={(e) => setPType(e.target.value)}>
             <option value = "0">Select one</option>
             <option value = "Cash">Cash</option>
             <option value = "Card">Card</option>
           </select>
-          </label>
           </li>
           <li>
             <label>Customer:
@@ -225,10 +270,37 @@ function SellTicket(props) {
             </label>
           </li>
          <button type="submit" value="Enter" class= "small-button"
-         onClick={handleClick.bind(this)}>Enter</button>
+         onClick={() => {getCardInput(pType);}}>Enter</button>
          <button class="small-button" onClick={getMainMenu}>Go Back</button>
         </ul>
        </div>
+      </body>
+    )
+  } else if(card){
+    return (
+      <body class="indexbody">
+          <Header staffType={props.staffType} staffName={props.staffName} staffID={props.staffID}/>
+          <div id="mainmenu">
+              <button type="button" class="page-button">Card Payment</button>
+          </div>
+          <div id="menubox" class="mainSize">
+              <ul>
+                  <li><label>Card number:</label></li>
+                  <li><textarea value={cardNum} required onChange={(e) => setCardNum(e.target.value)}></textarea></li>
+                  <li><label>Expiry Date:</label></li>
+                  <li><textarea value={expiryDate} required onChange={(e) => setExpiryDate(e.target.value)}></textarea></li>
+              </ul>
+              <ul>
+                  <li><label>Name on Card:</label></li>
+                  <li><textarea value={nameOnCard} required onChange={(e) => setNameOnCard(e.target.value)}></textarea></li>
+                  <li><label>Security Code:</label></li>
+                  <li><textarea value={securityCode} required onChange={(e) => setSecurityCode(e.target.value)}></textarea></li>
+              </ul>
+              <li align="center">
+                <NavLink to="/mainMenu"><button type="button" class="small-button" onClick={addCard}>Pay</button></NavLink>
+                <NavLink to="/mainMenu"><button type="button" class="small-button">Cancel</button></NavLink>
+              </li>
+          </div>
       </body>
     )
   }
