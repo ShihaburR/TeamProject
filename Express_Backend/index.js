@@ -384,6 +384,54 @@ app.get('/assigns', function(request, response) {
     });
 });
 
+//sales section
+app.post('/addInterlineSale', function(request, response) {
+  //sales data & queries
+  var num = request.body.num;
+  var origin = request.body.origin;
+  var destination= request.body.destination;
+  //var exchangeCode = ;
+  var localCurrency = request.body.local;
+  var usdValue = request.body.usd;
+  var paymentType = request.body.paymentType;
+  var id = request.body.customer;
+  var saleinsert = "INSERT INTO sales(`staffID`,`customerID`,`blankNumber`,`amount`," +
+  "`amountUSD`,`tax`,`isRefunded`,`payByDate`,`paymentTypeID`,`typeofFlightID`," +
+  "`isPaid`,`commisionRate`,`exchangeRateCode`, `transactionDate`)" +
+  "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+  //card data & queries
+  var cardNum = request.body.cardNum;
+  var date = request.body.date;
+  var ccv = request.body.ccv;
+  var cardinsert = "INSERT INTO carddetails(`cardNumber`,`expiryDate`,`securityCode`,`customerID`)" +
+  "VALUES (?,?,?,?)";
+
+  //insert cardDetails
+  /*db.query(insert, [cardNum,date,ccv,id], (error, result) => {
+    var string = JSON.stringify(result);
+    if(string.length > 3){
+      response.sendStatus(200);
+      response.end();
+    }
+  });*/
+});
+
+app.post('/addDomesticSale', function(request, response) {
+  var num = request.body.num;
+  var origin = request.body.origin;
+  var destination= request.body.destination;
+  var usdValue = request.body.usd;
+  var paymentType = request.body.paymentType;
+  var name = request.body.customer;
+  var insert = "INSERT INTO sales(`staffID`,`customerID`,`blankNumber`,`amount`," +
+  "`amountUSD`,`tax`,`isRefunded`,`payByDate`,`paymentTypeID`,`typeofFlightID`," +
+  "`isPaid`,`commisionRate`,`exchangeRateCode`, `transactionDate`)" +
+  "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+  var getID = "SELECT customerID FROM staff WHERE name = ? , surname = ?"
+});
+
+
 //rates section
 app.post('/commissions', function(request, response) {
   var saleID = request.body.salesID;

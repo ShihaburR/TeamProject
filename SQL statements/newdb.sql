@@ -33,8 +33,8 @@ CREATE TABLE IF NOT EXISTS `Staff` (
 	`password`	varchar ( 255 ) NOT NULL,
 	`agencyID`	integer ( 10 ) NOT NULL,
 	`Active`	varchar ( 3 ),
-	FOREIGN KEY(`agencyID`) REFERENCES `TravelAgency`(`agencyID`) ON UPDATE RESTRICT ON DELETE RESTRICT,
-	FOREIGN KEY(`staffTypeID`) REFERENCES `StaffType`(`staffTypeID`) ON UPDATE CASCADE ON DELETE CASCADE
+	FOREIGN KEY(`staffTypeID`) REFERENCES `StaffType`(`staffTypeID`) ON UPDATE CASCADE ON DELETE CASCADE,
+	FOREIGN KEY(`agencyID`) REFERENCES `TravelAgency`(`agencyID`) ON UPDATE RESTRICT ON DELETE RESTRICT
 );
 CREATE TABLE IF NOT EXISTS `ExchangeRate` (
 	`exchangeRateCode`	varchar ( 3 ) NOT NULL UNIQUE,
@@ -48,9 +48,8 @@ CREATE TABLE IF NOT EXISTS `CustomerType` (
 	PRIMARY KEY(`customerTypeID`)
 );
 CREATE TABLE IF NOT EXISTS `DiscountAmount` (
-	`discountId`	integer ( 10 ) NOT NULL UNIQUE,
-	`discountPercent`	float ( 10 ) NOT NULL,
-	PRIMARY KEY(`discountId`)
+	`discountId`	INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT UNIQUE,
+	`discountPercent`	float ( 10 ) NOT NULL
 );
 CREATE TABLE IF NOT EXISTS `DiscountType` (
 	`discountTypeID`	integer ( 1 ),
@@ -66,9 +65,8 @@ CREATE TABLE IF NOT EXISTS `Customer` (
 	`customerTypeID`	integer ( 1 ) NOT NULL,
 	`discountAmount`	integer ( 10 ),
 	`discountType`	integer ( 1 ),
-	`password`	varchar (255),
-	FOREIGN KEY(`discountType`) REFERENCES `DiscountType`(`discountTypeID`),
 	FOREIGN KEY(`customerTypeID`) REFERENCES `CustomerType`(`customerTypeID`),
+	FOREIGN KEY(`discountType`) REFERENCES `DiscountType`(`discountTypeID`),
 	FOREIGN KEY(`discountAmount`) REFERENCES `DiscountAmount`(`discountId`)
 );
 CREATE TABLE IF NOT EXISTS `Sales` (
@@ -78,7 +76,8 @@ CREATE TABLE IF NOT EXISTS `Sales` (
 	`blankNumber`	integer ( 11 ) NOT NULL UNIQUE,
 	`amount`	double ( 10 , 2 ) NOT NULL,
 	`amountUSD`	double ( 10 , 2 ) NOT NULL,
-	`tax`	integer ( 10 ) NOT NULL,
+	`localTax`	float ( 10 , 2 ),
+	`otherTax`	double ( 10 , 2 ),
 	`isRefunded`	varchar ( 5 ) NOT NULL,
 	`payByDate`	date,
 	`paymentTypeID`	integer ( 1 ) NOT NULL,
@@ -88,10 +87,10 @@ CREATE TABLE IF NOT EXISTS `Sales` (
 	`exchangeRateCode`	varchar ( 3 ) NOT NULL,
 	`transactionDate`	DATE,
 	FOREIGN KEY(`customerID`) REFERENCES `Customer`(`customerID`) ON UPDATE RESTRICT ON DELETE RESTRICT,
-	FOREIGN KEY(`paymentTypeID`) REFERENCES `TypeOfPayment`(`paymentTypeID`),
-	FOREIGN KEY(`typeOfFlightID`) REFERENCES `TypeOfFlight`(`typeOfFlightID`),
 	FOREIGN KEY(`exchangeRateCode`) REFERENCES `ExchangeRate`(`exchangeRateCode`),
-	FOREIGN KEY(`staffID`) REFERENCES `Staff`(`staffID`) ON UPDATE RESTRICT ON DELETE RESTRICT
+	FOREIGN KEY(`typeOfFlightID`) REFERENCES `TypeOfFlight`(`typeOfFlightID`),
+	FOREIGN KEY(`staffID`) REFERENCES `Staff`(`staffID`) ON UPDATE RESTRICT ON DELETE RESTRICT,
+	FOREIGN KEY(`paymentTypeID`) REFERENCES `TypeOfPayment`(`paymentTypeID`)
 );
 CREATE TABLE IF NOT EXISTS `JourneyLeg` (
 	`locationId`	integer ( 10 ) NOT NULL,
@@ -112,9 +111,9 @@ CREATE TABLE IF NOT EXISTS `Blank` (
 	`blankTypeID`	integer ( 1 ) NOT NULL,
 	`isAssigned`	varchar ( 5 ) NOT NULL,
 	`assignedDate`	DATE,
+	FOREIGN KEY(`statusID`) REFERENCES `Status`(`statusID`) ON UPDATE RESTRICT ON DELETE RESTRICT,
 	FOREIGN KEY(`blankTypeID`) REFERENCES `BlankType`(`blankTypeID`) ON UPDATE RESTRICT ON DELETE RESTRICT,
-	PRIMARY KEY(`blankNumber`),
-	FOREIGN KEY(`statusID`) REFERENCES `Status`(`statusID`) ON UPDATE RESTRICT ON DELETE RESTRICT
+	PRIMARY KEY(`blankNumber`)
 );
 CREATE TABLE IF NOT EXISTS `BlankAllocation` (
 	`blankAllocationId`	INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT UNIQUE,
@@ -126,8 +125,8 @@ CREATE TABLE IF NOT EXISTS `BlankAllocation` (
 CREATE TABLE IF NOT EXISTS `Coupons` (
 	`couponID`	INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT UNIQUE,
 	`BlankNumber`	integer ( 11 ) NOT NULL,
-	`departureTime`	varchar ( 255 ) NOT NULL,
-	`arrivalTime`	varchar ( 255 ) NOT NULL,
+	`departureTime`	datetime NOT NULL,
+	`arrivalTime`	datetime NOT NULL,
 	`locationId`	integer ( 10 ) NOT NULL,
 	FOREIGN KEY(`BlankNumber`) REFERENCES `Blank`(`blankNumber`) ON UPDATE RESTRICT ON DELETE RESTRICT,
 	FOREIGN KEY(`locationId`) REFERENCES `JourneyLeg`(`locationId`)
