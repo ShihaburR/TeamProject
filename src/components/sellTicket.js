@@ -13,7 +13,7 @@ function SellTicket(props) {
   const [domestic, setDomestic] = useState(false);
   const [interline, setInterline] = useState(false);
   const [card, setCard] = useState(false);
-
+  const [isDSale,setDSale] = useState(false);
   //sale details
   const [num, setNum] = useState(0);
   const [origin, setOrigin] = useState('');
@@ -23,7 +23,8 @@ function SellTicket(props) {
   const [tax, setTax] = useState(0);
   const [localTax, setLocalTax] = useState(0);
   const [usd, setUSD] = useState(0);
-  const [pType, setPType] = useState("");
+  const [pType, setPType] = useState(0);
+  const [commission, setCommission] = useState(0);
   const [customerFName, setForename] = useState('');
   const [customerSName, setSurname] = useState('');
 
@@ -78,7 +79,7 @@ function SellTicket(props) {
       });
   }
   const addInterlineSale = () => {
-    axios.post('https://localhost:5000/addInterlineSale',{
+    axios.post('http://localhost:5000/addInterlineSale',{
         num : num,
         origin : origin,
         destination : destination,
@@ -87,6 +88,7 @@ function SellTicket(props) {
         paymentType : pType,
         cforename : customerFName,
         csurname : customerSName,
+        commission : commission,
         cardNum: cardNum,
         nCard: nameOnCard,
         date: expiryDate,
@@ -102,14 +104,16 @@ function SellTicket(props) {
       });
     }
   const addDomesticSale = () => {
-    axios.post('https://localhost:5000/addDomesticSale',{
+    axios.post('http://localhost:5000/addDomesticSale',{
         num : num,
         origin : origin,
         destination : destination,
         usd : usd,
+        tax : tax,
         paymentType : pType,
         cforename : customerFName,
         csurname : customerSName,
+        commission : commission,
         cardNum: cardNum,
         nCard: nameOnCard,
         date: expiryDate,
@@ -155,18 +159,25 @@ function SellTicket(props) {
     setInterline(false);
   }
   const getCardInput = (pType) => {
-    if(pType.includes("Card")) {
-      if(domestic){
-        addDomesticSale();
-        console.log("Made it");
+    console.log(pType);
+    switch (pType) {
+      case "2":
+        setDSale(true);
         getCardMenu();
-      } else{
-        addInterlineSale();
-        console.log("Made it");
-        getCardMenu();
-      }
+        break;
+      default:
+        if(domestic){
+          addDomesticSale();
+        }
+        else{addInterlineSale();}
+        break;
+    }
+  }
+  const sender = () => {
+    if(isDSale){
+      addDomesticSale();
     } else {
-      alert("Choose a valid Payment Type");
+      addInterlineSale();
     }
   }
 
@@ -238,12 +249,11 @@ function SellTicket(props) {
             </label>
           </li>
           <li>
-            <label> Origin:
-              <input
-                type="text"
-                value={origin}
-                required onChange={(e) => setOrigin(e.target.valueAsNumber)}/>
-            </label>
+            <label>Origin:</label>
+            <input
+              type="text"
+              value={origin}
+              required onChange={(e) => setOrigin(e.target.value)}/>
           </li>
           <li>
             <label> Destination:
@@ -273,9 +283,16 @@ function SellTicket(props) {
           <label>Payment Type:</label>
           <select value = {pType} required onChange={(e) => setPType(e.target.value)}>
             <option value = "0">Select one</option>
-            <option value = "Cash">Cash</option>
-            <option value = "Card">Card</option>
+            <option value = "1">Cash</option>
+            <option value = "2">Card</option>
+            <option value = "3">Valued</option>
           </select>
+          </li>
+          <li>
+            <label>Commission Rate:
+            <input type="number" value={commission}
+            required onChange={(e) => setCommission(e.target.value)}/>
+            </label>
           </li>
           <li>
             <label>Customer Forename:
@@ -371,6 +388,12 @@ function SellTicket(props) {
           </select>
           </li>
           <li>
+            <label>Commission Rate:
+            <input type="number" value={commission}
+            required onChange={(e) => setCommission(e.target.value)}/>
+            </label>
+          </li>
+          <li>
             <label>Customer Forename:
             <input type="text" value={customerFName}
             required onChange={(e) => setForename(e.target.value)}/>
@@ -400,17 +423,17 @@ function SellTicket(props) {
               <ul>
                   <li><label>Card number:</label></li>
                   <li><textarea value={cardNum} required onChange={(e) => setCardNum(e.target.value)}></textarea></li>
-                  <li><label>Expiry Date:</label></li>
-                  <li><textarea value={expiryDate} required onChange={(e) => setExpiryDate(e.target.value)}></textarea></li>
+                  <li><label>Expiry Date (Day doesn't matter):</label></li>
+                  <li><input type="date" value={expiryDate} required onChange={(e) => setExpiryDate(e.target.value)}/></li>
               </ul>
               <ul>
                   <li><label>Name on Card:</label></li>
                   <li><textarea value={nameOnCard} required onChange={(e) => setNameOnCard(e.target.value)}></textarea></li>
                   <li><label>Security Code:</label></li>
-                  <li><textarea value={securityCode} required onChange={(e) => setSecurityCode(e.target.value)}></textarea></li>
+                  <li><input type="number" value={securityCode} required onChange={(e) => setSecurityCode(e.target.value)}/>></li>
               </ul>
               <li align="center">
-                <NavLink to="/mainMenu"><button type="button" class="small-button" onClick={addCard}>Pay</button></NavLink>
+                <NavLink to="/mainMenu"><button type="button" class="small-button" onClick={sender}>Pay</button></NavLink>
                 <NavLink to="/mainMenu"><button type="button" class="small-button">Cancel</button></NavLink>
               </li>
           </div>

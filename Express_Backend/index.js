@@ -395,10 +395,10 @@ app.post('/addInterlineSale', function(request, response) {
   var usdValue = request.body.usd;
   var paymentType = request.body.paymentType;
   var id = request.body.customer;
-  var saleinsert = "INSERT INTO sales(`staffID`,`customerID`,`blankNumber`,`amount`," +
-  "`amountUSD`,`tax`,`isRefunded`,`payByDate`,`paymentTypeID`,`typeofFlightID`," +
+  var insert = "INSERT INTO sales(`staffID`,`customerID`,`blankNumber`,`amount`," +
+  "`amountUSD`,`localTax`,`otherTax`,`isRefunded`,`payByDate`,`paymentTypeID`,`typeofFlightID`," +
   "`isPaid`,`commisionRate`,`exchangeRateCode`, `transactionDate`)" +
-  "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+  "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
   //card data & queries
   var cardNum = request.body.cardNum;
@@ -407,28 +407,121 @@ app.post('/addInterlineSale', function(request, response) {
   var cardinsert = "INSERT INTO carddetails(`cardNumber`,`expiryDate`,`securityCode`,`customerID`)" +
   "VALUES (?,?,?,?)";
 
-  //insert cardDetails
-  /*db.query(insert, [cardNum,date,ccv,id], (error, result) => {
+  //getCustomerID from db
+  /*db.query(getcustomerID, [name, surname], (error,result) => {
     var string = JSON.stringify(result);
     if(string.length > 3){
-      response.sendStatus(200);
-      response.end();
-    }
+      var packet = JSON.parse(string);
+      var customerID = packet[0].customerID;
+      //add sale to db
+      db.query(insert, [staffID,customerID,num,0,usdValue,tax,0,'no',date,paymentType,
+      2,isPaid,commission,"USD",date], (error,result) => {
+        var string = JSON.stringify(result);
+        if(string.length > 3){
+          console.log("Domestic Sale added");
+          if(paymentType === 2){
+            //insert cardDetails to db
+            db.query(insert, [cardNum,date,ccv,customerID], (error, result) => {
+              var string = JSON.stringify(result);
+              if(string.length > 3){
+                response.sendStatus(200);
+                response.end();
+              }
+            });
+          } else {response.sendStatus(200);}
+        } else {response.sendStatus(401);}
+      });
+    } else {response.sendStatus(401);}
   });*/
 });
 
 app.post('/addDomesticSale', function(request, response) {
+  console.log("Domestics");
   var num = request.body.num;
   var origin = request.body.origin;
   var destination= request.body.destination;
   var usdValue = request.body.usd;
-  var paymentType = request.body.paymentType;
-  var name = request.body.customer;
+  var tax = request.body.tax;
+  var paymentType = parseInt(request.body.paymentType);
+  var commission = request.body.commission;
+  var name = request.body.cforename;
+  var surname = request.body.csurname;
+  var isPaid = "yes";
+  let date = new Date().toISOString().slice(0, 10);
+  var now = new Date();
   var insert = "INSERT INTO sales(`staffID`,`customerID`,`blankNumber`,`amount`," +
-  "`amountUSD`,`tax`,`isRefunded`,`payByDate`,`paymentTypeID`,`typeofFlightID`," +
+  "`amountUSD`,`localTax`,`otherTax`,`isRefunded`,`payByDate`,`paymentTypeID`,`typeofFlightID`," +
   "`isPaid`,`commisionRate`,`exchangeRateCode`, `transactionDate`)" +
-  "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-  var getID = "SELECT customerID FROM staff WHERE name = ? , surname = ?"
+  "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+  var getcustomerID = "SELECT * FROM customer WHERE name = ? AND surname = ?";
+  var insertJourney = "INSERT INTO ";
+
+  //card details
+  var cardNum = request.body.cardNum;
+  var cdate = request.body.date;
+  var ccv = request.body.ccv;
+  var cardinsert = "INSERT INTO carddetails(`cardNumber`,`expiryDate`,`securityCode`,`customerID`)" +
+  "VALUES (?,?,?,?)";
+  console.log("Payment Type: " + paymentType);
+  if(paymentType === 3){
+    console.log("Current Date: " + date);
+    let newDate = new Date(now.getFullYear(),now.getMonth() + 1, now.getDate()).toISOString().slice(0,10);
+    console.log("New Date: " + date);
+    isPaid = "no";
+  } else {}
+
+
+  //getCustomerID from db
+  db.query(getcustomerID, [name, surname], (error,result) => {
+    console.log(error);
+    var string = JSON.stringify(result);
+    if(string.length > 3){
+      var packet = JSON.parse(JSON.stringify(result));
+      console.log("Packet: " + packet);
+      var customerID = packet[0].customerID;
+      console.log("ID: " + customerID);
+      console.log("isPaid: " + isPaid);
+      if(isPaid === "no"){
+        db.query(insert, [staffID,customerID,num,0,usdValue,tax,0,'no',newDate,paymentType,
+        2,isPaid,commission,"USD",newDate], (error,result) => {
+          var string = JSON.stringify(result);
+          if(string.length > 3){
+            console.log("Domestic Sale added");
+            if(paymentType === 2){
+              //insert cardDetails to db
+              db.query(insert, [cardNum,date,ccv,customerID], (error, result) => {
+                var string = JSON.stringify(result);
+                if(string.length > 3){
+                  db.query()
+                }
+              });
+            } else {response.sendStatus(200);}
+          } else {response.sendStatus(401);}
+        });
+      }
+      //add sale to db
+      db.query(insert, [staffID,customerID,num,0,usdValue,tax,0,'no',date,paymentType,
+      2,isPaid,commission,"USD",date], (error,result) => {
+        console.log(error);
+        var string = JSON.stringify(result);
+        if(string.length > 3){
+          console.log("Domestic Sale added");
+          if(paymentType === 2){
+            //insert cardDetails to db
+            db.query(insert, [cardNum,date,ccv,customerID], (error, result) => {
+              console.log(error);
+              var string = JSON.stringify(result);
+              if(string.length > 3){
+                response.sendStatus(200);
+                response.end();
+              }
+            });
+          } else {response.sendStatus(200);}
+        } else {response.sendStatus(401);}
+      });
+    } else {response.sendStatus(401);}
+  });
+
 });
 
 
