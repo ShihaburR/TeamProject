@@ -9,6 +9,7 @@ function SellTicket(props) {
   //page naviagation
   const [blanksData, setData] = useState("");
   const [customerData, setCData] = useState("");
+  const [exchangeCodes, setEData] = useState("");
   const [main, setMain] = useState(true);
   const [domestic, setDomestic] = useState(false);
   const [interline, setInterline] = useState(false);
@@ -21,7 +22,8 @@ function SellTicket(props) {
   const [local, setLocal] = useState(0);
   const [eCode, setCode] = useState('');
   const [tax, setTax] = useState(0);
-  const [localTax, setLocalTax] = useState(0);
+  const [otherTax, setotherTax] = useState(0);
+  const [converter, setConverter] = useState("");
   const [usd, setUSD] = useState(0);
   const [pType, setPType] = useState(0);
   const [commission, setCommission] = useState(0);
@@ -33,7 +35,8 @@ function SellTicket(props) {
   const [nameOnCard,setNameOnCard] = useState("");
   const [expiryDate,setExpiryDate] = useState("");
   const [securityCode,setSecurityCode] = useState("");
-  const [converter, setConverter] = useState("");
+
+  //page render
   const getBlanks = () => {
     axios.get('http://localhost:5000/advisorBlanks')
       .then(response => {
@@ -54,37 +57,33 @@ function SellTicket(props) {
         console.log(error);
       });
   }
-  //page render
-  useEffect(() => {
-    getCustomers();
-    getBlanks();
-  }, []);
-
-  //add Details
-  const addCard = () => {
-      console.log(cardNum + " " + nameOnCard + " " + expiryDate + " " + securityCode);
-      axios.post('http://localhost:5000/addCardDetails', {
-          cardNum: cardNum,
-          nCard: nameOnCard,
-          date: expiryDate,
-          ccv: setSecurityCode
-      })
+  const getCodes = () => {
+    axios.get('http://localhost:5000/rateCodes')
       .then(response => {
-        if(response.status === 200){
-          alert("Payment has been made. Returning to Main Menu");
-        }
+        console.log(response.data);
+        setEData(response.data);
       })
-      .catch(error => {
+      .catch(function(error) {
         console.log(error);
       });
   }
+  useEffect(() => {
+    getCustomers();
+    getBlanks();
+    getCodes();
+  }, []);
+
+  //add Details
   const addInterlineSale = () => {
     axios.post('http://localhost:5000/addInterlineSale',{
         num : num,
         origin : origin,
         destination : destination,
+        eCode : eCode,
         local : local,
         usd : usd,
+        tax : tax,
+        otherTax : otherTax,
         paymentType : pType,
         cforename : customerFName,
         csurname : customerSName,
@@ -92,7 +91,7 @@ function SellTicket(props) {
         cardNum: cardNum,
         nCard: nameOnCard,
         date: expiryDate,
-        ccv: setSecurityCode
+        ccv: securityCode
     })
       .then(response => {
         if(response.status === 200){
@@ -117,7 +116,7 @@ function SellTicket(props) {
         cardNum: cardNum,
         nCard: nameOnCard,
         date: expiryDate,
-        ccv: setSecurityCode
+        ccv: securityCode
     })
       .then(response => {
         if(response.status === 200){
@@ -128,9 +127,9 @@ function SellTicket(props) {
         console.log(error);
       });
   }
-  const convert = () => {
-    var one = 1;
-
+  const convert = (local,converter) => {
+    var converted = (local * converter).toFixed(4);
+    setUSD(converted);
   }
 
   //menu navigation
@@ -348,7 +347,12 @@ function SellTicket(props) {
             </label>
           </li>
           <li>
-            <label> Amount (Local Currency):
+            <label>ExchangeCode:</label>
+            <select>
+
+            </select>
+            <br/><br/>
+            <label> Amount:
               <input
                 type="number"
                 value={local}
@@ -356,23 +360,17 @@ function SellTicket(props) {
             </label>
           </li>
           <li>
-            <label> Amount in USD:
-              <input
-                type="number"
-                value={usd}
-                required onChange={(e) => setUSD(e.target.value)}/>
+            <label>USD rate:
+              <input type="number" value={converter}
+                required onChange={(e) => setConverter(e.target.value)}/>
+              <button type="button" onClick={() => convert(local,converter)}>Convert</button>
+            </label>
+            <label style={{padding: "10px"}}> USD Value:
+                {" " + usd}
             </label>
           </li>
           <li>
             <label> Local Tax:
-              <input
-                type="number"
-                value={localTax}
-                required onChange={(e) => setLocalTax(e.target.value)}/>
-            </label>
-          </li>
-          <li>
-            <label> Other Tax:
               <input
                 type="number"
                 value={tax}
@@ -380,11 +378,20 @@ function SellTicket(props) {
             </label>
           </li>
           <li>
+            <label> Other Tax:
+              <input
+                type="number"
+                value={otherTax}
+                required onChange={(e) => setotherTax(e.target.value)}/>
+            </label>
+          </li>
+          <li>
           <label>Payment Type:</label>
           <select value = {pType} required onChange={(e) => setPType(e.target.value)}>
             <option value = "0">Select one</option>
-            <option value = "Cash">Cash</option>
-            <option value = "Card">Card</option>
+            <option value = "1">Cash</option>
+            <option value = "2">Card</option>
+            <option value = "3">Valued</option>
           </select>
           </li>
           <li>
@@ -422,8 +429,8 @@ function SellTicket(props) {
           <div id="menubox" class="mainSize">
               <ul>
                   <li><label>Card number:</label></li>
-                  <li><textarea value={cardNum} required onChange={(e) => setCardNum(e.target.value)}></textarea></li>
-                  <li><label>Expiry Date (Day doesn't matter):</label></li>
+                  <li><input type="text" value={cardNum} required onChange={(e) => setCardNum(e.target.value)}/></li>
+                  <li><label>Expiry Date (set any day):</label></li>
                   <li><input type="date" value={expiryDate} required onChange={(e) => setExpiryDate(e.target.value)}/></li>
               </ul>
               <ul>

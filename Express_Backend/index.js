@@ -174,9 +174,9 @@ app.post('/addBlank', function(request, response) {
     var s = type.toString() + n
     var num = parseInt(s);
 
-    var insert = "INSERT INTO blank(`blankNumber`,`couponAmount`,`statusID`,`recievedDate`," +
-    "`blankTypeID`, `isAssigned`, `assignedDate`)" +
-    "VALUES (?,1,1,?,?,'no',NULL)"
+    var insert = "INSERT INTO blank(`blankNumber`,`statusID`,`recievedDate`," +
+    "`blankTypeID`)" +
+    "VALUES (?,3,?,?)"
     //console.log("Date: " + date);
     //console.log("Type: " + type);
     //console.log("Num: " + num);
@@ -217,8 +217,8 @@ app.post('/addBulk', function(request, response) {
   var range = (max - min) + 1;
   var values = []
   var strType = type.toString();
-  var insert = "INSERT INTO blank(`blankNumber`,`couponAmount`,`statusID`,`recievedDate`," +
-  "`blankTypeID`, `isAssigned`) VALUES ?";
+  var insert = "INSERT INTO blank(`blankNumber`,`statusID`,`recievedDate`," +
+  "`blankTypeID`) VALUES ?";
   var checkType = "SELECT blankTypeID FROM blanktype WHERE blankType = ?";
   db.query(checkType, [type], (error, result) => {
     var packet = JSON.parse(JSON.stringify(result));
@@ -226,14 +226,13 @@ app.post('/addBulk', function(request, response) {
     //creating the bulk to push to database
     for(let n = 0; n < range; n++){
       strN = min.toString();
-      values.push([parseInt(strType + strN.padStart(6,'0')), 1, 1, date, bTypeID,'no'])
+      values.push([parseInt(strType + strN.padStart(6,'0')), 3, date, bTypeID])
       parseInt(min);
       min++;
     }
     db.query(insert, [values], (error, result) => {
       var string = JSON.stringify(result);
       var packet = JSON.parse(string);
-      //console.log(string);
       console.log("Blanks inserted");
       response.sendStatus(200);
     });
@@ -243,8 +242,7 @@ app.post('/addBulk', function(request, response) {
 
 app.post('/removeBlank', function(request, response) {
   var number = request.body.bNumber;
-  console.log(number);
-  var del = "DELETE FROM blank WHERE blankNumber = ?"
+  var del = "UPDATE blank SET statusID = 5 WHERE blankNumber = ?"
   db.query(del, [number], (error,result) => {
     //console.log("Error: " + error);
     //console.log("Result: " + result);
@@ -253,7 +251,7 @@ app.post('/removeBlank', function(request, response) {
 });
 
 app.get('/blanks', function(request, response) {
-  var get = "SELECT * FROM blank";
+  var get = "SELECT * FROM blank WHERE statusID < 4";
     db.query(get, (error,result) => {
       response.status(200).send(result);
       response.end();
@@ -284,7 +282,7 @@ app.post('/assignBlank', function(request, response) {
         var string = JSON.stringify(result);
         if(string.includes('"affectedRows":1')){
           console.log("Blank assigned");
-          db.query(update, [{isAssigned : 'yes', assignedDate : date}, {blankNumber: number}],
+          db.query(update, [{statusID: 2 ,isAssigned : 'yes', assignedDate : date}, {blankNumber: number}],
           (error, result) => {
             var string = JSON.stringify(result);
             if(string.includes('"affectedRows":1')){
@@ -327,7 +325,7 @@ app.post('/assignBulk', function(request, response) {
     console.log("String: " + string);
     if(string.length > 3){
       for(let r = 0; r < range; r++){
-        db.query(update,[{isAssigned: 'yes', assignedDate: date},blanks[r]], (error, result) => {
+        db.query(update,[{statusID: 2 ,isAssigned: 'yes', assignedDate: date},blanks[r]], (error, result) => {
           var string = JSON.stringify(result);
         });
       }
@@ -390,38 +388,77 @@ app.post('/addInterlineSale', function(request, response) {
   var num = request.body.num;
   var origin = request.body.origin;
   var destination= request.body.destination;
-  //var exchangeCode = ;
+  var exchangeCode = request.body.eCode;
   var localCurrency = request.body.local;
   var usdValue = request.body.usd;
+  var tax = request.body.tax;
+  var othertax = request.body.otherTax;
   var paymentType = request.body.paymentType;
-  var id = request.body.customer;
+  var commission = request.body.commission;
+  var name = request.body.cforename;
+  var surname = request.body.csurname;
+  var isPaid = "yes";
+  let date = new Date().toISOString().slice(0, 10);
+  var now = new Date();
   var insert = "INSERT INTO sales(`staffID`,`customerID`,`blankNumber`,`amount`," +
   "`amountUSD`,`localTax`,`otherTax`,`isRefunded`,`payByDate`,`paymentTypeID`,`typeofFlightID`," +
   "`isPaid`,`commisionRate`,`exchangeRateCode`, `transactionDate`)" +
   "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+  var getcustomerID = "SELECT * FROM customer WHERE name = ? AND surname = ?";
 
   //card data & queries
   var cardNum = request.body.cardNum;
-  var date = request.body.date;
+  var cdate = request.body.date;
   var ccv = request.body.ccv;
   var cardinsert = "INSERT INTO carddetails(`cardNumber`,`expiryDate`,`securityCode`,`customerID`)" +
   "VALUES (?,?,?,?)";
-
+  if(paymentType === 3){
+    console.log("Current Date: " + date);
+    let newDate = new Date(now.getFullYear(),now.getMonth() + 1, now.getDate()).toISOString().slice(0,10);
+    console.log("New Date: " + date);
+    isPaid = "no";
+  } else {}
   //getCustomerID from db
-  /*db.query(getcustomerID, [name, surname], (error,result) => {
+  db.query(getcustomerID, [name, surname], (error,result) => {
+    console.log(error);
     var string = JSON.stringify(result);
     if(string.length > 3){
-      var packet = JSON.parse(string);
+      var packet = JSON.parse(JSON.stringify(result));
+      console.log("Packet: " + packet);
       var customerID = packet[0].customerID;
+      console.log("ID: " + customerID);
+      console.log("isPaid: " + isPaid);
+      if(isPaid === "no"){
+        db.query(insert, [staffID,customerID,num,localCurrency,usdValue,tax,otherTax,
+        'no',newDate,paymentType,1,isPaid,commission,exchangeCode,newDate], (error,result) => {
+          var string = JSON.stringify(result);
+          if(string.length > 3){
+            console.log("Interline Sale added");
+            if(paymentType === 2){
+              //insert cardDetails to db
+              db.query(insert, [cardNum,cdate,ccv,customerID], (error, result) => {
+                var string = JSON.stringify(result);
+                console.log("Error: " + error);
+                if(string.length > 3){
+                  console.log("Card Details added");
+                  response.sendStatus(200)
+                }
+              });
+            } else {response.sendStatus(200);}
+          } else {response.sendStatus(401);}
+        });
+      }
       //add sale to db
       db.query(insert, [staffID,customerID,num,0,usdValue,tax,0,'no',date,paymentType,
       2,isPaid,commission,"USD",date], (error,result) => {
+        console.log(error);
         var string = JSON.stringify(result);
         if(string.length > 3){
           console.log("Domestic Sale added");
           if(paymentType === 2){
             //insert cardDetails to db
-            db.query(insert, [cardNum,date,ccv,customerID], (error, result) => {
+            db.query(cardinsert, [cardNum,cdate,ccv,customerID], (error, result) => {
+              console.log(error);
               var string = JSON.stringify(result);
               if(string.length > 3){
                 response.sendStatus(200);
@@ -432,7 +469,7 @@ app.post('/addInterlineSale', function(request, response) {
         } else {response.sendStatus(401);}
       });
     } else {response.sendStatus(401);}
-  });*/
+  });
 });
 
 app.post('/addDomesticSale', function(request, response) {
@@ -458,7 +495,7 @@ app.post('/addDomesticSale', function(request, response) {
 
   //card details
   var cardNum = request.body.cardNum;
-  var cdate = request.body.date;
+  let cdate = request.body.date;
   var ccv = request.body.ccv;
   var cardinsert = "INSERT INTO carddetails(`cardNumber`,`expiryDate`,`securityCode`,`customerID`)" +
   "VALUES (?,?,?,?)";
@@ -489,10 +526,12 @@ app.post('/addDomesticSale', function(request, response) {
             console.log("Domestic Sale added");
             if(paymentType === 2){
               //insert cardDetails to db
-              db.query(insert, [cardNum,date,ccv,customerID], (error, result) => {
+              db.query(insert, [cardNum,cdate,ccv,customerID], (error, result) => {
                 var string = JSON.stringify(result);
+                console.log("Error: " + error);
                 if(string.length > 3){
-                  db.query()
+                  console.log("Card Details added");
+                  response.sendStatus(200)
                 }
               });
             } else {response.sendStatus(200);}
@@ -508,7 +547,7 @@ app.post('/addDomesticSale', function(request, response) {
           console.log("Domestic Sale added");
           if(paymentType === 2){
             //insert cardDetails to db
-            db.query(insert, [cardNum,date,ccv,customerID], (error, result) => {
+            db.query(cardinsert, [cardNum,cdate,ccv,customerID], (error, result) => {
               console.log(error);
               var string = JSON.stringify(result);
               if(string.length > 3){
@@ -616,6 +655,15 @@ app.post('/removeExchangeRate', function(request, response) {
       });
     }
   });
+});
+
+app.get('/rateCodes', function(request, response) {
+  var get = "SELECT exchangeRateCode FROM exchangerate";
+  db.query(get, (error,result) => {
+    response.status(200).send(result);
+    response.end();
+  });
+
 });
 
 

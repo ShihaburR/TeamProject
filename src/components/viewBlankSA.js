@@ -99,6 +99,7 @@ function ViewBlankSA(props) {
     .then(response => {
       if(response.status === 200){
         alert("Blank deleted");
+        getBlanks();
       }
     })
     .catch(function(error) {
@@ -145,7 +146,7 @@ function ViewBlankSA(props) {
               <td align="center">{r.isAssigned}</td>
               <td>{displayDate(r.assignedDate)}</td>
               <td align="center"><button type="button" value={r.blankNumber}
-               onClick ={() => {removeBlank(r.blankNumber); getBlanks();}}>Delete</button></td>
+               onClick ={() => {removeBlank(r.blankNumber)}}>Delete</button></td>
             </tr>
             ))}
           </tbody>
@@ -168,6 +169,8 @@ function ViewBlankSA(props) {
               <label>Blank Type:</label>
               <select value = {bType} required onChange={(e) => setType(e.target.value)}>
                 <option value = "0">Select one</option>
+                <option value = "452">452</option>
+                <option value = "451">451</option>
                 <option value = "444">444</option>
                 <option value = "440">440</option>
                 <option value = "420">420</option>
@@ -202,6 +205,8 @@ function ViewBlankSA(props) {
              <label>Blank Type:</label>
              <select value = {bType} required onChange={(e) => setType(e.target.value)}>
                <option value = "0">Select one</option>
+               <option value = "452">452</option>
+               <option value = "451">451</option>
                <option value = "444">444</option>
                <option value = "440">440</option>
                <option value = "420">420</option>

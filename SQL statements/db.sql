@@ -3,6 +3,11 @@ CREATE TABLE IF NOT EXISTS `TypeOfPayment` (
 	`paymentType`	varchar ( 255 ) NOT NULL,
 	PRIMARY KEY(`paymentTypeID`)
 );
+CREATE TABLE IF NOT EXISTS `TypeOfFlight` (
+	`typeOfFlightID`	integer ( 1 ) NOT NULL UNIQUE,
+	`typeOfFlight`	varchar ( 255 ) NOT NULL,
+	PRIMARY KEY(`typeOfFlightID`)
+);
 CREATE TABLE IF NOT EXISTS `TravelAgency` (
 	`agencyID`	INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT UNIQUE,
 	`name`	varchar ( 255 ) NOT NULL,
@@ -27,17 +32,9 @@ CREATE TABLE IF NOT EXISTS `Staff` (
 	`email`	varchar ( 255 ) NOT NULL UNIQUE,
 	`password`	varchar ( 255 ) NOT NULL,
 	`agencyID`	integer ( 10 ) NOT NULL,
-	`active`	varchar ( 3 ),
-	FOREIGN KEY(`agencyID`) REFERENCES `TravelAgency`(`agencyID`) ON UPDATE RESTRICT ON DELETE RESTRICT,
-	FOREIGN KEY(`staffTypeID`) REFERENCES `StaffType`(`staffTypeID`) ON UPDATE CASCADE ON DELETE CASCADE
-);
-CREATE TABLE IF NOT EXISTS `FlexibleDiscount` (
-	`discountID`	INTEGER PRIMARY KEY AUTO_INCREMENT,
-	`range1`	INTEGER,
-	`range2`	INTEGER,
-	`discount1`	INTEGER,
-	`discount2`	INTEGER,
-	`discount3`	INTEGER
+	`Active`	varchar ( 3 ),
+	FOREIGN KEY(`staffTypeID`) REFERENCES `StaffType`(`staffTypeID`) ON UPDATE CASCADE ON DELETE CASCADE,
+	FOREIGN KEY(`agencyID`) REFERENCES `TravelAgency`(`agencyID`) ON UPDATE RESTRICT ON DELETE RESTRICT
 );
 CREATE TABLE IF NOT EXISTS `ExchangeRate` (
 	`exchangeRateCode`	varchar ( 3 ) NOT NULL UNIQUE,
@@ -68,19 +65,9 @@ CREATE TABLE IF NOT EXISTS `Customer` (
 	`customerTypeID`	integer ( 1 ) NOT NULL,
 	`discountAmount`	integer ( 10 ),
 	`discountType`	integer ( 1 ),
-	`active`	varchar ( 3 ),
-	`flexibleDiscount`	INTEGER,
-	FOREIGN KEY(`discountAmount`) REFERENCES `DiscountAmount`(`discountId`),
+	FOREIGN KEY(`customerTypeID`) REFERENCES `CustomerType`(`customerTypeID`),
 	FOREIGN KEY(`discountType`) REFERENCES `DiscountType`(`discountTypeID`),
-	FOREIGN KEY(`flexibleDiscount`) REFERENCES `FlexibleDiscount`(`discountID`),
-	FOREIGN KEY(`customerTypeID`) REFERENCES `CustomerType`(`customerTypeID`)
-);
-CREATE TABLE IF NOT EXISTS `CardDetails` (
-	`CardID`	INTEGER PRIMARY KEY AUTO_INCREMENT,
-	`cardNumber`	varchar ( 16 ) NOT NULL UNIQUE,
-	`expiryDate`	date NOT NULL,
-	`securityCode`	integer ( 3 ) NOT NULL,
-	`customerID`	integer ( 10 ) NOT NULL
+	FOREIGN KEY(`discountAmount`) REFERENCES `DiscountAmount`(`discountId`)
 );
 CREATE TABLE IF NOT EXISTS `Sales` (
 	`saleID`	INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT UNIQUE,
@@ -94,39 +81,61 @@ CREATE TABLE IF NOT EXISTS `Sales` (
 	`isRefunded`	varchar ( 5 ) NOT NULL,
 	`payByDate`	date,
 	`paymentTypeID`	integer ( 1 ) NOT NULL,
+	`typeOfFlightID`	integer ( 1 ) NOT NULL,
 	`isPaid`	varchar ( 3 ) NOT NULL,
 	`commisionRate`	double ( 10 , 2 ) NOT NULL,
 	`exchangeRateCode`	varchar ( 3 ) NOT NULL,
-	`transactionDate`	DATE NOT NULL,
-	`cardDetails`	INTEGER,
-	FOREIGN KEY(`paymentTypeID`) REFERENCES `TypeOfPayment`(`paymentTypeID`),
-	FOREIGN KEY(`cardDetails`) REFERENCES `CardDetails`(`CardID`) ON UPDATE RESTRICT ON DELETE RESTRICT,
+	`transactionDate`	DATE,
+	FOREIGN KEY(`customerID`) REFERENCES `Customer`(`customerID`) ON UPDATE RESTRICT ON DELETE RESTRICT,
 	FOREIGN KEY(`exchangeRateCode`) REFERENCES `ExchangeRate`(`exchangeRateCode`),
+	FOREIGN KEY(`typeOfFlightID`) REFERENCES `TypeOfFlight`(`typeOfFlightID`),
 	FOREIGN KEY(`staffID`) REFERENCES `Staff`(`staffID`) ON UPDATE RESTRICT ON DELETE RESTRICT,
-	FOREIGN KEY(`customerID`) REFERENCES `Customer`(`customerID`) ON UPDATE RESTRICT ON DELETE RESTRICT
+	FOREIGN KEY(`paymentTypeID`) REFERENCES `TypeOfPayment`(`paymentTypeID`)
+);
+CREATE TABLE IF NOT EXISTS `JourneyLeg` (
+	`locationId`	integer ( 10 ) NOT NULL,
+	`departureDestination`	varchar ( 255 ) NOT NULL,
+	`arrivalDestination`	varchar ( 255 ) NOT NULL,
+	PRIMARY KEY(`locationId`)
 );
 CREATE TABLE IF NOT EXISTS `BlankType` (
 	`blankTypeID`	integer ( 1 ) NOT NULL UNIQUE,
 	`blankType`	integer ( 4 ) NOT NULL,
-	`blankArea`	varchar(255),
 	PRIMARY KEY(`blankTypeID`)
 );
 CREATE TABLE IF NOT EXISTS `Blank` (
 	`blankNumber`	integer ( 11 ) NOT NULL UNIQUE,
+	`couponAmount`	integer ( 1 ) NOT NULL,
 	`statusID`	integer ( 1 ) NOT NULL,
 	`recievedDate`	DATE NOT NULL,
 	`blankTypeID`	integer ( 1 ) NOT NULL,
+	`isAssigned`	varchar ( 5 ) NOT NULL,
 	`assignedDate`	DATE,
-	`departureDestination`	varchar(255),
-	`arrivalDestination`	varchar(255),
-	PRIMARY KEY(`blankNumber`),
 	FOREIGN KEY(`statusID`) REFERENCES `Status`(`statusID`) ON UPDATE RESTRICT ON DELETE RESTRICT,
-	FOREIGN KEY(`blankTypeID`) REFERENCES `BlankType`(`blankTypeID`) ON UPDATE RESTRICT ON DELETE RESTRICT
+	FOREIGN KEY(`blankTypeID`) REFERENCES `BlankType`(`blankTypeID`) ON UPDATE RESTRICT ON DELETE RESTRICT,
+	PRIMARY KEY(`blankNumber`)
 );
 CREATE TABLE IF NOT EXISTS `BlankAllocation` (
 	`blankAllocationId`	INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT UNIQUE,
 	`staffID`	integer ( 10 ),
 	`blankNumber`	integer ( 10 ) NOT NULL UNIQUE,
-	FOREIGN KEY(`staffID`) REFERENCES `Staff`(`staffID`),
-	FOREIGN KEY(`blankNumber`) REFERENCES `Blank`(`blankNumber`)
+	FOREIGN KEY(`blankNumber`) REFERENCES `Blank`(`blankNumber`),
+	FOREIGN KEY(`staffID`) REFERENCES `Staff`(`staffID`)
+);
+CREATE TABLE IF NOT EXISTS `Coupons` (
+	`couponID`	INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT UNIQUE,
+	`BlankNumber`	integer ( 11 ) NOT NULL,
+	`departureTime`	datetime NOT NULL,
+	`arrivalTime`	datetime NOT NULL,
+	`locationId`	integer ( 10 ) NOT NULL,
+	FOREIGN KEY(`BlankNumber`) REFERENCES `Blank`(`blankNumber`) ON UPDATE RESTRICT ON DELETE RESTRICT,
+	FOREIGN KEY(`locationId`) REFERENCES `JourneyLeg`(`locationId`)
+);
+CREATE TABLE IF NOT EXISTS `CardDetails` (
+	`cardNumber`	integer ( 16 ) NOT NULL UNIQUE,
+	`expiryDate`	date NOT NULL,
+	`securityCode`	integer ( 3 ) NOT NULL,
+	`customerID`	integer ( 10 ) NOT NULL,
+	PRIMARY KEY(`cardNumber`),
+	FOREIGN KEY(`customerID`) REFERENCES `Customer`(`customerID`) ON UPDATE RESTRICT ON DELETE RESTRICT
 );
