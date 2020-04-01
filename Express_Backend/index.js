@@ -122,7 +122,28 @@ app.get('/advisors', function(request, response) {
   });
 });
 
-//createCustomer
+//Staff
+app.get('/staff', function(request, response) {
+  var get = "SELECT * FROM staff"
+    db.query(get, (error,result) => {
+      response.status(200).send(result);
+      response.end();
+    });
+});
+
+app.post('/removeStaff', function(request, response) {
+  var staffID = request.body.ID
+  var del = "UPDATE staff SET active = 'no' WHERE staffID = ? "
+  db.query(del, [staffID], (error, result) => {
+      var string = JSON.stringify(result);
+      if(string.includes('"affectedRows: 1"')){
+        response.sendStatus(200);
+        response.end();
+      }
+  });
+});
+
+//Customers
 app.post('/createCustomer', function(request, response) {
     //issue if discount id is the same it breaks.
     var firstname = request.body.firstname;
@@ -164,6 +185,18 @@ app.get('/customers', function(request, response) {
       response.status(200).send(result);
       response.end();
     });
+});
+
+app.post('/removeCustomer', function(request, response) {
+  var customerID = request.body.ID
+  var del = "UPDATE customer SET active = 'no' WHERE customerID = ? "
+  db.query(del, [customerID], (error, result) => {
+      var string = JSON.stringify(result);
+      if(string.includes('"affectedRows: 1"')){
+        response.sendStatus(200);
+        response.end();
+      }
+  });
 });
 
 //blanks
@@ -266,6 +299,12 @@ app.get('/advisorBlanks', function(request, response){
   });
 })
 
+//Look into a way of display if a blank has been sold
+app.post('/isSold', function(request, response) {
+  var num = request.body.num;
+  var get = "SELECT * FROM sales WHERE blankNumber = ?"
+})
+
 app.post('/assignBlank', function(request, response) {
   var id = request.body.id;
   var number = request.body.bNumber;
@@ -282,7 +321,7 @@ app.post('/assignBlank', function(request, response) {
         var string = JSON.stringify(result);
         if(string.includes('"affectedRows":1')){
           console.log("Blank assigned");
-          db.query(update, [{statusID: 2 ,isAssigned : 'yes', assignedDate : date}, {blankNumber: number}],
+          db.query(update, [{statusID: 2 , assignedDate : date}, {blankNumber: number}],
           (error, result) => {
             var string = JSON.stringify(result);
             if(string.includes('"affectedRows":1')){
@@ -325,7 +364,7 @@ app.post('/assignBulk', function(request, response) {
     console.log("String: " + string);
     if(string.length > 3){
       for(let r = 0; r < range; r++){
-        db.query(update,[{statusID: 2 ,isAssigned: 'yes', assignedDate: date},blanks[r]], (error, result) => {
+        db.query(update,[{statusID: 2, assignedDate: date},blanks[r]], (error, result) => {
           var string = JSON.stringify(result);
         });
       }
@@ -392,8 +431,8 @@ app.post('/addInterlineSale', function(request, response) {
   var localCurrency = request.body.local;
   var usdValue = request.body.usd;
   var tax = request.body.tax;
-  var othertax = request.body.otherTax;
-  var paymentType = request.body.paymentType;
+  var otherTax = request.body.otherTax;
+  var paymentType = parseInt(request.body.paymentType);
   var commission = request.body.commission;
   var name = request.body.cforename;
   var surname = request.body.csurname;
@@ -401,79 +440,127 @@ app.post('/addInterlineSale', function(request, response) {
   let date = new Date().toISOString().slice(0, 10);
   var now = new Date();
   var insert = "INSERT INTO sales(`staffID`,`customerID`,`blankNumber`,`amount`," +
-  "`amountUSD`,`localTax`,`otherTax`,`isRefunded`,`payByDate`,`paymentTypeID`,`typeofFlightID`," +
+  "`amountUSD`,`localTax`,`otherTax`,`isRefunded`,`payByDate`,`paymentTypeID`," +
   "`isPaid`,`commisionRate`,`exchangeRateCode`, `transactionDate`)" +
-  "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+  "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
   var getcustomerID = "SELECT * FROM customer WHERE name = ? AND surname = ?";
+  var insertJourney = "UPDATE blank SET departureDestination = ? ,arrivalDestination = ? " +
+    ",statusID = 1 WHERE blankNumber = ?";
 
   //card data & queries
   var cardNum = request.body.cardNum;
   var cdate = request.body.date;
   var ccv = request.body.ccv;
-  var cardinsert = "INSERT INTO carddetails(`cardNumber`,`expiryDate`,`securityCode`,`customerID`)" +
-  "VALUES (?,?,?,?)";
-  if(paymentType === 3){
-    console.log("Current Date: " + date);
-    let newDate = new Date(now.getFullYear(),now.getMonth() + 1, now.getDate()).toISOString().slice(0,10);
-    console.log("New Date: " + date);
-    isPaid = "no";
-  } else {}
+  var cardinsert = "INSERT INTO carddetails(`cardNumber`,`expiryDate`,`securityCode`)" +
+  "VALUES (?,?,?)";
+  var getCardID = "SELECT CardID FROM carddetails WHERE cardNumber = ?";
+  var cinsert = "INSERT INTO sales(`staffID`,`customerID`,`blankNumber`,`amount`," +
+  "`amountUSD`,`localTax`,`otherTax`,`isRefunded`,`payByDate`,`paymentTypeID`," +
+  "`isPaid`,`commisionRate`,`exchangeRateCode`, `transactionDate`, carddetails)" +
+  "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
   //getCustomerID from db
+  // first get CustomerID from db
   db.query(getcustomerID, [name, surname], (error,result) => {
-    console.log(error);
+    console.log("Cust ID Error: " + error);
     var string = JSON.stringify(result);
-    if(string.length > 3){
+    //if customer exists
+    if(string.length > 3) {
       var packet = JSON.parse(JSON.stringify(result));
-      console.log("Packet: " + packet);
+      console.log("Cust ID Packet: " + packet);
       var customerID = packet[0].customerID;
-      console.log("ID: " + customerID);
-      console.log("isPaid: " + isPaid);
-      if(isPaid === "no"){
+      console.log("Cust ID: " + customerID);
+      //if valued customer
+      if(paymentType === 3){
+        console.log("---------Valued Payer---------");
+        console.log("Current Date: " + date);
+        let newDate = new Date(now.getFullYear(),now.getMonth() + 1, now.getDate()).toISOString().slice(0,10);
+        console.log("New Date: " + newDate);
+        isPaid = "no";
+        //add sale to db
+        console.log("Valued Customer sale being added");
         db.query(insert, [staffID,customerID,num,localCurrency,usdValue,tax,otherTax,
-        'no',newDate,paymentType,1,isPaid,commission,exchangeCode,newDate], (error,result) => {
+        'no',newDate,paymentType,isPaid,commission,exchangeCode,newDate], (error,result) => {
           var string = JSON.stringify(result);
           if(string.length > 3){
             console.log("Interline Sale added");
-            if(paymentType === 2){
-              //insert cardDetails to db
-              db.query(insert, [cardNum,cdate,ccv,customerID], (error, result) => {
-                var string = JSON.stringify(result);
-                console.log("Error: " + error);
-                if(string.length > 3){
-                  console.log("Card Details added");
-                  response.sendStatus(200)
-                }
-              });
-            } else {response.sendStatus(200);}
-          } else {response.sendStatus(401);}
-        });
-      }
-      //add sale to db
-      db.query(insert, [staffID,customerID,num,0,usdValue,tax,0,'no',date,paymentType,
-      2,isPaid,commission,"USD",date], (error,result) => {
-        console.log(error);
-        var string = JSON.stringify(result);
-        if(string.length > 3){
-          console.log("Domestic Sale added");
-          if(paymentType === 2){
-            //insert cardDetails to db
-            db.query(cardinsert, [cardNum,cdate,ccv,customerID], (error, result) => {
-              console.log(error);
+            //add destination info & update blank
+            db.query(insertJourney, [destination, origin, num], (error, result) => {
+              console.log("Insert Journey Error: " + error);
               var string = JSON.stringify(result);
               if(string.length > 3){
+                console.log("Blank Updated and Journey Added");
                 response.sendStatus(200);
-                response.end();
               }
             });
-          } else {response.sendStatus(200);}
-        } else {response.sendStatus(401);}
-      });
-    } else {response.sendStatus(401);}
+          } else {response.sendStatus(401);}
+        });
+      //if paying by card
+      } else if(paymentType === 2) {
+        console.log("---------Card Payment---------");
+        //insert card details first
+        db.query(cardinsert, [cardNum,cdate,ccv], (error, result) => {
+          var string = JSON.stringify(result);
+          console.log("Error: " + error);
+          if(string.length > 3){
+            console.log("Card Details added");
+            console.log("Fetching Card ID");
+            //get CardID to link to sales row
+            db.query(getCardID,[cardNum], (error, result) => {
+              var packet = JSON.parse(JSON.stringify(result));
+              var cardID = packet[0].CardID;
+              //add sale to db
+              console.log("cardID: " + cardID);
+              console.log("Adding card payer sale to DB");
+              //add sale to db
+              db.query(cinsert, [staffID,customerID,num,localCurrency,usdValue,tax,otherTax,
+              'no',date,paymentType,isPaid,commission,exchangeCode,date,cardID], (error,result) => {
+                console.log(error);
+                var string = JSON.stringify(result);
+                if(string.length > 3){
+                  console.log("Interline Sale added");
+                  //add destination info & update blank
+                  db.query(insertJourney, [destination, origin, num], (error, result) => {
+                    console.log("Insert Journey Error: " + error);
+                    var string = JSON.stringify(result);
+                    console.log(string);
+                    if(string.length > 3){
+                      console.log("Blank Updated and Journey Added");
+                      response.sendStatus(200);
+                    }
+                });
+              } else {response.sendStatus(401);}
+            });
+            });
+          }
+        });
+        //cash payment
+      } else {
+          console.log("---------Cash Payer---------");
+          //add sale to db
+          db.query(insert, [staffID,customerID,num,localCurrency,usdValue,tax,otherTax,
+          'no',date,paymentType,isPaid,commission,exchangeCode,date], (error,result) => {
+            console.log("Error: " + error);
+            var string = JSON.stringify(result);
+            if(string.length > 3){
+              console.log("Interline Sale added");
+              //add destination info & update blank
+              db.query(insertJourney, [destination, origin, num], (error, result) => {
+                console.log("Insert Journey Error: " + error);
+                var string = JSON.stringify(result);
+                if(string.length > 3){
+                  console.log("Blank Updated and Journey Added");
+                  response.sendStatus(200);
+                }
+              });
+            } else {response.sendStatus(401);}
+          });
+      }
+    }
   });
 });
 
 app.post('/addDomesticSale', function(request, response) {
-  console.log("Domestics");
+  //sales data
   var num = request.body.num;
   var origin = request.body.origin;
   var destination= request.body.destination;
@@ -487,82 +574,125 @@ app.post('/addDomesticSale', function(request, response) {
   let date = new Date().toISOString().slice(0, 10);
   var now = new Date();
   var insert = "INSERT INTO sales(`staffID`,`customerID`,`blankNumber`,`amount`," +
-  "`amountUSD`,`localTax`,`otherTax`,`isRefunded`,`payByDate`,`paymentTypeID`,`typeofFlightID`," +
+  "`amountUSD`,`localTax`,`otherTax`,`isRefunded`,`payByDate`,`paymentTypeID`," +
   "`isPaid`,`commisionRate`,`exchangeRateCode`, `transactionDate`)" +
-  "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+  "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
   var getcustomerID = "SELECT * FROM customer WHERE name = ? AND surname = ?";
-  var insertJourney = "INSERT INTO ";
+  var insertJourney = "UPDATE blank SET departureDestination = ? ,arrivalDestination = ? " +
+  ",statusID = 1 WHERE blankNumber = ?";
 
   //card details
   var cardNum = request.body.cardNum;
   let cdate = request.body.date;
   var ccv = request.body.ccv;
-  var cardinsert = "INSERT INTO carddetails(`cardNumber`,`expiryDate`,`securityCode`,`customerID`)" +
-  "VALUES (?,?,?,?)";
+  var cardinsert = "INSERT INTO carddetails(`cardNumber`,`expiryDate`,`securityCode`)" +
+  "VALUES (?,?,?)";
+  var getCardID = "SELECT CardID FROM carddetails WHERE cardNumber = ?";
   console.log("Payment Type: " + paymentType);
-  if(paymentType === 3){
-    console.log("Current Date: " + date);
-    let newDate = new Date(now.getFullYear(),now.getMonth() + 1, now.getDate()).toISOString().slice(0,10);
-    console.log("New Date: " + date);
-    isPaid = "no";
-  } else {}
+  var cinsert = "INSERT INTO sales(`staffID`,`customerID`,`blankNumber`,`amount`," +
+  "`amountUSD`,`localTax`,`otherTax`,`isRefunded`,`payByDate`,`paymentTypeID`," +
+  "`isPaid`,`commisionRate`,`exchangeRateCode`, `transactionDate`, carddetails)" +
+  "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
-
-  //getCustomerID from db
+  // first get CustomerID from db
   db.query(getcustomerID, [name, surname], (error,result) => {
-    console.log(error);
+    console.log("Cust ID Error: " + error);
     var string = JSON.stringify(result);
-    if(string.length > 3){
+    //if customer exists
+    if(string.length > 3) {
       var packet = JSON.parse(JSON.stringify(result));
-      console.log("Packet: " + packet);
+      console.log("Cust ID Packet: " + packet);
       var customerID = packet[0].customerID;
-      console.log("ID: " + customerID);
-      console.log("isPaid: " + isPaid);
-      if(isPaid === "no"){
-        db.query(insert, [staffID,customerID,num,0,usdValue,tax,0,'no',newDate,paymentType,
-        2,isPaid,commission,"USD",newDate], (error,result) => {
+      console.log("Cust ID: " + customerID);
+      //if valued customer
+      if(paymentType === 3){
+        console.log("---------Valued Payer---------");
+        console.log("Current Date: " + date);
+        let newDate = new Date(now.getFullYear(),now.getMonth() + 1, now.getDate()).toISOString().slice(0,10);
+        console.log("New Date: " + newDate);
+        isPaid = "no";
+        //add sale to db
+        console.log("Valued Customer sale being added");
+        db.query(insert, [staffID,customerID,num,0,usdValue,tax,0,'no',newDate,paymentType
+        ,isPaid,commission,"USD",newDate], (error,result) => {
           var string = JSON.stringify(result);
           if(string.length > 3){
             console.log("Domestic Sale added");
-            if(paymentType === 2){
-              //insert cardDetails to db
-              db.query(insert, [cardNum,cdate,ccv,customerID], (error, result) => {
-                var string = JSON.stringify(result);
-                console.log("Error: " + error);
-                if(string.length > 3){
-                  console.log("Card Details added");
-                  response.sendStatus(200)
-                }
-              });
-            } else {response.sendStatus(200);}
-          } else {response.sendStatus(401);}
-        });
-      }
-      //add sale to db
-      db.query(insert, [staffID,customerID,num,0,usdValue,tax,0,'no',date,paymentType,
-      2,isPaid,commission,"USD",date], (error,result) => {
-        console.log(error);
-        var string = JSON.stringify(result);
-        if(string.length > 3){
-          console.log("Domestic Sale added");
-          if(paymentType === 2){
-            //insert cardDetails to db
-            db.query(cardinsert, [cardNum,cdate,ccv,customerID], (error, result) => {
-              console.log(error);
+            //add destination info & update blank
+            db.query(insertJourney, [destination, origin, num], (error, result) => {
+              console.log("Insert Journey Error: " + error);
               var string = JSON.stringify(result);
               if(string.length > 3){
+                console.log("Blank Updated and Journey Added");
                 response.sendStatus(200);
-                response.end();
               }
             });
-          } else {response.sendStatus(200);}
-        } else {response.sendStatus(401);}
-      });
-    } else {response.sendStatus(401);}
+          } else {response.sendStatus(401);}
+        });
+      //if paying by card
+      } else if(paymentType === 2) {
+        console.log("---------Card Payment---------");
+        //insert card details first
+        db.query(cardinsert, [cardNum,cdate,ccv], (error, result) => {
+          var string = JSON.stringify(result);
+          console.log("Error: " + error);
+          if(string.length > 3){
+            console.log("Card Details added");
+            console.log("Fetching Card ID");
+            //get CardID to link to sales row
+            db.query(getCardID,[cardNum], (error, result) => {
+              var packet = JSON.parse(JSON.stringify(result));
+              var cardID = packet[0].CardID;
+              //add sale to db
+              console.log("cardID: " + cardID);
+              console.log("Adding card payer sale to DB");
+              //add sale to db
+              db.query(cinsert, [staffID,customerID,num,0,usdValue,tax,0,'no',date,paymentType
+              ,isPaid,commission,"USD",date,cardID], (error,result) => {
+                console.log(error);
+                var string = JSON.stringify(result);
+                if(string.length > 3){
+                  console.log("Domestic Sale added");
+                  //add destination info & update blank
+                  db.query(insertJourney, [destination, origin, num], (error, result) => {
+                    console.log("Insert Journey Error: " + error);
+                    var string = JSON.stringify(result);
+                    console.log(string);
+                    if(string.length > 3){
+                      console.log("Blank Updated and Journey Added");
+                      response.sendStatus(200);
+                    }
+                });
+              } else {response.sendStatus(401);}
+            });
+            });
+          }
+        });
+        //cash payment
+      } else {
+          console.log("---------Cash Payer---------");
+          //add sale to db
+          db.query(insert, [staffID,customerID,num,0,usdValue,tax,0,'no',date,paymentType
+          ,isPaid,commission,"USD",date], (error,result) => {
+            console.log("Error: " + error);
+            var string = JSON.stringify(result);
+            if(string.length > 3){
+              console.log("Domestic Sale added");
+              //add destination info & update blank
+              db.query(insertJourney, [destination, origin, num], (error, result) => {
+                console.log("Insert Journey Error: " + error);
+                var string = JSON.stringify(result);
+                if(string.length > 3){
+                  console.log("Blank Updated and Journey Added");
+                  response.sendStatus(200);
+                }
+              });
+            } else {response.sendStatus(401);}
+          });
+      }
+    }
   });
-
 });
-
 
 //rates section
 app.post('/commissions', function(request, response) {
@@ -658,7 +788,7 @@ app.post('/removeExchangeRate', function(request, response) {
 });
 
 app.get('/rateCodes', function(request, response) {
-  var get = "SELECT exchangeRateCode FROM exchangerate";
+  var get = "SELECT * FROM exchangerate";
   db.query(get, (error,result) => {
     response.status(200).send(result);
     response.end();

@@ -1,9 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import Header from './header';
-import { NavLink, Redirect } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import axios from 'axios';
-import CardPayment from './cardPayment';
-
 
 function SellTicket(props) {
   //page naviagation
@@ -125,6 +123,9 @@ function SellTicket(props) {
       })
       .catch(error => {
         console.log(error);
+        if(error.response.status === 401){
+          alert("Something went wrong, Please check your details again.")
+        }
       });
   }
   const convert = (local,converter) => {
@@ -156,6 +157,7 @@ function SellTicket(props) {
     setMain(false);
     setDomestic(false);
     setInterline(false);
+
   }
   const getCardInput = (pType) => {
     console.log(pType);
@@ -173,10 +175,11 @@ function SellTicket(props) {
     }
   }
   const sender = () => {
-    if(isDSale){
-      addDomesticSale();
-    } else {
+    console.log("Local Amount: " + local);
+    if(local > 0){
       addInterlineSale();
+    } else {
+      addDomesticSale();
     }
   }
 
@@ -335,7 +338,7 @@ function SellTicket(props) {
               <input
                 type="text"
                 value={origin}
-                required onChange={(e) => setOrigin(e.target.valueAsNumber)}/>
+                required onChange={(e) => setOrigin(e.target.value)}/>
             </label>
           </li>
           <li>
@@ -348,10 +351,13 @@ function SellTicket(props) {
           </li>
           <li>
             <label>ExchangeCode:</label>
-            <select>
-
+            <select value={eCode} onChange={(e) => setCode(e.target.value)}>
+              {exchangeCodes.map(r => (
+                <option key={r.exchangeRateCode} value={r.exchangeRateCode}>
+                {r.exchangeRateCode}
+                </option>
+              ))}
             </select>
-            <br/><br/>
             <label> Amount:
               <input
                 type="number"
@@ -429,7 +435,7 @@ function SellTicket(props) {
           <div id="menubox" class="mainSize">
               <ul>
                   <li><label>Card number:</label></li>
-                  <li><input type="text" value={cardNum} required onChange={(e) => setCardNum(e.target.value)}/></li>
+                  <li><input type="text" maxLength="16" value={cardNum} required onChange={(e) => setCardNum(e.target.value)}/></li>
                   <li><label>Expiry Date (set any day):</label></li>
                   <li><input type="date" value={expiryDate} required onChange={(e) => setExpiryDate(e.target.value)}/></li>
               </ul>

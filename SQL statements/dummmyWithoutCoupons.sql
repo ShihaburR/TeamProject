@@ -21,6 +21,7 @@ INSERT INTO ExchangeRate(`exchangeRateCode`, `exchangeRate`,`currencyName`) VALU
 INSERT INTO ExchangeRate(`exchangeRateCode`, `exchangeRate`,`currencyName`) VALUES ('GBR', '33' ,'Great Britain');
 INSERT INTO ExchangeRate(`exchangeRateCode`, `exchangeRate`,`currencyName`) VALUES ('POL', '66' ,'Poland');
 INSERT INTO ExchangeRate(`exchangeRateCode`, `exchangeRate`,`currencyName`) VALUES ('SWE', '399' ,'Sweden');
+INSERT INTO ExchangeRate(`exchangeRateCode`, `exchangeRate`,`currencyName`) VALUES ('USD', '1.54' ,'USA');
 ------------------------------------------------------------------------------------------------
 INSERT INTO CustomerType(`customerTypeId`,`customerType`) VALUES ('1','valued');
 INSERT INTO CustomerType(`customerTypeId`,`customerType`) VALUES ('2','non-valued');

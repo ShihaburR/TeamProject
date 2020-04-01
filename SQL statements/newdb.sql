@@ -68,19 +68,18 @@ CREATE TABLE IF NOT EXISTS `Customer` (
 	`customerTypeID`	integer ( 1 ) NOT NULL,
 	`discountAmount`	integer ( 10 ),
 	`discountType`	integer ( 1 ),
-	`active`	varchar ( 3 ),
-	`flexibleDiscount`	INTEGER,
+	`flexibleDiscount`	INTEGER ( 10 ),
+	`active`	varchar ( 3 ) NOT NULL,
 	FOREIGN KEY(`discountAmount`) REFERENCES `DiscountAmount`(`discountId`),
-	FOREIGN KEY(`discountType`) REFERENCES `DiscountType`(`discountTypeID`),
+	FOREIGN KEY(`customerTypeID`) REFERENCES `CustomerType`(`customerTypeID`),
 	FOREIGN KEY(`flexibleDiscount`) REFERENCES `FlexibleDiscount`(`discountID`),
-	FOREIGN KEY(`customerTypeID`) REFERENCES `CustomerType`(`customerTypeID`)
+	FOREIGN KEY(`discountType`) REFERENCES `DiscountType`(`discountTypeID`)
 );
 CREATE TABLE IF NOT EXISTS `CardDetails` (
 	`CardID`	INTEGER PRIMARY KEY AUTO_INCREMENT,
 	`cardNumber`	varchar ( 16 ) NOT NULL UNIQUE,
 	`expiryDate`	date NOT NULL,
-	`securityCode`	integer ( 3 ) NOT NULL,
-	`customerID`	integer ( 10 ) NOT NULL
+	`securityCode`	integer ( 3 ) NOT NULL
 );
 CREATE TABLE IF NOT EXISTS `Sales` (
 	`saleID`	INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT UNIQUE,
@@ -99,10 +98,10 @@ CREATE TABLE IF NOT EXISTS `Sales` (
 	`exchangeRateCode`	varchar ( 3 ) NOT NULL,
 	`transactionDate`	DATE NOT NULL,
 	`cardDetails`	INTEGER,
-	FOREIGN KEY(`paymentTypeID`) REFERENCES `TypeOfPayment`(`paymentTypeID`),
-	FOREIGN KEY(`cardDetails`) REFERENCES `CardDetails`(`CardID`) ON UPDATE RESTRICT ON DELETE RESTRICT,
-	FOREIGN KEY(`exchangeRateCode`) REFERENCES `ExchangeRate`(`exchangeRateCode`),
 	FOREIGN KEY(`staffID`) REFERENCES `Staff`(`staffID`) ON UPDATE RESTRICT ON DELETE RESTRICT,
+	FOREIGN KEY(`paymentTypeID`) REFERENCES `TypeOfPayment`(`paymentTypeID`),
+	FOREIGN KEY(`exchangeRateCode`) REFERENCES `ExchangeRate`(`exchangeRateCode`),
+	FOREIGN KEY(`cardDetails`) REFERENCES `CardDetails`(`CardID`) ON UPDATE RESTRICT ON DELETE RESTRICT,
 	FOREIGN KEY(`customerID`) REFERENCES `Customer`(`customerID`) ON UPDATE RESTRICT ON DELETE RESTRICT
 );
 CREATE TABLE IF NOT EXISTS `BlankType` (
@@ -119,8 +118,8 @@ CREATE TABLE IF NOT EXISTS `Blank` (
 	`assignedDate`	DATE,
 	`departureDestination`	varchar(255),
 	`arrivalDestination`	varchar(255),
-	PRIMARY KEY(`blankNumber`),
 	FOREIGN KEY(`statusID`) REFERENCES `Status`(`statusID`) ON UPDATE RESTRICT ON DELETE RESTRICT,
+	PRIMARY KEY(`blankNumber`),
 	FOREIGN KEY(`blankTypeID`) REFERENCES `BlankType`(`blankTypeID`) ON UPDATE RESTRICT ON DELETE RESTRICT
 );
 CREATE TABLE IF NOT EXISTS `BlankAllocation` (
@@ -129,4 +128,4 @@ CREATE TABLE IF NOT EXISTS `BlankAllocation` (
 	`blankNumber`	integer ( 10 ) NOT NULL UNIQUE,
 	FOREIGN KEY(`staffID`) REFERENCES `Staff`(`staffID`),
 	FOREIGN KEY(`blankNumber`) REFERENCES `Blank`(`blankNumber`)
-);
+)

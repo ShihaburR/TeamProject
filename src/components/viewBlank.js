@@ -198,11 +198,10 @@ function ViewBlank(props) {
               ))}
               </tbody>
             </table>
-            <table style={{width : "35%", display : "inline-block"}} className="striped responsive-table">
+            <table style={{width : "24%", display : "inline-block"}} className="striped responsive-table">
               <thead>
                 <tr>
                   <th>Blank Number</th>
-                  <th>Blank Assigned?</th>
                   <th>Assigned Date</th>
                 </tr>
               </thead>
@@ -210,7 +209,6 @@ function ViewBlank(props) {
                 {Array.isArray(blanksData) && blanksData.length > 0 && blanksData.map(r => (
                 <tr key={r.blankNumber} id={r.blankNumber}>
                   <td>{r.blankNumber}</td>
-                  <td align="center">{r.isAssigned}</td>
                   <td>{displayDate(r.assignedDate)}</td>
                 </tr>
                 ))}

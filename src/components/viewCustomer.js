@@ -21,6 +21,21 @@ function ViewCustomer(props) {
       });
   }
 
+  const removeCustomer = () => {
+    axios.post('http://localhost:5000/removeCustomer', {
+    })
+      .then(response => {
+        if(response.status === 200){
+          alert("Customer Removed");
+          getCustomers();
+        }
+      })
+      .catch(function(error) {
+        console.log(error);
+        alert("Deletion failed");
+      });
+  }
+
   return (
     <body class="indexbody">
       <Header staffType={props.staffType} staffName={props.staffName} staffID={props.staffID}/>
@@ -36,6 +51,8 @@ function ViewCustomer(props) {
               <th>Address</th>
               <th>Email</th>
               <th>Customer Type</th>
+              <th>Active?</th>
+              <th>Remove</th>
             </tr>
           </thead>
           <tbody>
@@ -46,6 +63,8 @@ function ViewCustomer(props) {
               <td>{r.address}</td>
               <td>{r.email}</td>
               <td align="center">{r.customerTypeID}</td>
+              <td align="center">{r.active}</td>
+              <td align="center"><button type="button">Remove</button></td>
             </tr>
             ))}
           </tbody>
