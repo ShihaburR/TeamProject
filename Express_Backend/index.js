@@ -299,6 +299,47 @@ app.get('/advisorBlanks', function(request, response){
   });
 })
 
+app.get('/advisorDBlanks', function(request, response) {
+  var get = "SELECT blankNumber FROM blankallocation WHERE staffID = ?";
+  var getSpecifics = "SELECT * FROM blank WHERE blankNumber in (?) AND blankTypeID in ?";
+  var blanks = [];
+  var conditions = [[4,5]];
+  db.query(get,[staffID] ,(error,result) => {
+    var packet = JSON.parse(JSON.stringify(result));
+    //gets the JSON object's total length - since we're getting multiple rows from a single column
+    var length = Object.keys(packet).length;
+    console.log("DBlanks Packet length: " + length);
+    for(var n = 0; n < length; n++) {
+      blanks.push(packet[n].blankNumber);
+    }
+    db.query(getSpecifics, [blanks,conditions], (error, result) => {
+      console.log("DBlanks getSpecifics Error: " + error);
+      response.status(200).send(result);
+      response.end();
+    })
+  });
+})
+
+app.get('/advisorIBlanks', function(request, response) {
+  var get = "SELECT blankNumber FROM blankallocation WHERE staffID = ?";
+  var getSpecifics = "SELECT * FROM blank WHERE blankNumber in (?) AND blankTypeID in ?";
+  var blanks = [];
+  var conditions = [[1,2,3]];
+  db.query(get,[staffID] ,(error,result) => {
+    var packet = JSON.parse(JSON.stringify(result));
+    var length = Object.keys(packet).length;
+    console.log("IBlanks Packet length: " + length);
+    for(var n = 0; n < length; n++) {
+      blanks.push(packet[n].blankNumber);
+    }
+    db.query(getSpecifics, [blanks, conditions], (error, result) => {
+      console.log("IBlanks getSpecifics Error: " + error);
+      response.status(200).send(result);
+      response.end();
+    })
+  });
+})
+
 //Look into a way of display if a blank has been sold
 app.post('/isSold', function(request, response) {
   var num = request.body.num;
@@ -444,7 +485,7 @@ app.post('/addInterlineSale', function(request, response) {
   "`isPaid`,`commisionRate`,`exchangeRateCode`, `transactionDate`)" +
   "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
   var getcustomerID = "SELECT * FROM customer WHERE name = ? AND surname = ?";
-  var insertJourney = "UPDATE blank SET departureDestination = ? ,arrivalDestination = ? " +
+  var insertJourney = "UPDATE blank SET arrivalDestination = ?, departureDestination = ? " +
     ",statusID = 1 WHERE blankNumber = ?";
 
   //card data & queries
@@ -578,7 +619,7 @@ app.post('/addDomesticSale', function(request, response) {
   "`isPaid`,`commisionRate`,`exchangeRateCode`, `transactionDate`)" +
   "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
   var getcustomerID = "SELECT * FROM customer WHERE name = ? AND surname = ?";
-  var insertJourney = "UPDATE blank SET departureDestination = ? ,arrivalDestination = ? " +
+  var insertJourney = "UPDATE blank SET arrivalDestination = ?, departureDestination = ?" +
   ",statusID = 1 WHERE blankNumber = ?";
 
   //card details

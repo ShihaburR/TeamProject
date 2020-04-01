@@ -8,11 +8,14 @@ function SellTicket(props) {
   const [blanksData, setData] = useState("");
   const [customerData, setCData] = useState("");
   const [exchangeCodes, setEData] = useState("");
+  const [dBlanks, setDBlanks] = useState("");
+  const [IBlanks, setIBlanks] = useState("");
   const [main, setMain] = useState(true);
   const [domestic, setDomestic] = useState(false);
   const [interline, setInterline] = useState(false);
   const [card, setCard] = useState(false);
   const [isDSale,setDSale] = useState(false);
+
   //sale details
   const [num, setNum] = useState(0);
   const [origin, setOrigin] = useState('');
@@ -65,10 +68,32 @@ function SellTicket(props) {
         console.log(error);
       });
   }
+  const getDBlanks = () => {
+    axios.get('http://localhost:5000/advisorDBlanks')
+    .then(response => {
+      console.log(response.data);
+      setDBlanks(response.data);
+    })
+    .catch(function(error) {
+      console.log(error);
+    });
+  }
+  const getIBlanks = () => {
+    axios.get('http://localhost:5000/advisorIBlanks')
+    .then(response => {
+      console.log(response.data);
+      setIBlanks(response.data);
+    })
+    .catch(function(error) {
+      console.log(error);
+    });
+  }
   useEffect(() => {
     getCustomers();
     getBlanks();
     getCodes();
+    getDBlanks();
+    getIBlanks()
   }, []);
 
   //add Details
@@ -244,10 +269,14 @@ function SellTicket(props) {
         <ul>
           <li>
             <label> Blank Number:
-              <input
-                type="number"
-                value={num}
-                required onChange={(e) => setNum(e.target.value)}/>
+              <select value={num} onChange={(e) => setNum(e.target.value)}>
+                <option value="0">"Select a Blank Number"</option>
+                {dBlanks.map(r => (
+                  <option key={r.blankNumber} value={r.blankNumber}>
+                  {r.blankNumber}
+                  </option>
+                ))}
+              </select>
             </label>
           </li>
           <li>
@@ -327,10 +356,14 @@ function SellTicket(props) {
         <ul>
           <li>
             <label> Blank Number:
-              <input
-                type="number"
-                value={num}
-                required onChange={(e) => setNum(e.target.value)}/>
+              <select value={num} onChange={(e) => setNum(e.target.value)}>
+                <option value="0">"Select a Blank Number"</option>
+                {IBlanks.map(r => (
+                  <option key={r.blankNumber} value={r.blankNumber}>
+                  {r.blankNumber}
+                  </option>
+                ))}
+              </select>
             </label>
           </li>
           <li>
