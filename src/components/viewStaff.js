@@ -21,10 +21,25 @@ function ViewStaff(props) {
       });
   }
 
-  const removeStaff = () => {
-    axios.post('http://localhost:5000/removeStaff')
+  const removeStaff = (id) => {
+    axios.post('http://localhost:5000/removeStaff', {
+      id : id
+    })
       .then(response => {
         alert("Staff Removed");
+        getStaff();
+      })
+      .catch(function(error) {
+        console.log(error);
+      });
+  }
+
+  const reActivate = (id) => {
+    axios.post('http://localhost:5000/reactivateStaff', {
+      id : id
+    })
+      .then(response => {
+        alert("Staff is now Activated");
         getStaff();
       })
       .catch(function(error) {
@@ -49,6 +64,7 @@ function ViewStaff(props) {
                 <th>Agency</th>
                 <th>Active?</th>
                 <th>Remove</th>
+                <th>Re-Activate</th>
               </tr>
             </thead>
             <tbody>
@@ -60,7 +76,10 @@ function ViewStaff(props) {
                 <td>{r.email}</td>
                 <td align="center">{r.agencyID}</td>
                 <td align="center">{r.active}</td>
-                <td align="center"><button type="button">Remove</button></td>
+                <td align="center"><button type="button" value={r.staffID}
+                 onClick ={() => {removeStaff(r.staffID)}}>Delete</button></td>
+                 <td align="center"><button type="button" value={r.staffID}
+                  onClick ={() => {reActivate(r.staffID)}}>Re-Activate</button></td>
               </tr>
               ))}
             </tbody>

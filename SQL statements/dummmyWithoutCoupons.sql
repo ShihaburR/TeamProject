@@ -55,3 +55,4 @@ VALUES ('4','2','204',115,130,10,12,'no','2020-03-24',1,'yes',4,'GBR','2021-03-0
 INSERT INTO Status(`statusID`,`status`) VALUES (1,'used'), (2,'assigned'), (3, 'recieved'), (4, 'void'), (5, 'returned');
 INSERT INTO BlankType(`blankTypeID`,`blankType`, `blankArea`)
 VALUES (1, 444, "International"), (2, 440, "International"), (3, 420, "International"), (4, 201, "Domestic"), (5,101, "Domestic"), (6, 451, "MCO"), (7, 452, "MCO");
+INSERT INTO discountamount(`discountPercent`) VALUES (0),(1),(2);

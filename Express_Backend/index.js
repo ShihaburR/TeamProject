@@ -130,13 +130,60 @@ app.get('/staff', function(request, response) {
       response.end();
     });
 });
+//set this up
+app.post('/createStaff', function(request, response) {
+    //issue if discount id is the same it breaks.
+    var firstname = request.body.firstname;
+    var lastname = request.body.lastname;
+    var address = request.body.address;
+    var email = request.body.email;
+    var staffType = request.body.valued;
+    var insert = "INSERT INTO staff(`name`, `surname`, `address`, `email`,`customerTypeId`," +
+    "`discountAmount` , `discountType`) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    //discount values in a seperate sql command
+    var drate = request.body.discountrate;
+    var dtype = request.body.discounttype;
+    var drateID = request.body.drateID;
+    var dtypeID = request.body.dtypeID;
+    var createDiscountType = "INSERT INTO discounttype(`discountTypeID`,`discountType`) VALUES (?,?)";
+    var createDiscountAmount = "INSERT INTO discountamount(`discountId`,`discountPercent`) VALUES (?,?)";
+
+    db.query(createDiscountType, [dtypeID, dtype], (error, result) => {
+        var string = JSON.stringify(result);
+        //console.log(string);
+        db.query(createDiscountAmount, [drateID, drate], (error, result) => {
+          var string = JSON.stringify(result);
+          //console.log(string);
+          db.query(insert, [firstname,lastname,address,email,valued,drateID,dtypeID], (error,result) => {
+             var string = JSON.stringify(result);
+             //console.log(string);
+             if(string.includes('"affectedRows":1')){
+               console.log("Customer created");
+               response.sendStatus(200);
+             }
+          })
+        });
+    });
+});
 
 app.post('/removeStaff', function(request, response) {
-  var staffID = request.body.ID
+  var staffID = request.body.id
   var del = "UPDATE staff SET active = 'no' WHERE staffID = ? "
   db.query(del, [staffID], (error, result) => {
       var string = JSON.stringify(result);
-      if(string.includes('"affectedRows: 1"')){
+      if(string.length > 3){
+        response.sendStatus(200);
+        response.end();
+      }
+  });
+});
+
+app.post('/reactivateStaff', function(request, response) {
+  var staffID = request.body.id
+  var add = "UPDATE staff SET active = 'yes' WHERE staffID = ? "
+  db.query(add, [staffID], (error, result) => {
+      var string = JSON.stringify(result);
+      if(string.length > 3){
         response.sendStatus(200);
         response.end();
       }
@@ -188,11 +235,23 @@ app.get('/customers', function(request, response) {
 });
 
 app.post('/removeCustomer', function(request, response) {
-  var customerID = request.body.ID
+  var customerID = request.body.id
   var del = "UPDATE customer SET active = 'no' WHERE customerID = ? "
   db.query(del, [customerID], (error, result) => {
       var string = JSON.stringify(result);
-      if(string.includes('"affectedRows: 1"')){
+      if(string.length > 3){
+        response.sendStatus(200);
+        response.end();
+      }
+  });
+});
+
+app.post('/reactivateCustomer', function(request, response) {
+  var customerID = request.body.id
+  var add = "UPDATE customer SET active = 'yes' WHERE customerID = ? "
+  db.query(add, [customerID], (error, result) => {
+      var string = JSON.stringify(result);
+      if(string.length > 3){
         response.sendStatus(200);
         response.end();
       }
@@ -291,6 +350,15 @@ app.get('/blanks', function(request, response) {
     });
 });
 
+app.get('/refunds', function(request, response) {
+  var get = "SELECT * FROM blank WHERE statusID = 5";
+    db.query(get, (error,result) => {
+      response.status(200).send(result);
+      response.end();
+    });
+});
+
+//display blanks
 app.get('/advisorBlanks', function(request, response){
   var get = "SELECT * FROM blankallocation WHERE staffID = ?";
   db.query(get,[staffID] ,(error,result) => {
@@ -465,6 +533,8 @@ app.get('/assigns', function(request, response) {
 //sales section
 app.post('/addInterlineSale', function(request, response) {
   //sales data & queries
+  let date = request.body.sdate;
+  console.log("Date: " + date);
   var num = request.body.num;
   var origin = request.body.origin;
   var destination= request.body.destination;
@@ -478,8 +548,6 @@ app.post('/addInterlineSale', function(request, response) {
   var name = request.body.cforename;
   var surname = request.body.csurname;
   var isPaid = "yes";
-  let date = new Date().toISOString().slice(0, 10);
-  var now = new Date();
   var insert = "INSERT INTO sales(`staffID`,`customerID`,`blankNumber`,`amount`," +
   "`amountUSD`,`localTax`,`otherTax`,`isRefunded`,`payByDate`,`paymentTypeID`," +
   "`isPaid`,`commisionRate`,`exchangeRateCode`, `transactionDate`)" +
@@ -514,7 +582,7 @@ app.post('/addInterlineSale', function(request, response) {
       if(paymentType === 3){
         console.log("---------Valued Payer---------");
         console.log("Current Date: " + date);
-        let newDate = new Date(now.getFullYear(),now.getMonth() + 1, now.getDate()).toISOString().slice(0,10);
+        let newDate = new Date(date.slice(0,4),parseInt(date.slice(-5,-3)) + 1 ,date.slice(-2)).toISOString().slice(0,10);
         console.log("New Date: " + newDate);
         isPaid = "no";
         //add sale to db
@@ -602,6 +670,7 @@ app.post('/addInterlineSale', function(request, response) {
 
 app.post('/addDomesticSale', function(request, response) {
   //sales data
+  let date = request.body.sdate;
   var num = request.body.num;
   var origin = request.body.origin;
   var destination= request.body.destination;
@@ -612,8 +681,6 @@ app.post('/addDomesticSale', function(request, response) {
   var name = request.body.cforename;
   var surname = request.body.csurname;
   var isPaid = "yes";
-  let date = new Date().toISOString().slice(0, 10);
-  var now = new Date();
   var insert = "INSERT INTO sales(`staffID`,`customerID`,`blankNumber`,`amount`," +
   "`amountUSD`,`localTax`,`otherTax`,`isRefunded`,`payByDate`,`paymentTypeID`," +
   "`isPaid`,`commisionRate`,`exchangeRateCode`, `transactionDate`)" +
@@ -649,7 +716,8 @@ app.post('/addDomesticSale', function(request, response) {
       if(paymentType === 3){
         console.log("---------Valued Payer---------");
         console.log("Current Date: " + date);
-        let newDate = new Date(now.getFullYear(),now.getMonth() + 1, now.getDate()).toISOString().slice(0,10);
+        console.log("Month: " + (parseInt(date.slice(-5,-3)) + 1));
+        let newDate = new Date(date.slice(0,4), parseInt(date.slice(-5,-3)) + 1, date.slice(-2)).toISOString().slice(0,10);
         console.log("New Date: " + newDate);
         isPaid = "no";
         //add sale to db
@@ -732,6 +800,25 @@ app.post('/addDomesticSale', function(request, response) {
           });
       }
     }
+  });
+});
+
+app.post('/refund', function(request, response) {
+  var num = request.body.num;
+  var updateBlank = "UPDATE blank set statusID = 5 WHERE blankNumber = ?";
+  var updateSale = "UPDATE sales set isRefunded = 'yes' WHERE blankNumber = ?";
+  console.log("------Refund------");
+  db.query(updateBlank, [num], (error,result) => {
+    var string = JSON.stringify(result);
+    if(string.length > 3){
+      console.log("Blank updated");
+      db.query(updateSale, [num], (error,result) => {
+        if(string.length > 3){
+          console.log("Sale updated");
+          response.sendStatus(200);
+        } else{response.sendStatus(401);}
+      });
+    } else{response.sendStatus(401);}
   });
 });
 

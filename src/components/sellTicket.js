@@ -17,6 +17,7 @@ function SellTicket(props) {
   const [isDSale,setDSale] = useState(false);
 
   //sale details
+  const [date, setdate] = useState(0);
   const [num, setNum] = useState(0);
   const [origin, setOrigin] = useState('');
   const [destination, setDestination] = useState('');
@@ -99,6 +100,7 @@ function SellTicket(props) {
   //add Details
   const addInterlineSale = () => {
     axios.post('http://localhost:5000/addInterlineSale',{
+        sdate : date,
         num : num,
         origin : origin,
         destination : destination,
@@ -127,6 +129,7 @@ function SellTicket(props) {
     }
   const addDomesticSale = () => {
     axios.post('http://localhost:5000/addDomesticSale',{
+        sdate : date,
         num : num,
         origin : origin,
         destination : destination,
@@ -268,6 +271,11 @@ function SellTicket(props) {
        <div id="menubox" align="center" class="mainSize">
         <ul>
           <li>
+            <label>Date:
+              <input type="date" value={date} onChange={(e) => setdate(e.target.value)}/>
+            </label>
+          </li>
+          <li>
             <label> Blank Number:
               <select value={num} onChange={(e) => setNum(e.target.value)}>
                 <option value="0">"Select a Blank Number"</option>
@@ -354,6 +362,11 @@ function SellTicket(props) {
          </div>
        <div id="menubox" align="center" class="mainSize">
         <ul>
+          <li>
+            <label>Date:
+              <input type="date" value={date} onChange={(e) => setdate(e.target.value)}/>
+            </label>
+          </li>
           <li>
             <label> Blank Number:
               <select value={num} onChange={(e) => setNum(e.target.value)}>

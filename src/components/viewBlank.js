@@ -281,6 +281,8 @@ function ViewBlank(props) {
               <label>Blank Type:</label>
               <select value = {type} required onChange={(e) => setType(e.target.value)}>
                 <option value = "0">Select one</option>
+                <option value = "452">452</option>
+                <option value = "451">451</option>
                 <option value = "444">444</option>
                 <option value = "440">440</option>
                 <option value = "420">420</option>

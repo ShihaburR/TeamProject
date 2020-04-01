@@ -21,8 +21,9 @@ function ViewCustomer(props) {
       });
   }
 
-  const removeCustomer = () => {
+  const removeCustomer = (id) => {
     axios.post('http://localhost:5000/removeCustomer', {
+      id : id
     })
       .then(response => {
         if(response.status === 200){
@@ -33,6 +34,19 @@ function ViewCustomer(props) {
       .catch(function(error) {
         console.log(error);
         alert("Deletion failed");
+      });
+  }
+
+  const reActivate = (id) => {
+    axios.post('http://localhost:5000/reactivateCustomer', {
+      id : id
+    })
+      .then(response => {
+        alert("Customer is now Activated");
+        getCustomers();
+      })
+      .catch(function(error) {
+        console.log(error);
       });
   }
 
@@ -53,6 +67,7 @@ function ViewCustomer(props) {
               <th>Customer Type</th>
               <th>Active?</th>
               <th>Remove</th>
+              <th>Re-Activate</th>
             </tr>
           </thead>
           <tbody>
@@ -64,7 +79,10 @@ function ViewCustomer(props) {
               <td>{r.email}</td>
               <td align="center">{r.customerTypeID}</td>
               <td align="center">{r.active}</td>
-              <td align="center"><button type="button">Remove</button></td>
+              <td align="center"><button type="button" value={r.customerID}
+               onClick ={() => {removeCustomer(r.customerID)}}>Delete</button></td>
+               <td align="center"><button type="button" value={r.customerID}
+                onClick ={() => {reActivate(r.customerID)}}>Re-Activate</button></td>
             </tr>
             ))}
           </tbody>
