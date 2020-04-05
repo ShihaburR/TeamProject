@@ -67,22 +67,22 @@ function ViewCustomer(props) {
               <th>Customer Type</th>
               <th>Active?</th>
               <th>Remove</th>
-              <th>Re-Activate</th>
+              <th>Restore</th>
             </tr>
           </thead>
           <tbody>
             {Array.isArray(customers) && customers.length > 0 && customers.map(r => (
             <tr key={r.customerID} id={r.customerID}>
               <td align="center">{r.customerID}</td>
-              <td>{r.name.toString() + " " + r.surname.toString()}</td>
-              <td>{r.address}</td>
-              <td>{r.email}</td>
+              <td align="center">{r.name.toString() + " " + r.surname.toString()}</td>
+              <td align="center">{r.address}</td>
+              <td align="center">{r.email}</td>
               <td align="center">{r.customerTypeID}</td>
               <td align="center">{r.active}</td>
               <td align="center"><button type="button" value={r.customerID}
                onClick ={() => {removeCustomer(r.customerID)}}>Delete</button></td>
                <td align="center"><button type="button" value={r.customerID}
-                onClick ={() => {reActivate(r.customerID)}}>Re-Activate</button></td>
+                onClick ={() => {reActivate(r.customerID)}}>Activate</button></td>
             </tr>
             ))}
           </tbody>

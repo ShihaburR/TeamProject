@@ -8,12 +8,10 @@ function Refund(props) {
     const [bData, setData] = useState([]);
 
     const handleSubmit = () => {
-        axios.post('http://localhost:5000/refund', {
-          num : blankID
-        })
+        axios.get('http://localhost:5000/logRefund')
         .then(response => {
             if(response.status === 200){
-              alert("Ticket has been refunded");
+              alert("Ticket has been refunded and logged");
             }
         })
         .catch(error => {
@@ -24,7 +22,6 @@ function Refund(props) {
         })
     }
     const getBlanks = () => {
-      console.log("here i am");
       axios.get('http://localhost:5000/advisorBlanks')
         .then(response => {
           console.log(response.data);

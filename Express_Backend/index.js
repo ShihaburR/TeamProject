@@ -1,3 +1,4 @@
+const fs = require('fs');
 const cors = require('cors');
 const mysql = require('mysql');
 const express = require('express');
@@ -12,12 +13,14 @@ app.use(bodyParser.json());
 app.use(cors());
 app.use(bodyParser.urlencoded({extended : true}));
 
+
 //Create the connection to MySQL
 const db = mysql.createConnection({
     host : 'localhost',
     user : 'root',
     password: 'admin',
-    database: 'airticketsales'
+    database: 'airticketsales',
+    multipleStatements: true
 });
 
 //connect to database and check for errors
@@ -95,7 +98,7 @@ app.get('/logout', function(request, response) {
   response.sendStatus(200);
 });
 
-// these gets will send the staff info to designate home pages
+// these gets send staff info to designate home pages
 app.get('/advisor', function(request, response) {
   response.status(200).send({username: username,
   staffID: staffID, staffType: staffType})
@@ -262,10 +265,8 @@ app.post('/reactivateCustomer', function(request, response) {
 app.post('/addBlank', function(request, response) {
     var date = request.body.bDate;
     var type = request.body.bType;
-    var n = request.body.bNumber;
-    var s = type.toString() + n
-    var num = parseInt(s);
-
+    var n = request.body.bNumber.padStart(8,'0');
+    var num = parseInt(type.toString() + n );
     var insert = "INSERT INTO blank(`blankNumber`,`statusID`,`recievedDate`," +
     "`blankTypeID`)" +
     "VALUES (?,3,?,?)"
@@ -308,7 +309,10 @@ app.post('/addBulk', function(request, response) {
   var max = request.body.bMax;
   var range = (max - min) + 1;
   var values = []
+  var blanks = []
   var strType = type.toString();
+  //sort out checkBulk
+  var checkBulk = "SELECT blankNumber FROM blank WHERE blankNumber in (?)"
   var insert = "INSERT INTO blank(`blankNumber`,`statusID`,`recievedDate`," +
   "`blankTypeID`) VALUES ?";
   var checkType = "SELECT blankTypeID FROM blanktype WHERE blankType = ?";
@@ -318,27 +322,42 @@ app.post('/addBulk', function(request, response) {
     //creating the bulk to push to database
     for(let n = 0; n < range; n++){
       strN = min.toString();
-      values.push([parseInt(strType + strN.padStart(6,'0')), 3, date, bTypeID])
+      values.push([parseInt(strType + strN.padStart(9,'0')), 3, date, bTypeID]);
+      blanks.push([parseInt(strType + strN.padStart(9,'0'))]);
       parseInt(min);
       min++;
     }
-    db.query(insert, [values], (error, result) => {
-      var string = JSON.stringify(result);
-      var packet = JSON.parse(string);
-      console.log("Blanks inserted");
-      response.sendStatus(200);
+    db.query(checkBulk, [blanks], (error, result) => {
+      var packet = JSON.parse(JSON.stringify(result));
+      var length = Object.keys(packet).length;
+      if(length > 0){
+         response.sendStatus(401);
+      } else {
+        db.query(insert, [values], (error, result) => {
+          var string = JSON.stringify(result);
+          var packet = JSON.parse(string);
+          console.log("Blanks inserted");
+          response.sendStatus(200);
+        });
+      }
     });
-    //console.log(values);
   });
 });
 
 app.post('/removeBlank', function(request, response) {
   var number = request.body.bNumber;
+  var check = "SELECT statusID FROM blank WHERE blankNumber = ?"
   var del = "UPDATE blank SET statusID = 5 WHERE blankNumber = ?"
-  db.query(del, [number], (error,result) => {
-    //console.log("Error: " + error);
-    //console.log("Result: " + result);
-    response.sendStatus(200);
+  db.query(check, [number], (error,result) => {
+    var packet = JSON.parse(JSON.stringify(result));
+    var status = packet[0].statusID;
+    if(status === 2){
+      response.sendStatus(401);
+    } else {
+      db.query(del, [number], (error, result) => {
+        response.sendStatus(200);
+      });
+    }
   });
 });
 
@@ -456,28 +475,39 @@ app.post('/assignBulk', function(request, response) {
   var blanks = [];
   let date = new Date().toISOString().slice(0, 10);
   var strType = type.toString();
-
+  var check = "SELECT blankAllocationId FROM blankallocation WHERE blankNumber in (?)"
   var assign = "INSERT INTO blankallocation(`staffID`,`blankNumber`) VALUES ?";
   var update = "UPDATE blank SET ? WHERE blankNumber = ?";
   //bulk creation
   for(let n = 0; n < range; n++){
       strN = min.toString();
-      assigns.push([id , parseInt(strType + strN.padStart(6,'0'))]);
-      blanks.push([parseInt(strType + strN.padStart(6,'0'))]);
+      assigns.push([id , parseInt(strType + strN.padStart(9,'0'))]);
+      blanks.push([parseInt(strType + strN.padStart(9,'0'))]);
       parseInt(min);
       min++;
   }
-  db.query(assign, [assigns], (error, result) => {
-    console.log(error);
+
+  //checks the bulk if it has been assigned already
+  db.query(check, [blanks], (error, result) => {
     var string = JSON.stringify(result);
-    console.log("String: " + string);
-    if(string.length > 3){
-      for(let r = 0; r < range; r++){
-        db.query(update,[{statusID: 2, assignedDate: date},blanks[r]], (error, result) => {
-          var string = JSON.stringify(result);
-        });
-      }
-      response.sendStatus(200);
+    var packet = JSON.parse(JSON.stringify(result));
+    var length = Object.keys(packet).length;
+    if(length > 0){
+       response.sendStatus(401);
+    } else {
+      db.query(assign, [assigns], (error, result) => {
+        console.log(error);
+        var string = JSON.stringify(result);
+        console.log("String: " + string);
+        if(string.length > 3){
+          for(let r = 0; r < range; r++){
+            db.query(update,[{statusID: 2, assignedDate: date},blanks[r]], (error, result) => {
+              var string = JSON.stringify(result);
+            });
+          }
+          response.sendStatus(200);
+        }
+      });
     }
   });
 });
@@ -805,6 +835,7 @@ app.post('/addDomesticSale', function(request, response) {
 
 app.post('/refund', function(request, response) {
   var num = request.body.num;
+  var data = "";
   var updateBlank = "UPDATE blank set statusID = 5 WHERE blankNumber = ?";
   var updateSale = "UPDATE sales set isRefunded = 'yes' WHERE blankNumber = ?";
   console.log("------Refund------");
@@ -815,10 +846,63 @@ app.post('/refund', function(request, response) {
       db.query(updateSale, [num], (error,result) => {
         if(string.length > 3){
           console.log("Sale updated");
-          response.sendStatus(200);
+          response.redirect('/logRefund');
         } else{response.sendStatus(401);}
       });
     } else{response.sendStatus(401);}
+  });
+});
+
+function checkPaymentType(type) {
+    switch (type) {
+      case 1:
+        return 'Cash';
+        break;
+      case 2:
+        return 'Card';
+        break;
+      case 3:
+        return 'Valued';
+        break;
+      default:
+        return 'null';
+    }
+}
+
+app.get('/logRefund', function(request, response) {
+  var logData = "";
+  var dataCollection = "SELECT B.blankNumber, departureDestination," +
+  "arrivalDestination, B.statusID, S.staffID, S.amount, S.amountUSD," +
+  "S.localTax,S.otherTax ,S.paymentTypeID, S.commisionRate, S.exchangeRateCode," +
+  "S.transactionDate FROM blank B, sales S WHERE B.blankNumber = S.blankNumber" +
+  " AND B.statusID = 5";
+
+  db.query(dataCollection, (error, result) => {
+    console.log(error);
+    console.log(result);
+    var packet = JSON.parse(JSON.stringify(result));
+    for (var i in packet) {
+      logData += "--------------Refund Details for Blank Number: "
+      + packet[i].blankNumber + '--------------' + '\n';
+      logData += "Origin: " + packet[i].departureDestination + '\n';
+      logData += "Destination: " + packet[i].arrivalDestination + '\n';
+      logData += "StaffID: " + packet[i].staffID + '\n';
+      logData += "Amount: " + packet[i].amount + '\n';
+      logData += "USD Amount: " + packet[i].amountUSD + '\n';
+      logData += "Local Tax: " + packet[i].localTax + '\n';
+      logData += "Other Tax: " + packet[i].otherTax + '\n';
+      logData += "Payment Type: " + checkPaymentType(packet[i].paymentTypeID) + '\n';
+      logData += "Commission Rate: " + packet[i].commisionRate + '\n';
+      logData += "Exchange Code: " + packet[i].exchangeRateCode + '\n';
+      logData += "Transaction Date: " + packet[i].transactionDate.toString().slice(0,10)
+      + '\n' + '\n';
+    }
+    console.log(logData);
+    fs.writeFile('logs/Refund.txt', logData ,'utf8' ,function (err) {
+      if (err) throw err;
+      console.log('Refund Details saved in log file: Refund.txt');
+      response.sendStatus(200);
+    });
   });
 });
 
@@ -922,6 +1006,16 @@ app.get('/rateCodes', function(request, response) {
     response.end();
   });
 
+});
+
+//searches
+app.post('/searchBlanks', function(request, response) {
+  var num = parseInt(request.body.num);
+  var search = "SELECT * FROM blank WHERE blankNumber LIKE ?";
+  db.query(search, ['%' + num + '%'], (error, result) => {
+    response.status(200).send(result);
+    response.end();
+  });
 });
 
 

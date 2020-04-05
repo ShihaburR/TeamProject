@@ -19,6 +19,14 @@ function ViewRefund(props) {
   useEffect(() => {
     getRefunds();
   }, [])
+  const displayDate = (date) => {
+    if(date != null) {
+      date = date.toString().slice(0,10);
+      return (date);
+    } else {
+      return(date);
+    }
+  }
 
   return (
     <body class="indexbody">
@@ -39,8 +47,8 @@ function ViewRefund(props) {
         {Array.isArray(refunds) && refunds.length > 0 && refunds.map(r => (
         <tr key={r.blankNumber} id={r.blankNumber}>
           <td align="center">{r.blankNumber}</td>
-          <td align="center">{(r.recievedDate.toString()).slice(0,10)}</td>
-          <td align="center">{(r.assignedDate.toString()).slice(0,10)}</td>
+          <td align="center">{displayDate(r.recievedDate)}</td>
+          <td align="center">{displayDate(r.assignedDate)}</td>
           <td align="center">{r.departureDestination}</td>
           <td align="center">{r.arrivalDestination}</td>
         </tr>
@@ -52,6 +60,6 @@ function ViewRefund(props) {
         </div>
     </body>
   );
-}
 
+}
 export default ViewRefund;

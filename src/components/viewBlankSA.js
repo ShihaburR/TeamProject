@@ -2,6 +2,7 @@ import React, {Component, useState, useEffect} from 'react';
 import axios from 'axios';
 import Header from './header';
 import { NavLink } from 'react-router-dom';
+import searchIcon from './search-icon.png';
 
 function ViewBlankSA(props) {
   const [addblank , setBlankMenu] = useState(false);
@@ -13,6 +14,7 @@ function ViewBlankSA(props) {
   const [bMin, setMin] = useState(0);
   const [bMax, setMax] = useState(0);
   const [blanksData, setData] = useState("");
+  const [search, setSearch] = useState("");
 
   //on startup will load blanks into table
   useEffect(() => {
@@ -25,13 +27,11 @@ function ViewBlankSA(props) {
       setBulkMenu(false);
       setMainMenu(false);
   }
-
   const showBulkMenu = () => {
       setBulkMenu(true);
       setBlankMenu(false);
       setMainMenu(false);
   }
-
   const showMainMenu = () => {
       setMainMenu(true);
       setBlankMenu(false);
@@ -104,6 +104,10 @@ function ViewBlankSA(props) {
     })
     .catch(function(error) {
       console.log(error)
+      if(error.response.status === 401){
+        alert("Error, you are trying to delete a blank that is assigned to an advisor" +
+      " Please delete a different blank or contact the office manager");
+      }
     });
   }
 
@@ -116,14 +120,36 @@ function ViewBlankSA(props) {
     }
   }
 
+  const filter = () => {
+    axios.post('http://localhost:5000/searchBlanks', {
+      num : search
+    })
+    .then(response => {
+      console.log(response.data);
+      setData(response.data);
+      console.log(blanksData);
+    })
+    .catch(error => {
+      console.log(error);
+    });
+  }
+
   if(mainMenu) {
     return (
       <body class="indexbody">
       <Header staffType={props.staffType} staffName={props.staffName} staffID={props.staffID}/>
       <div id="mainmenu">
-        <button type="button" class="page-button" onClick= {showBlankMenu}>Add a Blank</button>
-        <button type="button" class="page-button" onClick = {showBulkMenu}>Add bulk of Blanks</button>
-        <NavLink to="/mainMenu"><button type="button" class="page-button">Done</button></NavLink>
+        <button type="button" class="page-button">Blank Stocks</button>
+        <br/> <br/>
+        <input type="text" value={search} placeholder= "Enter a blank number..." class="search_bar"
+        placeholder="Enter a blank number"required onChange={(e) => setSearch(e.target.value)}/>
+        <button type="button" class="search_submit" onClick={() => {filter();}}>
+          <img src={searchIcon} alt="Search"  height="17.5" width="16"/>
+        </button>
+        <br/><br/>
+        <button type="button" class="menu-button" onClick= {showBlankMenu}>Add a Blank</button>
+        <button type="button" class="menu-button" onClick = {showBulkMenu}>Add bulk of Blanks</button>
+        <NavLink to="/mainMenu"><button type="button" class="menu-button">Done</button></NavLink>
       </div>
       <div id="tablecontainerrefund">
         <table className="striped responsive-table">
@@ -133,24 +159,26 @@ function ViewBlankSA(props) {
               <th>Recieved Date</th>
               <th>Blank Type</th>
               <th>Blank Assigned?</th>
-              <th>Assigned Date</th>
               <th>Delete</th>
             </tr>
           </thead>
           <tbody>
             {Array.isArray(blanksData) && blanksData.length > 0 && blanksData.map(r => (
             <tr key={r.blankNumber} id={r.blankNumber}>
-              <td>{r.blankNumber}</td>
-              <td>{(r.recievedDate.toString()).slice(0,10)}</td>
+              <td align="center">{r.blankNumber}</td>
+              <td align="center">{(r.recievedDate.toString()).slice(0,10)}</td>
               <td align="center">{(r.blankNumber.toString()).slice(0,3)}</td>
-              <td align="center">{r.isAssigned}</td>
-              <td>{displayDate(r.assignedDate)}</td>
+              <td align="center">{displayDate(r.assignedDate)}</td>
               <td align="center"><button type="button" value={r.blankNumber}
                onClick ={() => {removeBlank(r.blankNumber)}}>Delete</button></td>
             </tr>
             ))}
           </tbody>
         </table>
+      </div>
+      <div align="center">
+        <br/>
+        <button type="button" class="menu-button" onClick={getBlanks}>Reload Table</button>
       </div>
       </body>
     );
@@ -179,9 +207,8 @@ function ViewBlankSA(props) {
               </select>
             </li>
             <li>
-            //limit is 6
-              <label>Blank Number:</label>
-              <input type="text" pattern="{6,}"  value={bNumber} required onChange={(e) => setNumber(e.target.value)}/>
+              <label>Blank Last Digits:</label>
+              <input type="string"  maxLength="3"  value={bNumber} required onChange={(e) => setNumber(e.target.value)}/>
               <br/>
               <button type="button" class="small-button" onClick={addBlank}>Add</button>
               <button type="button" class="small-button" onClick={() => {showMainMenu(); getBlanks()}}>Cancel</button>

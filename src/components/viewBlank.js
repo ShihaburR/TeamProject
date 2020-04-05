@@ -121,7 +121,7 @@ function ViewBlank(props) {
       .catch(function(error) {
         console.log(error);
         if(error.response.status === 401){
-          alert("The range adds a blank that already exists. " +
+          alert("The range assigns a blank that is already assigned to an Advisor. " +
                 "Please enter a different range");
         }
       });

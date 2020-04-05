@@ -1,0 +1,65 @@
+--------------Refund Details for Blank Number: 45100000001--------------
+Origin: Peru
+Destination: South Dakota
+StaffID: 2
+Amount: 640
+USD Amount: 680
+Local Tax: 10
+Other Tax: 12
+Payment Type: Cash
+Commission Rate: 4
+Exchange Code: GBR
+Transaction Date: 2021-03-04
+
+--------------Refund Details for Blank Number: 45100000002--------------
+Origin: Australia
+Destination: South Africa
+StaffID: 2
+Amount: 630
+USD Amount: 580
+Local Tax: 10
+Other Tax: 12
+Payment Type: Cash
+Commission Rate: 4
+Exchange Code: GBR
+Transaction Date: 2021-03-04
+
+--------------Refund Details for Blank Number: 45100000003--------------
+Origin: Demmark
+Destination: Greenland
+StaffID: 2
+Amount: 620
+USD Amount: 480
+Local Tax: 10
+Other Tax: 12
+Payment Type: Cash
+Commission Rate: 4
+Exchange Code: GBR
+Transaction Date: 2021-03-04
+
+--------------Refund Details for Blank Number: 45100000004--------------
+Origin: Barcelona
+Destination: Azerbaijan
+StaffID: 2
+Amount: 610
+USD Amount: 380
+Local Tax: 10
+Other Tax: 12
+Payment Type: Cash
+Commission Rate: 4
+Exchange Code: GBR
+Transaction Date: 2021-03-04
+
+--------------Refund Details for Blank Number: 45100000005--------------
+Origin: India
+Destination: North Dakota
+StaffID: 2
+Amount: 660
+USD Amount: 280
+Local Tax: 10
+Other Tax: 12
+Payment Type: Cash
+Commission Rate: 4
+Exchange Code: GBR
+Transaction Date: 2021-03-04
+
