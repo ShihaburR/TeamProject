@@ -28,8 +28,8 @@ CREATE TABLE IF NOT EXISTS `Staff` (
 	`password`	varchar ( 255 ) NOT NULL,
 	`agencyID`	integer ( 10 ) NOT NULL,
 	`active`	varchar ( 3 ),
-	FOREIGN KEY(`agencyID`) REFERENCES `TravelAgency`(`agencyID`) ON UPDATE RESTRICT ON DELETE RESTRICT,
-	FOREIGN KEY(`staffTypeID`) REFERENCES `StaffType`(`staffTypeID`) ON UPDATE CASCADE ON DELETE CASCADE
+	FOREIGN KEY(`staffTypeID`) REFERENCES `StaffType`(`staffTypeID`) ON UPDATE CASCADE ON DELETE CASCADE,
+	FOREIGN KEY(`agencyID`) REFERENCES `TravelAgency`(`agencyID`) ON UPDATE RESTRICT ON DELETE RESTRICT
 );
 CREATE TABLE IF NOT EXISTS `FlexibleDiscount` (
 	`discountID`	INTEGER PRIMARY KEY AUTO_INCREMENT,
@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS `FlexibleDiscount` (
 );
 CREATE TABLE IF NOT EXISTS `ExchangeRate` (
 	`exchangeRateCode`	varchar ( 3 ) NOT NULL UNIQUE,
-	`exchangeRate`	double ( 10 , 2 ) NOT NULL,
+	`exchangeRate`	double ( 10 , 4 ) NOT NULL,
 	`currencyName`	varchar ( 255 ) NOT NULL,
 	PRIMARY KEY(`exchangeRateCode`)
 );
@@ -85,7 +85,7 @@ CREATE TABLE IF NOT EXISTS `Sales` (
 	`saleID`	INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT UNIQUE,
 	`staffID`	integer ( 10 ) NOT NULL,
 	`customerID`	integer ( 10 ) NOT NULL,
-	`blankNumber`	integer ( 11 ) NOT NULL UNIQUE,
+	`blankNumber` BIGINT NOT NULL UNIQUE,
 	`amount`	double ( 10 , 2 ) NOT NULL,
 	`amountUSD`	double ( 10 , 2 ) NOT NULL,
 	`localTax`	float ( 10 , 2 ),
@@ -99,10 +99,10 @@ CREATE TABLE IF NOT EXISTS `Sales` (
 	`transactionDate`	DATE NOT NULL,
 	`cardDetails`	INTEGER,
 	FOREIGN KEY(`staffID`) REFERENCES `Staff`(`staffID`) ON UPDATE RESTRICT ON DELETE RESTRICT,
-	FOREIGN KEY(`paymentTypeID`) REFERENCES `TypeOfPayment`(`paymentTypeID`),
 	FOREIGN KEY(`exchangeRateCode`) REFERENCES `ExchangeRate`(`exchangeRateCode`),
+	FOREIGN KEY(`customerID`) REFERENCES `Customer`(`customerID`) ON UPDATE RESTRICT ON DELETE RESTRICT,
 	FOREIGN KEY(`cardDetails`) REFERENCES `CardDetails`(`CardID`) ON UPDATE RESTRICT ON DELETE RESTRICT,
-	FOREIGN KEY(`customerID`) REFERENCES `Customer`(`customerID`) ON UPDATE RESTRICT ON DELETE RESTRICT
+	FOREIGN KEY(`paymentTypeID`) REFERENCES `TypeOfPayment`(`paymentTypeID`)
 );
 CREATE TABLE IF NOT EXISTS `BlankType` (
 	`blankTypeID`	integer ( 1 ) NOT NULL UNIQUE,
@@ -111,7 +111,7 @@ CREATE TABLE IF NOT EXISTS `BlankType` (
 	PRIMARY KEY(`blankTypeID`)
 );
 CREATE TABLE IF NOT EXISTS `Blank` (
-	`blankNumber`	integer ( 11 ) NOT NULL UNIQUE,
+	`blankNumber` BIGINT NOT NULL UNIQUE,
 	`statusID`	integer ( 1 ) NOT NULL,
 	`recievedDate`	DATE NOT NULL,
 	`blankTypeID`	integer ( 1 ) NOT NULL,
@@ -119,13 +119,13 @@ CREATE TABLE IF NOT EXISTS `Blank` (
 	`departureDestination`	varchar(255),
 	`arrivalDestination`	varchar(255),
 	FOREIGN KEY(`statusID`) REFERENCES `Status`(`statusID`) ON UPDATE RESTRICT ON DELETE RESTRICT,
-	PRIMARY KEY(`blankNumber`),
-	FOREIGN KEY(`blankTypeID`) REFERENCES `BlankType`(`blankTypeID`) ON UPDATE RESTRICT ON DELETE RESTRICT
+	FOREIGN KEY(`blankTypeID`) REFERENCES `BlankType`(`blankTypeID`) ON UPDATE RESTRICT ON DELETE RESTRICT,
+	PRIMARY KEY(`blankNumber`)
 );
 CREATE TABLE IF NOT EXISTS `BlankAllocation` (
 	`blankAllocationId`	INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT UNIQUE,
 	`staffID`	integer ( 10 ),
-	`blankNumber`	integer ( 10 ) NOT NULL UNIQUE,
-	FOREIGN KEY(`staffID`) REFERENCES `Staff`(`staffID`),
-	FOREIGN KEY(`blankNumber`) REFERENCES `Blank`(`blankNumber`)
-)
+	`blankNumber`	BIGINT NOT NULL UNIQUE,
+	FOREIGN KEY(`blankNumber`) REFERENCES `Blank`(`blankNumber`),
+	FOREIGN KEY(`staffID`) REFERENCES `Staff`(`staffID`)
+);

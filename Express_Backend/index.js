@@ -205,12 +205,18 @@ app.post('/createCustomer', function(request, response) {
     "`discountAmount` , `discountType`) VALUES (?, ?, ?, ?, ?, ?, ?)";
     //discount values in a seperate sql command
     var drate = request.body.discountrate;
-    var dtype = request.body.discounttype;
-    var drateID = request.body.drateID;
-    var dtypeID = request.body.dtypeID;
-    var createDiscountType = "INSERT INTO discounttype(`discountTypeID`,`discountType`) VALUES (?,?)";
+    var dtype = parseInt(request.body.discounttype);
+    var min = request.body.min;
+    var max = request.body.max
+    var r1 = request.body.r1;
+    var r2 = request.body.r2;
+    var r3 = request.body.r3;
     var createDiscountAmount = "INSERT INTO discountamount(`discountId`,`discountPercent`) VALUES (?,?)";
+    if(dtype == 2){
+      db.query()
+    } else {
 
+    }
     db.query(createDiscountType, [dtypeID, dtype], (error, result) => {
         var string = JSON.stringify(result);
         //console.log(string);
