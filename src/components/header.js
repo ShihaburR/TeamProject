@@ -1,5 +1,5 @@
 import React, { useState, Component, useEffect } from 'react';
-import planeheader from './planeheader.jpg';
+import planeheader from './images/planeheader.jpg';
 import moment from 'moment';
 import {NavLink, Redirect} from "react-router-dom";
 import Login from './login';

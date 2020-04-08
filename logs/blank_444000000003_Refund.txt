@@ -1,0 +1,13 @@
+--------------Refund Details for Blank Number: 444000000003--------------
+Origin: Ohio
+Destination: New Orleans
+StaffID: 1
+Amount: 220
+USD Amount: 94.6
+Local Tax: 63
+Other Tax: 75
+Payment Type: Valued
+Commission Rate: 9
+Exchange Code: SWE
+Transaction Date: 2020-03-31
+

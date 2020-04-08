@@ -31,7 +31,7 @@ button:hover {
 }
 /* login start */
 .background{
-  background-image: url("./components/loginBK.jpg");
+  background-image: url("./components/images/loginBK.jpg");
   background-color: #F1F5FF;
   /* Full height */
   width: 100%;

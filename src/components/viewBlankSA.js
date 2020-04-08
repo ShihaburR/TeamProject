@@ -2,7 +2,7 @@ import React, {Component, useState, useEffect} from 'react';
 import axios from 'axios';
 import Header from './header';
 import { NavLink } from 'react-router-dom';
-import searchIcon from './search-icon.png';
+import searchIcon from './images/search-icon.png';
 
 function ViewBlankSA(props) {
   const [addblank , setBlankMenu] = useState(false);

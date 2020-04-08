@@ -8,7 +8,9 @@ function Refund(props) {
     const [bData, setData] = useState([]);
 
     const handleSubmit = () => {
-        axios.get('http://localhost:5000/logRefund')
+        axios.post('http://localhost:5000/logRefund', {
+          num : blankID
+        })
         .then(response => {
             if(response.status === 200){
               alert("Ticket has been refunded and logged");
@@ -16,8 +18,9 @@ function Refund(props) {
         })
         .catch(error => {
           console.log(error);
-          if(error.response.code === 401){
-            alert("Something went wrong, Please try again");
+          if(error.response.status === 401){
+            alert("The Blank number given has a log file on its refund. " +
+            "Please enter a different blank number or check its log file");
           }
         })
     }

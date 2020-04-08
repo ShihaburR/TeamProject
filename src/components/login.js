@@ -1,10 +1,8 @@
 import React, {useState} from 'react';
 import axios from 'axios';
-import Background from './loginBK.jpg';
-//mainMenu imports
 import {Redirect} from "react-router-dom";
-//staff data syntax [staffType, staff's name, staffID]
 
+//staff data syntax [staffType, staff's name, staffID]
 let staffdata = [];
 
 function Login(props) {
@@ -68,7 +66,7 @@ function Login(props) {
                   </form>
                   <button type ="button" class="loginButton"
                   onClick={handleClick.bind(this)}>Login</button>
-                <img class="logo" src ={require("./logo.jpg")} alt =""/>
+                <img class="logo" src ={require("./images/logo.jpg")} alt =""/>
               </div>
           </body>
   )

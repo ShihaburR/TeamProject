@@ -2,6 +2,8 @@ import React from 'react';
 import Header from './header';
 import { NavLink } from 'react-router-dom';
 
+function checkPayments() {}
+
 function AdminMenu() {
     return (
       <body class="indexbody">
@@ -66,7 +68,7 @@ function ManagerMenu() {
             <ul>
                 <li><NavLink to="/rateNavigator"><button type="button" class="menu-button">Set Rates</button></NavLink></li>
                 <li><NavLink to="/generateReportManager"><button type="button" class="menu-button">Generate Reports</button></NavLink></li>
-                <li><NavLink to="/discount"><button type="button" class="menu-button">View Discounts</button></NavLink></li>
+                <li><NavLink to="/viewLatePayment"><button type="button" class="menu-button">View Late Payments</button></NavLink></li>
             </ul>
           </div>
         </div>

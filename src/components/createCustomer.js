@@ -16,9 +16,9 @@ function CreateCustomer(props) {
   const [fixed, setFixed] = useState(false);
   const [min, setMin] = useState(0);
   const [max, setMax] = useState(0);
-  const [range1, setRange1] = useState(0);
-  const [range2, setRange2] = useState(0);
-  const [range3, setRange3] = useState(0);
+  const [d1, setD1] = useState(0);
+  const [d2, setD2] = useState(0);
+  const [d3, setD3] = useState(0);
 
   const handleSubmit = () => {
       axios.post('http://localhost:5000/createCustomer',{
@@ -32,9 +32,9 @@ function CreateCustomer(props) {
         drateID : discountRateID,
         min : min,
         max : max,
-        r1 : range1,
-        r2 : range2,
-        r3 : range3
+        d1 : d1,
+        d2 : d2,
+        d3 : d3
       })
         .then(response => {
           if(response.status === 200){
@@ -110,38 +110,45 @@ function CreateCustomer(props) {
           <div>
             <li>
               <h3>Flexible Discount Details</h3>
-              <label> Minimum %:
-                <select value={min} required onChange={(e) => setMin(e.target.value)}>
+              <label> Minimum Amount:
+                <input type="number" value={min} required onChange={(e) => setMin(e.target.value)}/>
+              </label>
+              <br/>
+              <label> Maximun Amount:
+                <input type="number" value={max} required onChange={(e) => setMax(e.target.value)}/>
+              </label>
+            </li>
+            <li>
+              <label> 1st Discount %:
+                <select value={d1} required onChange={(e) => setD1(e.target.value)}>
                   <option value = "null">Select one</option>
                   <option value = "0">0%</option>
                   <option value = "1">1%</option>
                   <option value = "2">2%</option>
                 </select>
               </label>
-              <label> Maximun %:
-                <select value={max} required onChange={(e) => setMax(e.target.value)}>
-                  <option value = "null">Select one</option>
-                  <option value = "0">0%</option>
-                  <option value = "1">1%</option>
-                  <option value = "2">2%</option>
-                </select>
+            </li>
+            <li>
+              <label> 2nd Discount %:
+              <select value={d2} required onChange={(e) => setD2(e.target.value)}>
+                <option value = "null">Select one</option>
+                <option value = "0">0%</option>
+                <option value = "1">1%</option>
+                <option value = "2">2%</option>
+              </select>
               </label>
             </li>
             <li>
-              <label> Less Than value:
-                <input type="number" value={range1} required onChange={(e) => setRange1(e.target.value)}/>
+              <label> 3rd Discount %:
+              <select value={d3} required onChange={(e) => setD3(e.target.value)}>
+                <option value = "null">Select one</option>
+                <option value = "0">0%</option>
+                <option value = "1">1%</option>
+                <option value = "2">2%</option>
+              </select>
               </label>
             </li>
-            <li>
-              <label> More Than & equal to value:
-                <input type="number" value={range2} required onChange={(e) => setRange2(e.target.value)}/>
-              </label>
-            </li>
-            <li>
-              <label> More Than value:
-                <input type="number" value={range3} required onChange={(e) => setRange3(e.target.value)}/>
-              </label>
-            </li>
+            <button type="button" class="small-button" onClick={handleSubmit}>Submit</button>
           </div>
           }
           {fixed &&
@@ -153,7 +160,10 @@ function CreateCustomer(props) {
                 <option value = "1">1%</option>
                 <option value = "2">2%</option>
               </select>
+              <br/>
+              <button type="button" class="small-button" onClick={handleSubmit}>Submit</button>
             </li>
+
           }
         </ul>
       </div>

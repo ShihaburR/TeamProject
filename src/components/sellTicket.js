@@ -488,8 +488,8 @@ function SellTicket(props) {
               <ul>
                   <li><label>Name on Card:</label></li>
                   <li><textarea value={nameOnCard} required onChange={(e) => setNameOnCard(e.target.value)}></textarea></li>
-                  <li><label>Security Code:</label></li>
-                  <li><input type="number" value={securityCode} required onChange={(e) => setSecurityCode(e.target.value)}/>></li>
+                  <li><label>CCV:</label></li>
+                  <li><input type="number" value={securityCode} required onChange={(e) => setSecurityCode(e.target.value)}/></li>
               </ul>
               <li align="center">
                 <NavLink to="/mainMenu"><button type="button" class="small-button" onClick={sender}>Pay</button></NavLink>

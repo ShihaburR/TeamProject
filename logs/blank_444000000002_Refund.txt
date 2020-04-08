@@ -1,0 +1,13 @@
+--------------Refund Details for Blank Number: 444000000002--------------
+Origin: Germany
+Destination: Washington
+StaffID: 1
+Amount: 230
+USD Amount: 124.2
+Local Tax: 43
+Other Tax: 55
+Payment Type: Card
+Commission Rate: 9
+Exchange Code: POL
+Transaction Date: 2020-01-01
+

@@ -13,15 +13,11 @@ import {
 import ViewBlank from './components/viewBlank';
 import ViewBlankSA from './components/viewBlankSA';
 import CreateCustomer from './components/createCustomer';
-import Discount from './components/discount';
 import ViewCustomer from './components/viewCustomer';
 import SetFrequency from './components/setFrequency';
 import MainMenu from './components/mainMenu';
-import CardPayment from './components/cardPayment';
 import LatePayment from './components/latePayment';
-import Payment from './components/payment';
 import Refund from './components/refund';
-import RefundPayment from './components/refundPayment';
 import SellTicket from './components/sellTicket';
 import RateNavigator from './components/rateNavigator';
 import SetCommissionRate from './components/Commissions';
@@ -33,6 +29,7 @@ import GenerateReportStaff from './components/generateReportStaff';
 import GenerateReportType from './components/generateReportType';
 import ViewStaff from './components/viewStaff';
 import Login from './components/login';
+import ViewLatePayment from './components/viewLatePayment';
 
 // The main App component which determines what is being rendered.
 // No props are being passed into this component so there's no need to pass in a props param.
@@ -41,7 +38,6 @@ function App() {
   let [staffName, setStaffName] = useState('');
   let [staffID, setStaffID] = useState('');
   let [staffType, setStaffType] = useState('');
-  let [paymentAmount, setPaymentAmount] = useState(3000);
   let [staffData, setData] = useState('');
 
   // This is a the callback function used to retrieve the staffInfo Array which contains the staff information displayed on the top of every page.
@@ -68,9 +64,6 @@ function App() {
             <Route exact path="/createCustomer">
               <CreateCustomer staffType={staffType} staffName={staffName} staffID={staffID}/>
             </Route>
-            <Route exact path="/discount">
-              <Discount staffType={staffType} staffName={staffName} staffID={staffID}/>
-            </Route>
             <Route exact path="/viewCustomer">
               <ViewCustomer staffType={staffType} staffName={staffName} staffID={staffID}/>
             </Route>
@@ -80,20 +73,11 @@ function App() {
             <Route exact path="/mainMenu">
               <MainMenu staffType={staffType} staffName={staffName} staffID={staffID}/>
             </Route>
-            <Route exact path="/cardPayment">
-              <CardPayment staffType={staffType} staffName={staffName} staffID={staffID}/>
-            </Route>
             <Route exact path="/latePayment">
               <LatePayment staffType={staffType} staffName={staffName} staffID={staffID}/>
             </Route>
-            <Route exact path="/payment">
-              <Payment staffType={staffType} staffName={staffName} staffID={staffID} paymentAmount={paymentAmount}/>
-            </Route>
             <Route exact path="/refund">
               <Refund staffType={staffType} staffName={staffName} staffID={staffID}/>
-            </Route>
-            <Route exact path="/refundPayment">
-              <RefundPayment staffType={staffType} staffName={staffName} staffID={staffID}/>
             </Route>
             <Route exact path="/sellTicket">
               <SellTicket staffType={staffType} staffName={staffName} staffID={staffID}/>
@@ -124,6 +108,9 @@ function App() {
             </Route>
             <Route exact path="/viewStaff">
               <ViewStaff staffType={staffType} staffName={staffName} staffID={staffID}/>
+            </Route>
+            <Route exact path="/viewLatePayment">
+              <ViewLatePayment staffType={staffType} staffName={staffName} staffID={staffID}/>
             </Route>
             <Route exact path="/404">
               <h1>PAGE DOES NOT EXIST</h1>

@@ -201,38 +201,74 @@ app.post('/createCustomer', function(request, response) {
     var address = request.body.address;
     var email = request.body.email;
     var valued = request.body.valued;
-    var insert = "INSERT INTO customer(`name`, `surname`, `address`, `email`,`customerTypeId`," +
-    "`discountAmount` , `discountType`) VALUES (?, ?, ?, ?, ?, ?, ?)";
-    //discount values in a seperate sql command
-    var drate = request.body.discountrate;
-    var dtype = parseInt(request.body.discounttype);
-    var min = request.body.min;
-    var max = request.body.max
-    var r1 = request.body.r1;
-    var r2 = request.body.r2;
-    var r3 = request.body.r3;
-    var createDiscountAmount = "INSERT INTO discountamount(`discountId`,`discountPercent`) VALUES (?,?)";
-    if(dtype == 2){
-      db.query()
-    } else {
+    var getAmount = "SELECT discountId FROM discountamount WHERE discountPercent = ?";
+    var fixedInsert = "INSERT INTO customer(`name`, `surname`, `address`, `email`,`customerTypeId`," +
+    "`discountAmount` , `discountType`,`active`) VALUES (?, ?, ?, ?, ?, ?, 1, 'yes')";
 
-    }
-    db.query(createDiscountType, [dtypeID, dtype], (error, result) => {
-        var string = JSON.stringify(result);
-        //console.log(string);
-        db.query(createDiscountAmount, [drateID, drate], (error, result) => {
+    //discount values in a seperate sql command
+    var drate = parseInt(request.body.discountrate);
+    var dtype = parseInt(request.body.discounttype);
+    var min = parseInt(request.body.min);
+    var max = parseInt(request.body.max);
+    var r1 = parseInt(request.body.d1);
+    var r2 = parseInt(request.body.d2);
+    var r3 = parseInt(request.body.d3);
+
+    var flexibleInsert = "INSERT INTO customer(`name`, `surname`, `address`, `email`,`customerTypeId`," +
+    "`discountAmount` , `discountType`,`flexibleDiscount`,`active`) VALUES (?, ?, ?, ?, ?, ?, 2, ?, 'yes')";
+    var addFlexible = "INSERT INTO flexiblediscount(`range1`,`range2`,`discount1`,`discount2`,`discount3`)" +
+    " VALUES (?,?,?,?,?)";
+    var getFlexibleID = "SELECT discountID FROM flexiblediscount WHERE range1 = ? AND range2 = ?";
+
+    console.log("Discount Type: " + dtype);
+    if(dtype == 1){
+      //get discountAmount
+      db.query(getAmount, [drate], (error, result) => {
+        var packet = JSON.parse(JSON.stringify(result));
+        var drateID = packet[0].discountId;
+        console.log("DiscountId: " + drateID);
+        //insert into customer
+        db.query(fixedInsert, [firstname,lastname,address,email,valued,drateID],
+        (error,result) => {
           var string = JSON.stringify(result);
           //console.log(string);
-          db.query(insert, [firstname,lastname,address,email,valued,drateID,dtypeID], (error,result) => {
-             var string = JSON.stringify(result);
-             //console.log(string);
-             if(string.includes('"affectedRows":1')){
-               console.log("Customer created");
-               response.sendStatus(200);
-             }
-          })
+          if(string.includes('"affectedRows":1')){
+            console.log("Customer created");
+            response.sendStatus(200);
+          } else {response.sendStatus(401);}
         });
-    });
+      });
+    } else if(dtype == 2) {
+      db.query(getAmount, [r3], (error, result) => {
+        console.log(error);
+        var packet = JSON.parse(JSON.stringify(result));
+        var maxID = packet[0].discountId;
+        console.log("DiscountId: " + maxID);
+        //add details into flexibleDiscount table
+        db.query(addFlexible, [min,max,r1,r2,r3], (error, result) => {
+          var string = JSON.stringify(result);
+          if(string.length > 3){
+            console.log("Flexible Discount data added to DB");
+            //get flexible data's primary key
+            db.query(getFlexibleID, [min,max], (error,result) => {
+              var packet = JSON.parse(JSON.stringify(result));
+              var flexibleID = packet[0].discountID;
+              console.log("Flexible Discount ID: " + flexibleID);
+              //add customer to db with flexibleID included
+              db.query(flexibleInsert, [firstname,lastname,address,email,
+              valued,maxID,flexibleID], (error,result) => {
+                  var string = JSON.stringify(result);
+                  console.log("Flexible Insert Error: " + error);
+                  if(string.includes('"affectedRows":1')){
+                    console.log("Customer created");
+                    response.sendStatus(200);
+                  } else {response.sendStatus(401);}
+              });
+            });
+          } else {response.sendStatus(401);}
+        });
+      });
+    } else {response.sendStatus(401);}
 });
 
 app.get('/customers', function(request, response) {
@@ -433,6 +469,14 @@ app.get('/advisorIBlanks', function(request, response) {
   });
 })
 
+app.get('/advisorLateBlanks', function(request, response) {
+  var get = "SELECT * FROM sales WHERE staffID = ? AND paymentTypeID = 3";
+  db.query(get,[staffID],(error,result) => {
+    response.status(200).send(result);
+    response.end();
+  });
+});
+
 //Look into a way of display if a blank has been sold
 app.post('/isSold', function(request, response) {
   var num = request.body.num;
@@ -618,7 +662,7 @@ app.post('/addInterlineSale', function(request, response) {
       if(paymentType === 3){
         console.log("---------Valued Payer---------");
         console.log("Current Date: " + date);
-        let newDate = new Date(date.slice(0,4),parseInt(date.slice(-5,-3)) + 1 ,date.slice(-2)).toISOString().slice(0,10);
+        let newDate = new Date(date.slice(0,4), parseInt(date.slice(-5,-3)), date.slice(-2)).toISOString().slice(0,10);
         console.log("New Date: " + newDate);
         isPaid = "no";
         //add sale to db
@@ -753,7 +797,7 @@ app.post('/addDomesticSale', function(request, response) {
         console.log("---------Valued Payer---------");
         console.log("Current Date: " + date);
         console.log("Month: " + (parseInt(date.slice(-5,-3)) + 1));
-        let newDate = new Date(date.slice(0,4), parseInt(date.slice(-5,-3)) + 1, date.slice(-2)).toISOString().slice(0,10);
+        let newDate = new Date(date.slice(0,4), parseInt(date.slice(-5,-3)), date.slice(-2)).toISOString().slice(0,10);
         console.log("New Date: " + newDate);
         isPaid = "no";
         //add sale to db
@@ -859,6 +903,65 @@ app.post('/refund', function(request, response) {
   });
 });
 
+app.post('/lateAmount', function(request, response) {
+  var num = request.body.num;
+  var get = "SELECT amountUSD FROM sales WHERE blankNumber = ?";
+  db.query(get, [num], (error,result) => {
+    response.send(result).status(200);
+    response.end();
+  });
+});
+
+app.post('/latepayment', function(request, response) {
+  var blank = request.body.blank;
+  var update = "UPDATE sales SET isPaid = 'yes' WHERE blankNumber = ?";
+  var checkBlank = "SELECT * FROM sales WHERE blankNumber = ? AND isPaid = 'yes'";
+  var cardNum = request.body.cardNum;
+  var cdate = request.body.date;
+  var ccv = request.body.ccv;
+  var cardinsert = "INSERT INTO carddetails(`cardNumber`,`expiryDate`,`securityCode`)" +
+  "VALUES (?,?,?)";
+  var getCardID = "SELECT CardID FROM carddetails WHERE cardNumber = ?";
+  var cardupdate = "UPDATE sales SET isPaid = 'yes', cardDetails = ? WHERE blankNumber = ?";
+  db.query(checkBlank, [blank], (error, result) => {
+    var string = JSON.stringify(result);
+    if(string.length < 3){
+      if(cardNum.length > 1){
+        db.query(cardinsert, [cardNum,cdate,ccv], (error, result) => {
+          var string = JSON.stringify(result);
+          var packet = JSON.parse(string);
+          if(string.length > 3){
+            console.log("Card added to DB");
+            db.query(getCardID, [cardNum], (error, result) => {
+              var packet = JSON.parse(JSON.stringify(result));
+              var cardID = packet[0].CardID;
+              db.query(cardupdate, [cardID, blank], (error,result) => {
+                var string = JSON.stringify(result);
+                if(string.length > 3){
+                  console.log("Sales updated");
+                  response.sendStatus(200);
+                } else {response.sendStatus(401);}
+              });
+            });
+          } else {response.sendStatus(401);}
+        });
+      } else {
+        db.query(update, [blank], (error,result) => {
+          var string = JSON.stringify(result);
+          if(string.length > 3){
+            console.log("Late payment accepted");
+            response.sendStatus(200);
+          } else {response.sendStatus(401);}
+        });
+      }
+    } else {
+      console.log("Blank already paid");
+      response.sendStatus(400);
+    }
+  });
+});
+
+//for refund log
 function checkPaymentType(type) {
     switch (type) {
       case 1:
@@ -875,40 +978,62 @@ function checkPaymentType(type) {
     }
 }
 
-app.get('/logRefund', function(request, response) {
+app.post('/logRefund', function(request, response) {
   var logData = "";
+  var num = request.body.num;
+  const nameBegin = 'logs/blank_';
+  const nameEnd =  '_Refund.txt';
+  var filename = nameBegin.concat(num, nameEnd);
+  console.log(filename);
   var dataCollection = "SELECT B.blankNumber, departureDestination," +
   "arrivalDestination, B.statusID, S.staffID, S.amount, S.amountUSD," +
   "S.localTax,S.otherTax ,S.paymentTypeID, S.commisionRate, S.exchangeRateCode," +
-  "S.transactionDate FROM blank B, sales S WHERE B.blankNumber = S.blankNumber" +
-  " AND B.statusID = 5";
-
-  db.query(dataCollection, (error, result) => {
-    console.log(error);
-    console.log(result);
-    var packet = JSON.parse(JSON.stringify(result));
-    for (var i in packet) {
+  "S.transactionDate FROM blank B, sales S WHERE B.blankNumber = ? " +
+  " AND B.blankNumber = S.blankNumber";
+  if (fs.existsSync(filename)) {
+    console.log("This blank has already been logged");
+    response.sendStatus(401);
+  } else {
+      db.query(dataCollection, [num], (error, result) => {
+      console.log(error);
+      console.log(result);
+      var packet = JSON.parse(JSON.stringify(result));
       logData += "--------------Refund Details for Blank Number: "
-      + packet[i].blankNumber + '--------------' + '\n';
-      logData += "Origin: " + packet[i].departureDestination + '\n';
-      logData += "Destination: " + packet[i].arrivalDestination + '\n';
-      logData += "StaffID: " + packet[i].staffID + '\n';
-      logData += "Amount: " + packet[i].amount + '\n';
-      logData += "USD Amount: " + packet[i].amountUSD + '\n';
-      logData += "Local Tax: " + packet[i].localTax + '\n';
-      logData += "Other Tax: " + packet[i].otherTax + '\n';
-      logData += "Payment Type: " + checkPaymentType(packet[i].paymentTypeID) + '\n';
-      logData += "Commission Rate: " + packet[i].commisionRate + '\n';
-      logData += "Exchange Code: " + packet[i].exchangeRateCode + '\n';
-      logData += "Transaction Date: " + packet[i].transactionDate.toString().slice(0,10)
+      + packet[0].blankNumber + '--------------' + '\n';
+      logData += "Origin: " + packet[0].departureDestination + '\n';
+      logData += "Destination: " + packet[0].arrivalDestination + '\n';
+      logData += "StaffID: " + packet[0].staffID + '\n';
+      logData += "Amount: " + packet[0].amount + '\n';
+      logData += "USD Amount: " + packet[0].amountUSD + '\n';
+      logData += "Local Tax: " + packet[0].localTax + '\n';
+      logData += "Other Tax: " + packet[0].otherTax + '\n';
+      logData += "Payment Type: " + checkPaymentType(packet[0].paymentTypeID) + '\n';
+      logData += "Commission Rate: " + packet[0].commisionRate + '\n';
+      logData += "Exchange Code: " + packet[0].exchangeRateCode + '\n';
+      logData += "Transaction Date: " + packet[0].transactionDate.toString().slice(0,10)
       + '\n' + '\n';
-    }
-    console.log(logData);
-    fs.writeFile('logs/Refund.txt', logData ,'utf8' ,function (err) {
-      if (err) throw err;
-      console.log('Refund Details saved in log file: Refund.txt');
-      response.sendStatus(200);
+
+      fs.writeFile(filename, logData, 'utf8', function (err) {
+        if (err) throw err;
+        console.log('Refund Details saved in logs as: Blank:_' +num+ '_Refund.txt');
+        response.sendStatus(200);
     });
+  });
+  }
+});
+
+app.get('/alertLatePayment', function(request, response) {
+  var get = "SELECT payByDate FROM sales WHERE paymentTypeID = 3";
+  db.query(get, (error,result) => {
+    var packet = JSON.parse(JSON.stringify(result));
+    var today = parseInt(new Date());
+    console.log(today);
+    /*
+    for(var i in packet){
+      var date = parseInt(packet[i].payByDate);
+      console.log("Date: " + date);
+    }
+    */
   });
 });
 
@@ -1024,5 +1149,15 @@ app.post('/searchBlanks', function(request, response) {
   });
 });
 
+app.post('/searchCustomers', function(request,response) {
+  var details = request.body.details;
+  var search = "SELECT * FROM customer WHERE name LIKE ? or surname LIKE ? " +
+  "or customerID LIKE ?"
+  db.query(search,['%'+details+'%','%'+details+'%','%'+details+'%','%'+details+'%',
+  '%'+details+'%'], (error,result) => {
+      response.status(200).send(result);
+      response.end();
+  });
+});
 
 app.listen(port, () => console.log(`Backend app started on port ${port}!`));
