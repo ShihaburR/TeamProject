@@ -6,7 +6,7 @@ const bodyParser = require('body-parser');
 const port = 5000;
 const app = express();
 //global variables to be accessed in other pages
-var username = "", staffType = ""; staffID = ""; email=""
+var username = "", staffType = "", staffID = "", email="";
 //compile JSON (in our case mySQL data) to string to be used for our use
 app.use(bodyParser.json());
 //cors allows http requests from front-end to back-end
@@ -64,6 +64,7 @@ app.post('/login', function(request, response) {
     });
   }
 });
+
 //check what type of user we have
 app.get('/auth', function(request, response) {
   var sql = "(SELECT staffType FROM staff S, staffType ST WHERE " +
@@ -91,6 +92,7 @@ app.get('/auth', function(request, response) {
   }
   });
 });
+
 //clears staff info and logouts user
 app.get('/logout', function(request, response) {
   console.log("Logout initiatied for User: " + username + "- redirecting to login");
