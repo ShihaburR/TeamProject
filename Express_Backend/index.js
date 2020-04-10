@@ -1169,7 +1169,7 @@ app.get('/individualReport', (request, response) => {
        '((Sales.amount+Sales.localTax)/ExchangeRate.exchangeRate) where ' +
        'Sales.paymentTypeID=1) AS USD, (SELECT Sales.amount+Sales.localTax where ' +
        'Sales.paymentTypeID=1) AS BGL, Sales.localTax, (SELECT Sales.amount+Sales.localTax) AS ' +
-       'TotalAmountPaid, (SELECT Sales.amount) AS Commisionable, sales.commisionRate ' +
+       'TotalAmountPaid, (SELECT Sales.amount) AS commissionable, sales.commissionRate ' +
        'from Sales inner join ExchangeRate, Blank, BlankType, CardDetails, TypeOfPayment where ' +
        'Sales.exchangeRateCode=ExchangeRate.exchangeRateCode and (Sales.transactionDate ' +
        'BETWEEN ${req.params.start} AND ${req.params.end}) and Sales.blankNumber=Blank.blankNumber and ' +

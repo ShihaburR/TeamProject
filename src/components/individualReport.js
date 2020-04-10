@@ -39,15 +39,15 @@ function IndividualReport(props) {
         if (Array.isArray(individualReport) && individualReport.length > 0) {
             for (let i = 0; i < individualReport.length; i++) {
                 setNumOfTickets(numOfTickets + 1);
-                setTotalFareBaseLocal(totalFareBaseLocal + individualReport.fareBaseLocal);
-                setTotalFareBaseUSD(totalFareBaseUSD + individualReport.fareBaseUSD);
-                setTotalTax(totalTax + individualReport.tax);
-                setTotalCash(totalCash + individualReport.cash);
-                setTotalCardUSD(totalCardUSD + individualReport.cardUSD);
-                setTotalCardLocal(totalCardLocal + individualReport.cardLocal);
+                setTotalFareBaseLocal(totalFareBaseLocal + individualReport.amount);
+                setTotalFareBaseUSD(totalFareBaseUSD + individualReport.amountUSD);
+                setTotalTax(totalTax + individualReport.localTax);
+                setTotalCash(totalCash + individualReport.CASH);
+                setTotalCardUSD(totalCardUSD + individualReport.USD);
+                setTotalCardLocal(totalCardLocal + individualReport.BGL);
                 setTotalAmountPaid(totalAmountPaid + individualReport.totalAmountPaid);
-                setTotalCommissionableAmount(totalCommissionableAmount + individualReport.totalCommissionableAmount);
-                setTotalCommissions(totalCommissions + (individualReport.));
+                setTotalCommissionableAmount(totalCommissionableAmount + individualReport.commissionable);
+                setTotalCommissions(totalCommissions + (individualReport.commissionable * individualReport.commissionRate/100));
                 setNetAmounts4AgentDebits(totalCommissionableAmount - totalCommissions);
                 setBankRemittence(totalAmountPaid - totalCommissions);
             }
