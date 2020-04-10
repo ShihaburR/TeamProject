@@ -18,17 +18,14 @@ function StockTurnOverReport(props) {
     const [subNewACode, setSubNewACode] = useState([]);
     const [subACode, setSubACode] = useState([]);
     const [subTotalCode, setSubTotalCode] = useState([]);
-
-    useEffect(() => {
-        getStockTurnOverReportData();
-    }, [])
+    const [periodSet, setPeriodSet] = useState(false);
 
     useEffect(() => {
         sortData();
-    })
+    }, [])
 
-    const getStockTurnOverReportData = () => {
-        axios.get('http://localhost:5000/stockTurnOverReport')
+    const getStockTurnOverReportData = (start, end) => {
+        axios.get('http://localhost:5000/stockTurnOverReport', {params: {start: start, end: end}})
             .then(response => {
                 console.log(response.data);
                 SetStockTurnOverReport(response.data);
@@ -44,77 +41,77 @@ function StockTurnOverReport(props) {
         setP2(0);
         setPrevCode(0);
         if (Array.isArray(stockTurnOverReport) && stockTurnOverReport.length > 0) {
-            for (let i = 0; i < stockTurnOverReport.length; i++) {
-                if ((i > 0) && ((stockTurnOverReport[i].agntNewRBlanks !== p2 + 1) || (stockTurnOverReport[i].code !== prevCode))){
-                    setAgentsNewRecievedBlanks([...agentsNewRecievedBlanks, p1, p2]);
+            for (let i = 0; i < stockTurnOverReport.agntNewRBlanks.length; i++) {
+                if ((i > 0) && (stockTurnOverReport.agntNewRBlanks[i].blank !== stockTurnOverReport.agntNewRBlanks[p2].blank + 1)){
+                    setAgentsNewRecievedBlanks([...agentsNewRecievedBlanks, stockTurnOverReport.agntNewRBlanks[p1].blank, stockTurnOverReport.agntNewRBlanks[p2].blank]);
                     setP1(i);
                     setP2(i);
                 } else {
                     setP2(p2 + 1);
-                    setPrevCode(stockTurnOverReport[i].code);
                 }
             }
             setP1(0);
             setP2(0);
-            for (let i = 0; i < stockTurnOverReport.length; i++) {
-                if ((i > 0) && ((stockTurnOverReport[i].subAgntNewABlanks !== p2 + 1) || (stockTurnOverReport[i].code !== prevCode))){
-                    setSubAgentNewAssignedBlanks([...subAgentNewAssignedBlanks, p1, p2]);
+            setPrevCode(0);
+            for (let i = 0; i < stockTurnOverReport.subAgntNewABlanks.length; i++) {
+                if ((i > 0) && ((stockTurnOverReport.subAgntNewABlanks[i].blank !== stockTurnOverReport.subAgntNewABlanks[p2].blank + 1) || (prevCode != 0) && (stockTurnOverReport.subAgntNewABlanks[i].code !== prevCode))){
+                    setSubAgentNewAssignedBlanks([...subAgentNewAssignedBlanks, stockTurnOverReport.subAgntNewABlanks[p1].blank, stockTurnOverReport.subAgntNewABlanks[p2].blank]);
                     setSubNewACode([...subNewACode, prevCode]);
                     setP1(i);
                     setP2(i);
                 } else {
                     setP2(p2 + 1);
-                    setPrevCode(stockTurnOverReport[i].code);
+                    setPrevCode(stockTurnOverReport.subAgntNewABlanks[i].code);
                 }
             }
             setP1(0);
             setP2(0);
-            for (let i = 0; i < stockTurnOverReport.length; i++) {
-                if ((i > 0) && ((stockTurnOverReport[i].subAgntABlanks !== p2 + 1) || (stockTurnOverReport[i].code !== prevCode))){
-                    setSubAgentAssignedBlanks([...subAgentAssignedBlanks, p1, p2])
+            setPrevCode(0);
+            for (let i = 0; i < stockTurnOverReport.subAgntABlanks.length; i++) {
+                if ((i > 0) && ((stockTurnOverReport.subAgntABlanks[i].blank !== stockTurnOverReport.subAgntABlanks[p2].blank + 1) || (prevCode != 0) && (stockTurnOverReport.subAgntABlanks[i].code !== prevCode))){
+                    setSubAgentAssignedBlanks([...subAgentAssignedBlanks, stockTurnOverReport.subAgntABlanks[p1].blank, stockTurnOverReport.subAgntABlanks[p2].blank])
                     setSubACode([...subACode, prevCode]);
                     setP1(i);
                     setP2(i);
                 } else {
                     setP2(p2 + 1);
-                    setPrevCode(stockTurnOverReport[i].code);
+                    setPrevCode(stockTurnOverReport.subAgntABlanks[i].code);
                 }
             }
             setP1(0);
             setP2(0);
-            for (let i = 0; i < stockTurnOverReport.length; i++) {
-                if ((i > 0) && ((stockTurnOverReport[i].subAgntUBlanks !== p2 + 1) || (stockTurnOverReport[i].code !== prevCode))){
-                    setSubAgentUsedBlanks([...subAgentUsedBlanks, p1, p2]);
+            for (let i = 0; i < stockTurnOverReport.subAgntUBlanks.length; i++) {
+                if ((i > 0) && (stockTurnOverReport.subAgntUBlanks[i].blank !== stockTurnOverReport.subAgntUBlanks[p2].blank + 1)){
+                    setSubAgentUsedBlanks([...subAgentUsedBlanks, stockTurnOverReport.subAgntUBlanks[p1].blank, stockTurnOverReport.subAgntUBlanks[p2].blank]);
                     setP1(i);
                     setP2(i);
                 } else {
                     setP2(p2 + 1);
-                    setPrevCode(stockTurnOverReport[i].code);
                 }
             }
             setP1(0);
             setP2(0);
-            for (let i = 0; i < stockTurnOverReport.length; i++) {
-                if ((i > 0) && ((stockTurnOverReport[i].agentsAmounts !== p2 + 1) || (stockTurnOverReport[i].code !== prevCode))){
-                    setAgentsAmounts([...agentsAmounts, p1, p2]);
+            for (let i = 0; i < stockTurnOverReport.agentsAmounts.length; i++) {
+                if ((i > 0) && (stockTurnOverReport.agentsAmounts[i].blank !== stockTurnOverReport.agentsAmounts[p2].blank + 1)){
+                    setAgentsAmounts([...agentsAmounts, stockTurnOverReport.agentsAmounts[p1].blank, stockTurnOverReport.agentsAmounts[p2].blank]);
                     setP1(i);
                     setP2(i);
                 } else {
                     setP2(p2 + 1);
-                    setPrevCode(stockTurnOverReport[i].code);
                 }
             }
             setP1(0);
             setP2(0);
-            for (let i = 0; i < stockTurnOverReport.length; i++) {
-                if ((i > 0) && ((stockTurnOverReport[i].subAgentsAmounts !== p2 + 1) || (stockTurnOverReport[i].code !== prevCode))){
-                    setSubAgentsAmounts([...subAgentsAmounts, p1, p2]);
+            setPrevCode(0);
+            for (let i = 0; i < stockTurnOverReport.subAgentsAmounts.length; i++) {
+                if ((i > 0) && ((stockTurnOverReport.subAgentsAmounts[i].blank !== stockTurnOverReport.subAgentsAmounts[p2].blank + 1) || (prevCode != 0) && (stockTurnOverReport.subAgentsAmounts[i].code !== prevCode))){
+                    setSubAgentsAmounts([...subAgentsAmounts, stockTurnOverReport.subAgentsAmounts[p1].blank, stockTurnOverReport.subAgentsAmounts[p2].blank]);
                     setSubTotalCode([...subTotalCode, prevCode]);
                     setP1(i);
                     setP2(i);
                 } else {
                     setP2(p2 + 1);
-                    setPrevCode(stockTurnOverReport[i].code);
+                    setPrevCode(stockTurnOverReport.subAgentsAmounts[i].code);
                 }
             }
         }
@@ -124,7 +121,13 @@ function StockTurnOverReport(props) {
     const displayData = () => {
         let data = []
 
-        for ( let i = 0; i < stockTurnOverReport.length; i++) {
+        for ( let i = 0;
+              i < i < stockTurnOverReport.agntNewRBlanks.length
+              || i < stockTurnOverReport.subAgntNewABlanks.length
+              || i < stockTurnOverReport.subAgntABlanks.length
+              || i < stockTurnOverReport.subAgntUBlanks.length
+              || i < stockTurnOverReport.agentsAmounts.length
+              || i < stockTurnOverReport.subAgentsAmounts.length; i++) {
             let rows = [];
 
             for (let j = 0; j < 30; j+2) {
@@ -157,7 +160,7 @@ function StockTurnOverReport(props) {
                     )
                 } else {
                     rows.push(
-                        <td>{subNewACode}</td>
+                        <td>{subNewACode[j/2]}</td>
                     )
                     rows.push(
                         <td>{subAgentNewAssignedBlanks[j]} - {subAgentNewAssignedBlanks[j+1]}</td>
@@ -179,7 +182,7 @@ function StockTurnOverReport(props) {
                     )
                 } else {
                     rows.push(
-                        <td>{subACode}</td>
+                        <td>{subACode[j/2]}</td>
                     )
                     rows.push(
                         <td>{subAgentAssignedBlanks[j]} - {subAgentAssignedBlanks[j+1]}</td>
@@ -233,7 +236,7 @@ function StockTurnOverReport(props) {
                     )
                 } else {
                     rows.push(
-                        <td>{subTotalCode}</td>
+                        <td>{subTotalCode[j/2]}</td>
                     )
                     rows.push(
                         <td>{subAgentsAmounts[j]} - {subAgentsAmounts[j+1]}</td>
@@ -248,6 +251,53 @@ function StockTurnOverReport(props) {
         return data;
     }
 
+    const body = () => {
+        if (!periodSet) {
+            return (
+                <GenerateReportPeriod getData={getStockTurnOverReportData()} setPeriod={setPeriodSet}/>
+            )
+        } else {
+            return (
+                <div id="tablecontainer">
+                    <table>
+                        <tr>
+                            <th colSpan="5">Recieved Blanks</th>
+                            <th colSpan="5">Assigned/Used Blanks</th>
+                            <th colSpan="5">Final Amounts</th>
+                        </tr>
+                        <tr>
+                            <th colSpan="2">Agent's Stock</th>
+                            <th colSpan="3">Sub Agents'</th>
+                            <th colSpan="5">Sub Agents'</th>
+                            <th colSpan="2">Agent's Amounts</th>
+                            <th colSpan="3">Sub Agents' Amounts</th>
+                        </tr>
+                        <tr>
+                            <th>From/To Blanks</th>
+                            <th>AMNT</th>
+                            <th>Code</th>
+                            <th>From/To Blank Numbers</th>
+                            <th>AMNT</th>
+                            <th>Code</th>
+                            <th>Assigned (From/To)</th>
+                            <th>AMNT</th>
+                            <th>Used (From/To)</th>
+                            <th>AMNT</th>
+                            <th>From/To</th>
+                            <th>AMNT</th>
+                            <th>Code</th>
+                            <th>From/To</th>
+                            <th>AMNT</th>
+                        </tr>
+                        {displayData()}
+                    </table>
+                    <button type="button" class="small-button-right">Done</button>
+                </div>
+
+            )
+        }
+    }
+
     return (
         <body class="indexbody">
         <Header staffType={props.staffType} staffName={props.staffName} staffID={props.staffID}/>
@@ -255,41 +305,7 @@ function StockTurnOverReport(props) {
         <div id="mainmenu">
             <NavLink to="/mainMenu"><button type="button" class="page-button">Stock Turnover Report</button></NavLink>
         </div>
-        <div id="tablecontainer">
-            <table>
-                <tr>
-                    <th colSpan="5">Recieved Blanks</th>
-                    <th colSpan="5">Assigned/Used Blanks</th>
-                    <th colSpan="5">Final Amounts</th>
-                </tr>
-                <tr>
-                    <th colSpan="2">Agent's Stock</th>
-                    <th colSpan="3">Sub Agents'</th>
-                    <th colSpan="5">Sub Agents'</th>
-                    <th colSpan="2">Agent's Amounts</th>
-                    <th colSpan="3">Sub Agents' Amounts</th>
-                </tr>
-                <tr>
-                    <th>From/To Blanks</th>
-                    <th>AMNT</th>
-                    <th>Code</th>
-                    <th>From/To Blank Numbers</th>
-                    <th>AMNT</th>
-                    <th>Code</th>
-                    <th>Assigned (From/To)</th>
-                    <th>AMNT</th>
-                    <th>Used (From/To)</th>
-                    <th>AMNT</th>
-                    <th>From/To</th>
-                    <th>AMNT</th>
-                    <th>Code</th>
-                    <th>From/To</th>
-                    <th>AMNT</th>
-                </tr>
-                {displayData()}
-            </table>
-            <button type="button" class="small-button-right">Done</button>
-        </div>
+        {body()}
         </body>
     );
 }

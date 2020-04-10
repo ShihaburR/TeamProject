@@ -7,9 +7,10 @@ import GenerateReportPeriod from './components/generateReportPeriod';
 function AdvisorReport(props) {
     const [advisorReport, SetAdvisorReport] = useState('');
     const [totalAgents, setTotalAgents] = useState(0);
-    const [totalFareBaseLocal, setTotalFareBaseLocal] = useState(0);
-    const [totalFareBaseUSD, setTotalFareBaseUSD] = useState(0);
-    const [totalTax, setTotalTax] = useState(0);
+    const [totalFareAmount, setTotalFareAmount] = useState(0);
+    const [totalLZ, setTotalLZ] = useState(0);
+    const [totalOTHS, setTotalOTHS] = useState(0);
+    const [totalTTLDcmntAmount, setTotalTTLDcmntAmount] = useState(0);
     const [totalCash, setTotalCash] = useState(0);
     const [totalCardUSD, setTotalCardUSD] = useState(0);
     const [totalCardLocal, setTotalCardLocal] = useState(0);
@@ -21,8 +22,8 @@ function AdvisorReport(props) {
     const [bankRemittence, setBankRemittence] = useState(0);
     const [periodSet, setPeriodSet] = useState(false);
 
-    const getAdvisorReportData = () => {
-        axios.get('http://localhost:5000/AdvisorReport')
+    const getAdvisorReportData = (start, end) => {
+        axios.get('http://localhost:5000/advisorReport', {params: {start: start, end: end}})
             .then(response => {
                 console.log(response.data);
                 SetAdvisorReport(response.data);
@@ -36,15 +37,16 @@ function AdvisorReport(props) {
         if (Array.isArray(advisorReport) && advisorReport.length > 0){
             for (let i = 0; i < advisorReport.length; i++) {
                 setTotalAgents(totalAgents + 1);
-                setTotalFareBaseLocal(totalFareBaseLocal + advisorReport.fareBaseLocal);
-                setTotalFareBaseUSD(totalFareBaseUSD + advisorReport.fareBaseUSD);
-                setTotalTax(totalTax + advisorReport.tax);
-                setTotalCash(totalCash + advisorReport.cash);
-                setTotalCardUSD(totalCardUSD + advisorReport.cardUSD);
-                setTotalCardLocal(totalCardLocal + advisorReport.cardLocal);
-                setTotalOfAmountPaid(totalOfAmountPaid + advisorReport.totalAmountPaid);
-                setTotalCommissionableAmount(totalCommissionableAmount + advisorReport.totalCommissionableAmount);
-                setTotalCommission(totalCommission + advisorReport.commission);
+                setTotalFareAmount(totalFareAmount + advisorReport[i].fareAmount);
+                setTotalLZ(totalLZ + advisorReport[i].lz);
+                setTotalOTHS(totalOTHS + advisorReport[i].oths);
+                setTotalTTLDcmntAmount(totalTTLDcmntAmount + advisorReport[i].totalDocumentAmount)
+                setTotalCash(totalCash + advisorReport[i].cash);
+                setTotalCardUSD(totalCardUSD + advisorReport[i].cardUSD);
+                setTotalCardLocal(totalCardLocal + advisorReport[i].cardLocal);
+                setTotalOfAmountPaid(totalOfAmountPaid + advisorReport[i].totalAmountPaid);
+                setTotalCommissionableAmount(totalCommissionableAmount + advisorReport[i].commissionableAmount);
+                setTotalCommission(totalCommission + advisorReport[i].commission);
                 setNetAmount4AgentsDebits(totalCommissionableAmount - totalCommission);
                 setBankRemittence(totalOfAmountPaid - totalCommission);
             }
@@ -64,12 +66,11 @@ function AdvisorReport(props) {
                         <tr>
                             <th>Advisor Number</th>
                             <th>DOC NMBRS ACPNS</th>
-                            <th>Fare Amount (Local)</th>
-                            <th>Fare Amount (USD)</th>
+                            <th>Fare Amount</th>
                             <th>LZ</th>
                             <th>OTHS</th>
+                            <th>Total Document's Amount</th>
                             <th>Cash</th>
-                            <th>Card Number</th>
                             <th>Card (USD)</th>
                             <th>Card (Local)</th>
                             <th>Total Amount Paid</th>
@@ -81,12 +82,11 @@ function AdvisorReport(props) {
                             <tr key={advisorReport.indexOf(r)} id={advisorReport.indexOf(r)}>
                                 <td>{r.advisorNum}</td>
                                 <td>{r.docNumACPNS}</td>
-                                <td>{r.fareBaseLocal}</td>
-                                <td>{r.fareBaseUSD}</td>
+                                <td>{r.fareAmount}</td>
                                 <td>{r.lz}</td>
                                 <td>{r.oths}</td>
+                                <td>{r.totalDocumentAmount}</td>
                                 <td>{r.cash}</td>
-                                <td>{r.cardNum}</td>
                                 <td>{r.cardUSD}</td>
                                 <td>{r.cardLocal}</td>
                                 <td>{r.totalAmountPaid}</td>
@@ -100,14 +100,15 @@ function AdvisorReport(props) {
                     {sortSums()}
                     <table>
                         <th>Total Agents</th>
-                        <th>Total Fare Base (Local)</th>
-                        <th>Total Fare Base (USD)</th>
-                        <th>Total Tax</th>
+                        <th>Total Fare Amount</th>
+                        <th>Total LZ</th>
+                        <th>Total OTHS</th>
+                        <th>Total TTL Document's Amount</th>
                         <th>Total Cash</th>
                         <th>Total Card (USD)</th>
                         <th>Total Card (Local)</th>
                         <th>Total of Amount Paid</th>
-                        <th>Total Commissionable Amount</th>
+                        <th>Total Commissionable Amoun t</th>
                         <th>Total Commission</th>
                         <th>Total Non Assesable Amount</th>
                         <th>Net Amount's for Agent Debits</th>
@@ -115,9 +116,9 @@ function AdvisorReport(props) {
 
                         <tr>
                             <td>{totalAgents}</td>
-                            <td>{totalFareBaseLocal}</td>
-                            <td>{totalFareBaseUSD}</td>
-                            <td>{totalTax}</td>
+                            <td>{totalFareAmount}</td>
+                            <td>{totalLZ}</td>
+                            <td>{totalOTHS}</td>
                             <td>{totalCash}</td>
                             <td>{totalCardUSD}</td>
                             <td>{totalCardLocal}</td>

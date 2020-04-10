@@ -20,8 +20,8 @@ function IndividualReport(props) {
     const [bankRemittence, setBankRemittence] = useState(0);
     const [periodSet, setPeriodSet] = useState(false);
 
-    const getIndividualReportData = () => {
-        axios.get('http://localhost:5000/individualReport')
+    const getIndividualReportData = (start, end) => {
+        axios.get('http://localhost:5000/individualReport', {params: {start: start, end: end}})
             .then(response => {
                 console.log(response.data);
                 SetIndividualReport(response.data);
@@ -39,9 +39,9 @@ function IndividualReport(props) {
                 setTotalFareBaseLocal(totalFareBaseLocal + individualReport.amount);
                 setTotalFareBaseUSD(totalFareBaseUSD + individualReport.amountUSD);
                 setTotalTax(totalTax + individualReport.localTax);
-                setTotalCash(totalCash + individualReport.CASH);
-                setTotalCardUSD(totalCardUSD + individualReport.USD);
-                setTotalCardLocal(totalCardLocal + individualReport.BGL);
+                setTotalCash(totalCash + individualReport.cash);
+                setTotalCardUSD(totalCardUSD + individualReport.usd);
+                setTotalCardLocal(totalCardLocal + individualReport.bgl);
                 setTotalAmountPaid(totalAmountPaid + individualReport.totalAmountPaid);
                 setTotalCommissionableAmount(totalCommissionableAmount + individualReport.commissionable);
                 setTotalCommissions(totalCommissions + (individualReport.commissionable * individualReport.commissionRate/100));
@@ -74,16 +74,16 @@ function IndividualReport(props) {
                         </tr>
                         {Array.isArray(individualReport) && individualReport.length > 0 && individualReport.map(r => (
                             <tr key={individualReport.indexOf(r)} id={individualReport.indexOf(r)}>
-                                <td>{r.originalIssueNum}</td>
-                                <td>{r.fareBaseLocal}</td>
-                                <td>{r.fareBaseUSD}</td>
+                                <td>{r.saleID}</td>
+                                <td>{r.amount}</td>
+                                <td>{r.amountUSD}</td>
                                 <td>{r.cash}</td>
-                                <td>{r.cardUSD}</td>
-                                <td>{r.cardLocal}</td>
-                                <td>{r.tax}</td>
+                                <td>{r.usd}</td>
+                                <td>{r.bgl}</td>
+                                <td>{r.localTax}</td>
                                 <td>{r.totalAmountPaid}</td>
-                                <td>{r.commissionableAmount}</td>
-                                <td>{r.commission}</td>
+                                <td>{r.commissionable}</td>
+                                <td>{r.commissionRate}</td>
                             </tr>
                         ))}
                     </table>

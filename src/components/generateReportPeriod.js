@@ -9,7 +9,7 @@ function GenerateReportPeriod(props) {
 
     const handleSubmit = () => {
         console.log(beginning + " " + end);
-        props.getData();
+        props.getData(beginning, end);
         props.setPeriod(true);
     }
 
