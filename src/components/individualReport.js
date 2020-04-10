@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Header from './header';
 import { NavLink } from 'react-router-dom';
 import axios from 'axios';
+import GenerateReportPeriod from './components/generateReportPeriod';
 
 function IndividualReport(props) {
     const [individualReport, SetIndividualReport] = useState('');
@@ -24,14 +25,15 @@ function IndividualReport(props) {
 
     const getIndividualReportData = () => {
         axios.get('http://localhost:5000/individualReport')
-          .then(response => {
-            console.log(response.data);
-            SetIndividualReport(response.data);
-          })
-          .catch(function(error) {
-            console.log(error);
-          });
-      }
+            .then(response => {
+                console.log(response.data);
+                SetIndividualReport(response.data);
+            })
+            .catch(function(error) {
+                    console.log(error);
+                }
+            );
+    }
 
     const setSums = () => {
         if (Array.isArray(individualReport) && individualReport.length > 0) {
@@ -45,49 +47,49 @@ function IndividualReport(props) {
                 setTotalCardLocal(totalCardLocal + individualReport.cardLocal);
                 setTotalAmountPaid(totalAmountPaid + individualReport.totalAmountPaid);
                 setTotalCommissionableAmount(totalCommissionableAmount + individualReport.totalCommissionableAmount);
-                setTotalCommissions(totalCommissions + individualReport.commission);
-                setNetAmounts4AgentDebits(totalFareBaseLocal - totalCommissions);
-                setBankRemittence(totalFareBaseLocal - totalCommissions);
+                setTotalCommissions(totalCommissions + (individualReport.));
+                setNetAmounts4AgentDebits(totalCommissionableAmount - totalCommissions);
+                setBankRemittence(totalAmountPaid - totalCommissions);
             }
         }
     }
 
-  return (
-    <body class="indexbody">
+    return (
+        <body class="indexbody">
         <Header staffType={props.staffType} staffName={props.staffName} staffID={props.staffID}/>
 
         <div id="mainmenu">
             <NavLink to="/mainMenu"><button type="button" class="page-button">Individual Sales Report</button></NavLink>
         </div>
         <div id="tablecontainer">
-        <table>
-            <tr>
-                <th>Original Issue Number</th>
-                <th>Fare Base (Local)</th>
-                <th>Fare Base (USD)</th>
-                <th>Cash (Local)</th>
-                <th>Credit Card (USD)</th>
-                <th>Credit Card (Local)</th>
-                <th>Tax</th>
-                <th>Total Amount Paid</th>
-                <th>Commissionable Amount</th>
-                <th>Commission</th>
-            </tr>
-            {Array.isArray(individualReport) && individualReport.length > 0 && individualReport.map(r => (
-                <tr key={individualReport.indexOf(r)} id={individualReport.indexOf(r)}>
-                    <td>{r.originalIssueNum}</td>
-                    <td>{r.fareBaseLocal}</td>
-                    <td>{r.fareBaseUSD}</td>
-                    <td>{r.cash}</td>
-                    <td>{r.cardUSD}</td>
-                    <td>{r.cardLocal}</td>
-                    <td>{r.tax}</td>
-                    <td>{r.totalAmountPaid}</td>
-                    <td>{r.commissionableAmount}</td>
-                    <td>{r.commission}</td>
+            <table>
+                <tr>
+                    <th>Original Issue Number</th>
+                    <th>Fare Base (Local)</th>
+                    <th>Fare Base (USD)</th>
+                    <th>Cash (Local)</th>
+                    <th>Credit Card (USD)</th>
+                    <th>Credit Card (Local)</th>
+                    <th>Tax</th>
+                    <th>Total Amount Paid</th>
+                    <th>Commissionable Amount</th>
+                    <th>Commission</th>
                 </tr>
-          ))}
-          </table>
+                {Array.isArray(individualReport) && individualReport.length > 0 && individualReport.map(r => (
+                    <tr key={individualReport.indexOf(r)} id={individualReport.indexOf(r)}>
+                        <td>{r.originalIssueNum}</td>
+                        <td>{r.fareBaseLocal}</td>
+                        <td>{r.fareBaseUSD}</td>
+                        <td>{r.cash}</td>
+                        <td>{r.cardUSD}</td>
+                        <td>{r.cardLocal}</td>
+                        <td>{r.tax}</td>
+                        <td>{r.totalAmountPaid}</td>
+                        <td>{r.commissionableAmount}</td>
+                        <td>{r.commission}</td>
+                    </tr>
+                ))}
+            </table>
             <br />
             <table>
                 <th>Number of tickets</th>
@@ -116,12 +118,12 @@ function IndividualReport(props) {
                     <td>{totalCommissions}</td>
                     <td>{netAmounts4AgentDebits}</td>
                     <td>{bankRemittence}</td>
-            </tr>
+                </tr>
             </table>
             <button type="button" class="small-button-right">Done</button>
         </div>
-    </body>
-  );
+        </body>
+    );
 }
 
 export default IndividualReport;

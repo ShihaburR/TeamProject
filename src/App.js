@@ -24,7 +24,7 @@ import SetCommissionRate from './components/Commissions';
 import SetExchangeRate from './components/ExchangeRates';
 import ViewRefund from './components/viewRefund';
 import GenerateReportManager from './components/generateReportManager';
-import GenerateReportPeriod from './components/generateReportPeriod';
+//import GenerateReportPeriod from './components/generateReportPeriod';
 import GenerateReportStaff from './components/generateReportStaff';
 import GenerateReportType from './components/generateReportType';
 import ViewStaff from './components/viewStaff';
@@ -102,9 +102,9 @@ function App() {
             <Route exact path="/generateReportManager">
               <GenerateReportManager staffType={staffType} staffName={staffName} staffID={staffID}/>
             </Route>
-            <Route exact path="/generateReportPeriod">
-              <GenerateReportPeriod staffType={staffType} staffName={staffName} staffID={staffID}/>
-            </Route>
+                                                                                                        {/*<Route exact path="/generateReportPeriod">
+                                                                                                          <GenerateReportPeriod staffType={staffType} staffName={staffName} staffID={staffID}/>
+                                                                                                        </Route>*/}
             <Route exact path="/generateReportStaff">
               <GenerateReportStaff staffType={staffType} staffName={staffName} staffID={staffID}/>
             </Route>

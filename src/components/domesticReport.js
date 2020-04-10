@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Header from './header';
 import { NavLink } from 'react-router-dom';
 import axios from 'axios';
+import GenerateReportPeriod from './components/generateReportPeriod';
 
 function DomesticReport(props) {
     const [domesticReport, SetDomesticReport] = useState('');
@@ -31,7 +32,7 @@ function DomesticReport(props) {
             .catch(function(error) {
                 console.log(error);
             });
-        }
+    }
 
     const setSums = () => {
         if (Array.isArray(domesticReport) && domesticReport.length > 0){
@@ -43,24 +44,24 @@ function DomesticReport(props) {
                 setTotalCash(totalCash + domesticReport.cash);
                 setTotalCardUSD(totalCardUSD + domesticReport.cardUSD);
                 setTotalCardLocal(totalCardLocal + domesticReport.cardLocal);
-                setTotalAmountPaid(totalAmountPaid + (domesticReport.fareBaseLocal+domesticReport.tax));
+                setTotalAmountPaid(totalAmountPaid + (domesticReport.fareBaseLocal + domesticReport.tax));
                 setTotalCommissionableAmount(totalCommissionableAmount + domesticReport.totalCommissionableAmount);
                 setTotalCommssions(totalCommissions + domesticReport.commission);
                 setNetAmounts4AgentDebits(totalFareBaseLocal - totalCommissions);
-                setBankRemittence(totalAmountPaid + totalCommissions);
+                setBankRemittence(totalAmountPaid - totalCommissions);
             }
         }
     }
 
-  return (
-    <body>
+    return (
+        <body>
         <Header staffType={props.staffType} staffName={props.staffName} staffID={props.staffID}/>
 
         <div id="mainmenu">
             <NavLink to="/mainMenu"><button type="button" class="page-button">Domestic Sales Report</button></NavLink>
         </div>
         <div id="tablecontainer">
-        <table>
+            <table>
                 <tr>
                     <th>AGNT Number</th>
                     <th>USD</th>
@@ -76,19 +77,19 @@ function DomesticReport(props) {
                 </tr>
                 {Array.isArray(domesticReport) && domesticReport.length > 0 && domesticReport.map(r => (
                     <tr key={domesticReport.indexOf(r)} id={domesticReport.indexOf(r)}>
-                    <td>{r.agntNumber}</td>
-                    <td>{r.usd}</td>
-                    <td>{r.fareBaseUSD}</td>
-                    <td>{r.fareBaseLocal}</td>
-                    <td>{r.tax}</td>
-                    <td>{r.cash}</td>
-                    <td>{r.cardUSD}</td>
-                    <td>{r.cardLocal}</td>
-                    <td>{r.fareBaseLocal+r.tax}</td>
-                    <td>{r.commissionableAmount}</td>
-                    <td>{r.commission}</td>
+                        <td>{r.agntNumber}</td>
+                        <td>{r.usd}</td>
+                        <td>{r.fareBaseUSD}</td>
+                        <td>{r.fareBaseLocal}</td>
+                        <td>{r.tax}</td>
+                        <td>{r.cash}</td>
+                        <td>{r.cardUSD}</td>
+                        <td>{r.cardLocal}</td>
+                        <td>{r.fareBaseLocal+r.tax}</td>
+                        <td>{r.commissionableAmount}</td>
+                        <td>{r.commission}</td>
                     </tr>
-            ))}
+                ))}
             </table>
             <br />
             <table>
@@ -118,18 +119,12 @@ function DomesticReport(props) {
                     <td>{totalCommissions}</td>
                     <td>{netAmounts4AgentDebits}</td>
                     <td>{bankRemittence}</td>
-            </tr>
+                </tr>
             </table>
             <button type="button" class="small-button-right">Done</button>
         </div>
-    </body>
-  );
+        </body>
+    );
 }
 
 export default DomesticReport;
-
-/*
-<Route exact path="/domesticReport">
-    <DomesticReport staffType={staffType} staffName="Placeholder Name" staffID="Placeholder ID"/>
-</Route>
-*/

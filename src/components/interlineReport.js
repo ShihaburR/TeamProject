@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Header from './header';
 import { NavLink } from 'react-router-dom';
 import axios from 'axios';
+import GenerateReportPeriod from './components/generateReportPeriod';
 
 function InterlineReport(props) {
     const [interlineReport, setInterlineReport] = useState('');
@@ -27,39 +28,39 @@ function InterlineReport(props) {
 
     const getInterlineReportData = () => {
         axios.get('http://localhost:5000/interlineReport')
-          .then(response => {
-            console.log(response.data);
-            setInterlineReport(response.data);
-          })
-          .catch(function(error) {
-            console.log(error);
-          });
-      }
+            .then(response => {
+                console.log(response.data);
+                setInterlineReport(response.data);
+            })
+            .catch(function(error) {
+                console.log(error);
+            });
+    }
 
-const sortSums = () => {
-    if (Array.isArray(interlineReport) && interlineReport.length > 0) {
-        for (let i = 0; i < interlineReport.length; i++) {
-            setNumOfTickets(numOfTickets + 1);
-            setTotalCash(totalCash + interlineReport.cash);
-            setTotalUSD(totalUSD + interlineReport.usd);
-            setTotalCardUSD(totalCardUSD + interlineReport.cardUSD);
-            setTotalCardLocal(totalCardLocal + interlineReport.cardLocal);
-            setTotalCommissionableAmount(totalCommissionableAmount + interlineReport.totalCommissionableAmount);
-            setTotalCommissions(totalCommissions + interlineReport.commission);
-            setNetAmounts4AgentDebits(totalCommissionableAmount - totalCommissions);
-            setBankRemittence(bankRemittence + interlineReport.bankRemittence);
-            setTotalLocal(totalLocal + interlineReport.Local);
-            setTotalLZ(totalLZ + interlineReport.lz);
-            setTotalOTHS(totalOTHS + interlineReport.others);
-            setTotalOfDCMNT(totalOfDCMNT + interlineReport.totalDcmntAmount);
-            setTotalOfAmounts(totalOfAmounts + interlineReport.totalAmountPaid);
-            setTotalOfNonAssessAmounts(totalOfNonAssessAmounts + interlineReport.nonAssessAmounts);
+    const sortSums = () => {
+        if (Array.isArray(interlineReport) && interlineReport.length > 0) {
+            for (let i = 0; i < interlineReport.length; i++) {
+                setNumOfTickets(numOfTickets + 1);
+                setTotalCash(totalCash + interlineReport.cash);
+                setTotalUSD(totalUSD + interlineReport.usd);
+                setTotalCardUSD(totalCardUSD + interlineReport.cardUSD);
+                setTotalCardLocal(totalCardLocal + interlineReport.cardLocal);
+                setTotalCommissionableAmount(totalCommissionableAmount + interlineReport.totalCommissionableAmount);
+                setTotalCommissions(totalCommissions + interlineReport.commission);
+                setNetAmounts4AgentDebits(totalCommissionableAmount - totalCommissions);
+                setBankRemittence(bankRemittence + interlineReport.bankRemittence);
+                setTotalLocal(totalLocal + interlineReport.Local);
+                setTotalLZ(totalLZ + interlineReport.lz);
+                setTotalOTHS(totalOTHS + interlineReport.others);
+                setTotalOfDCMNT(totalOfDCMNT + interlineReport.totalDcmntAmount);
+                setTotalOfAmounts(totalOfAmounts + interlineReport.totalAmountPaid);
+                setTotalOfNonAssessAmounts(totalOfNonAssessAmounts + interlineReport.nonAssessAmounts);
+            }
         }
     }
-}
 
-  return (
-    <body class="indexbody">
+    return (
+        <body class="indexbody">
         <Header staffType={props.staffType} staffName={props.staffName} staffID={props.staffID}/>
         <div id="mainmenu">
             <NavLink to="/mainMenu"><button type="button" class="page-button">Interline Sales Report</button></NavLink>
@@ -85,25 +86,25 @@ const sortSums = () => {
                     <th>Non Assess Amounts</th>
                 </tr>
                 {Array.isArray(interlineReport) && interlineReport.length > 0 && interlineReport.map(r => (
-                <tr key={interlineReport.indexOf(r)} id={interlineReport.indexOf(r)}>
-                    <td>{r.originalIssueNum}</td>
-                    <td>{r.usd}</td>
-                    <td>{r.usdLocal}</td>
-                    <td>{r.Local}</td>
-                    <td>{r.lz}</td>
-                    <td>{r.others}</td>
-                    <td>{r.totalDcmntAmount}</td>
-                    <td>{r.cash}</td>
-                    <td>{r.lc}</td>
-                    <td>{r.fullCCNum}</td>
-                    <td>{r.cardUSD}</td>
-                    <td>{r.cardLocal}</td>
-                    <td>{r.totalAmountPaid}</td>
-                    <td>{r.commissionableAmount}</td>
-                    <td>{r.commission}</td>
-                    <td>{r.nonAssessAmounts}</td>
-                </tr>
-          ))}
+                    <tr key={interlineReport.indexOf(r)} id={interlineReport.indexOf(r)}>
+                        <td>{r.originalIssueNum}</td>
+                        <td>{r.usd}</td>
+                        <td>{r.usdLocal}</td>
+                        <td>{r.Local}</td>
+                        <td>{r.lz}</td>
+                        <td>{r.others}</td>
+                        <td>{r.totalDcmntAmount}</td>
+                        <td>{r.cash}</td>
+                        <td>{r.lc}</td>
+                        <td>{r.fullCCNum}</td>
+                        <td>{r.cardUSD}</td>
+                        <td>{r.cardLocal}</td>
+                        <td>{r.totalAmountPaid}</td>
+                        <td>{r.commissionableAmount}</td>
+                        <td>{r.commission}</td>
+                        <td>{r.nonAssessAmounts}</td>
+                    </tr>
+                ))}
             </table>
             <br />
             {sortSums()}
@@ -151,8 +152,8 @@ const sortSums = () => {
             </table>
             <button type="button" class="small-button-right">Done</button>
         </div>
-    </body>
-  );
+        </body>
+    );
 }
 
 export default InterlineReport;
