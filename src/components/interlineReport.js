@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Header from './header';
 import { NavLink } from 'react-router-dom';
 import axios from 'axios';
-import GenerateReportPeriod from './components/generateReportPeriod';
+import GenerateReportPeriod from './generateReportPeriod';
 
 function InterlineReport(props) {
     const [interlineReport, setInterlineReport] = useState('');
@@ -25,14 +25,17 @@ function InterlineReport(props) {
 
 
     const getInterlineReportData = (start, end) => {
-        axios.get('http://localhost:5000/interlineReport', {params: {start: start, end: end}})
-            .then(response => {
-                console.log(response.data);
-                setInterlineReport(response.data);
-            })
-            .catch(function(error) {
-                console.log(error);
-            });
+        axios.post('http://localhost:5000/interlineReport', {
+          start: start,
+          end: end
+        })
+        .then(response => {
+            console.log(response.data);
+            setInterlineReport(response.data);
+        })
+        .catch(function(error) {
+            console.log(error);
+        });
     }
 
     const sortSums = () => {
@@ -60,7 +63,7 @@ function InterlineReport(props) {
     const body = () => {
         if (!periodSet) {
             return (
-                <GenerateReportPeriod getData={getInterlineReportData()} setPeriod={setPeriodSet}/>
+                <GenerateReportPeriod getData={getInterlineReportData} setPeriod={setPeriodSet}/>
             )
         } else {
             return (

@@ -13,8 +13,8 @@ function GenerateReportType(props) {
         <div id="menubox">
 
             <ul>
-                <li><NavLink to="generateReportPeriod"><button type="button" class="menu-button">Domestic</button></NavLink></li>
-                <li><NavLink to="generateReportPeriod"><button type="button" class="menu-button">Interline</button></NavLink></li>
+                <li><NavLink to="/individualReport"><button type="button" class="menu-button">Domestic</button></NavLink></li>
+                <li><NavLink to="/advisorReport"><button type="button" class="menu-button">Interline</button></NavLink></li>
             </ul>
 
         </div>

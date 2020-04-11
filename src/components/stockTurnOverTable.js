@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import Header from './header';
 import { NavLink } from 'react-router-dom';
 import axios from 'axios';
-import GenerateReportPeriod from './components/generateReportPeriod';
+import GenerateReportPeriod from './generateReportPeriod';
 
 function StockTurnOverReport(props) {
-    const [stockTurnOverReport, SetStockTurnOverReport] = useState('');
+    const [stockTurnOverReport, setStockTurnOverReport] = useState([]);
     const [p1, setP1] = useState(0);
     const [p2, setP2] = useState(0);
     const [agentsNewRecievedBlanks, setAgentsNewRecievedBlanks] = useState([]);
@@ -25,14 +25,14 @@ function StockTurnOverReport(props) {
     }, [])
 
     const getStockTurnOverReportData = (start, end) => {
-        axios.get('http://localhost:5000/stockTurnOverReport', {params: {start: start, end: end}})
-            .then(response => {
-                console.log(response.data);
-                SetStockTurnOverReport(response.data);
-            })
-            .catch(function(error) {
-                console.log(error);
-            });
+        axios.post('http://localhost:5000/stockTurnOverReport', {start: start, end: end})
+        .then(response => {
+            console.log(response.data);
+            setStockTurnOverReport(response.data);
+        })
+        .catch(function(error) {
+            console.log(error);
+        });
     }
 
     // Creates Arrays where for each pair of value marks a range i.e array[0] is the first number in the range and array[1] is the end of the array
@@ -254,7 +254,7 @@ function StockTurnOverReport(props) {
     const body = () => {
         if (!periodSet) {
             return (
-                <GenerateReportPeriod getData={getStockTurnOverReportData()} setPeriod={setPeriodSet}/>
+                <GenerateReportPeriod getData={getStockTurnOverReportData} setPeriod={setPeriodSet}/>
             )
         } else {
             return (

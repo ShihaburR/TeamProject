@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Header from './header';
 import { NavLink } from 'react-router-dom';
 import axios from 'axios';
-import GenerateReportPeriod from './components/generateReportPeriod';
+import GenerateReportPeriod from './generateReportPeriod';
 
 function DomesticReport(props) {
     const [domesticReport, SetDomesticReport] = useState('');
@@ -22,15 +22,15 @@ function DomesticReport(props) {
     const [periodSet, setPeriodSet] = useState(false);
 
     const getDomesticReportData = (start, end) => {
-        axios.get('http://localhost:5000/domesticReport', {params: {start: start, end: end}})
-            .then(response => {
-                console.log(response.data);
-                SetDomesticReport(response.data);
-            })
-            .catch(function(error) {
-                console.log(error);
-            });
-    }
+        axios.post('http://localhost:5000/domesticReport', {start: start, end: end})
+        .then(response => {
+            console.log(response.data);
+            SetDomesticReport(response.data);
+        })
+        .catch(function(error) {
+            console.log(error);
+        });
+      }
 
     const setSums = () => {
         if (Array.isArray(domesticReport) && domesticReport.length > 0){
@@ -55,7 +55,7 @@ function DomesticReport(props) {
     const body = () => {
         if (!periodSet) {
             return (
-                <GenerateReportPeriod getData={getDomesticReportData()} setPeriod={setPeriodSet}/>
+                <GenerateReportPeriod getData={getDomesticReportData} setPeriod={setPeriodSet}/>
             )
         } else {
             return (

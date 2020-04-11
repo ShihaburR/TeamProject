@@ -20,7 +20,7 @@ function AdminMenu() {
               <ul>
                   <li><button type="button" class="menu-button">Backup System</button></li>
                   <li><button type="button" class="menu-button">Restore System</button></li>
-                  <li><NavLink to="/generateReportPeriod"><button type="button" class="menu-button">Generate Report</button></NavLink></li>
+                  <li><NavLink to='/stockTurnOverReport'> <button type="button" class="menu-button">Generate Stock-Turnover Report</button></NavLink></li>
               </ul>
             </div>
         </div>

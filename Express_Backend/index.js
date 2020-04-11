@@ -1161,21 +1161,32 @@ app.post('/searchCustomers', function(request,response) {
   });
 });
 
+app.get('/test', function(request, response) {
+  var get = "SELECT * FROM sales";
+  db.query(get, (error,result) => {
+    response.status(200).send(result);
+  });
+});
+
 //------------------------------------------------------------------------------------------------------------------------
 // individual Report
-app.get('/individualReport', (request, response) => {
+app.post('/individualReport', (request, response) => {
    let individualReport = 'select distinct (Sales.saleID) AS saleID, (Sales.amount) AS amount, ' +
-       '(Sales.amountUSD) AS amountUSD, (SELECT Sales.amount+Sales.localTax where Sales.paymentTypeID=2) AS cash, ' +
+       '(Sales.amountUSD) AS amountUSD, (SELECT Sales.amount+Sales.localTax where Sales.paymentTypeID=1) AS cash, ' +
        '(SELECT ((Sales.amount+Sales.localTax)/ExchangeRate.exchangeRate) where ' +
-       'Sales.paymentTypeID=1) AS usd, (SELECT Sales.amount+Sales.localTax where ' +
-       'Sales.paymentTypeID=1) AS bgl, (Sales.localTax) AS localTax, (SELECT Sales.amount+Sales.localTax) AS ' +
-       'totalAmountPaid, (SELECT Sales.amount) AS commissionable, (sales.commissionRate) AS commissionRate ' +
+       'Sales.paymentTypeID=2) AS usd, (SELECT Sales.amount+Sales.localTax where ' +
+       'Sales.paymentTypeID=2) AS bgl, (Sales.localTax) AS localTax, (SELECT Sales.amount+Sales.localTax) AS ' +
+       'totalAmountPaid, (SELECT Sales.amount) AS commissionable, (sales.commisionRate) AS commissionRate ' +
        'from Sales inner join ExchangeRate, Blank, BlankType, CardDetails, TypeOfPayment where ' +
        'Sales.exchangeRateCode=ExchangeRate.exchangeRateCode and (Sales.transactionDate ' +
-       'BETWEEN ${req.params.start} AND ${req.params.end}) and Sales.blankNumber=Blank.blankNumber and ' +
+       'BETWEEN ? AND ? and Sales.blankNumber=Blank.blankNumber and ' +
        'Blank.blankTypeID=BlankType.blankTypeID and BlankType.blankArea="domestic" and ' +
-       'Sales.paymentTypeID=TypeOfPayment.paymentTypeID order by saleID asc';
-   db.query(individualReport, (error, results) => {
+       'Sales.paymentTypeID=TypeOfPayment.paymentTypeID) order by saleID;';
+   var begin = request.body.start;
+   var end = request.body.end;
+   console.log("Begin Date: " + begin);
+   console.log("End Date: " + end);
+   db.query(individualReport,[begin, end] ,(error, results) => {
       if (error) throw error;
       console.log(results);
       response.status(200).send(results);
@@ -1184,17 +1195,26 @@ app.get('/individualReport', (request, response) => {
 });
 
 // global domestic
-app.get('/domesticReport', (request, response) => {
+app.post('/domesticReport', (request, response) => {
     let finalResults = [];
     let tempArray = [];
+    let ids = [];
     let domesticReportID = 'select distinct (Sales.staffID) AS staffID from Sales inner join Blank,BlankType where ' +
-        '(Sales.transactionDate BETWEEN ${req.params.start} AND ${req.params.end}) and ' +
+        '(Sales.transactionDate BETWEEN ? AND ? and ' +
         'Sales.blankNumber=Blank.blankNumber and Blank.blankTypeID=BlankType.blankTypeID ' +
-        'and BlankType.blankArea="domestic" order by Sales.staffID asc;';
-    db.query(domesticReportID, (error, results) => {
+        'and BlankType.blankArea="domestic") order by Sales.staffID asc;';
+    var begin = request.body.start;
+    var end = request.body.end;
+    db.query(domesticReportID,[begin, end],(error, results) => {
         if (error) throw error;
         console.log(results);
-        results.data.staffID.forEach(() => {
+        var packet = JSON.parse(JSON.stringify(results));
+        var length = Object.keys(packet).length;
+        for(var i = 0; i < length; i++) {
+            let id = packet[i].staffID;
+            ids.push([id]);
+        }
+        console.log("IDs: " + ids);
             let ticketsSold = 0;
             let amount = 0;
             let amountUSD = 0;
@@ -1210,37 +1230,39 @@ app.get('/domesticReport', (request, response) => {
             let domesticReportByID = 'select distinct (Sales.amount) AS amount, (Sales.amountUSD) AS amountUSD, ' +
                 '(Sales.localTax + Sales.otherTax) AS tax, (SELECT ' +
                 'Sales.amount + Sales.localTax + Sales.otherTax) AS totalDocumentAmount, (SELECT ' +
-                'Sales.amount + Sales.localTax + Sales.otherTax where Sales.paymentTypeID=2) AS CASH, ' +
+                'Sales.amount + Sales.localTax + Sales.otherTax where Sales.paymentTypeID=1) AS CASH, ' +
                 '(SELECT ((Sales.amount + Sales.localTax + sales.otherTax)/ExchangeRate.exchangeRate) ' +
-                'where Sales.paymentTypeID=1) AS USD, (SELECT ' +
-                'Sales.amount + Sales.localTax + Sales.otherTax where Sales.paymentTypeID=1) AS BGL, ' +
+                'where Sales.paymentTypeID=2) AS USD, (SELECT ' +
+                'Sales.amount + Sales.localTax + Sales.otherTax where Sales.paymentTypeID=2) AS BGL, ' +
                 '(SELECT Sales.amount + Sales.localTax + Sales.otherTax) AS totalPaidAmount, (SELECT ' +
                 'Sales.amount) AS commissionable, (SELECT Sales.localTax + Sales.otherTax) AS ' +
-                'nonAssessAmounts, (Sales.commissionRate) AS commissionRate ' +
+                'nonAssessAmounts, (Sales.commisionRate) AS commissionRate ' +
                 'from Sales inner join ExchangeRate, Blank, BlankType, CardDetails, TypeOfPayment where ' +
                 'Sales.exchangeRateCode=ExchangeRate.exchangeRateCode and (Sales.transactionDate ' +
-                'BETWEEN ${req.params.start} AND ${req.params.end}) and Sales.blankNumber=Blank.blankNumber and ' +
+                'BETWEEN ? AND ?) and Sales.blankNumber=Blank.blankNumber and ' +
                 'Blank.blankTypeID=BlankType.blankTypeID and BlankType.blankArea="international" and ' +
-                'Sales.paymentTypeID=TypeOfPayment.paymentTypeID and Sales.staffID=${results.data.staffID} order by saleID asc;';
-            db.query(domesticReportByID, (error, tempResults) => {
+                'Sales.paymentTypeID=TypeOfPayment.paymentTypeID and Sales.staffID= ? order by saleID';
+            db.query(domesticReportByID,[begin, end, ids],(error, tempResults) => {
                 if (error) throw error;
                 console.log(tempResults);
-                for (let i = 0; i < tempResults.data.length; i++) {
+                var packet = JSON.parse(JSON.stringify(tempResults));
+                var length = Object.keys(packet).length;
+                for (let i = 0; i < length; i++) {
                     ticketsSold = ticketsSold + 1;
-                    amount = amount + tempResults.data[i].amount;
-                    amountUSD = amountUSD + tempResults.data[i].amountUSD;
-                    tax = tax + tempResults.data[i].tax;
-                    totalDocumentAmount = totalDocumentAmount + tempResults.data[i].totalDocumentAmount;
-                    cash = cash + tempResults.data[i].CASH;
-                    usd = usd + tempResults.data[i].USD;
-                    bgl = bgl + tempResults.data[i].BGL;
-                    totalAmountPaid = totalAmountPaid + tempResults.data[i].totalAmountPaid;
-                    commissionable = commissionable + tempResults.data[i].commissionable;
-                    nonAssessAmounts = nonAssessAmounts + tempResults.data[i].nonAssessAmounts;
-                    commission = commission + (tempResults.data[i].commissionable * tempResults.data[i].commissionRate/100);
+                    amount = amount + packet[i].amount;
+                    amountUSD = amountUSD + packet[i].amountUSD;
+                    tax = tax + packet[i].tax;
+                    totalDocumentAmount = totalDocumentAmount + packet[i].totalDocumentAmount;
+                    cash = cash + packet[i].CASH;
+                    usd = usd + packet[i].USD;
+                    bgl = bgl + packet[i].BGL;
+                    totalAmountPaid = totalAmountPaid + packet[i].totalAmountPaid;
+                    commissionable = commissionable + packet[i].commissionable;
+                    nonAssessAmounts = nonAssessAmounts + packet[i].nonAssessAmounts;
+                    commission = commission + (packet[i].commissionable * packet[i].commissionRate/100);
                 }
                 tempArray = [{
-                    agntNumber: results.data.staffID,
+                    agntNumber: packet[i].staffID,
                     ticketsSold: ticketsSold,
                     fareBaseUSD: amountUSD,
                     fareBaseLocal: amount,
@@ -1253,35 +1275,36 @@ app.get('/domesticReport', (request, response) => {
                     commission: commission
                 }];
                 finalResults = (finalResults.concat(tempResults));
+                console.log(finalResults);
+                response.status(200).send(finalResults);
+                response.end();
             });
         });
-    });
-    console.log(finalResults);
-    response.status(200).send(finalResults);
-    response.end();
 });
 
 // interline individual
-app.get('/interlineReport', (request, response) => {
+app.post('/interlineReport', (request, response) => {
     let interlineReport = 'select distinct ' +
         '(Sales.saleID) AS saleID, (Sales.amountUSD) AS amountUSD, (ExchangeRate.exchangeRate) AS exchangeRate, ' +
         '(Sales.amount) AS amount, (Sales.localTax) AS localTax, ' +
         '(Sales.otherTax) AS otherTax, (SELECT Sales.amount+Sales.localTax + Sales.otherTax) AS ' +
         'totalDocumentAmount, (SELECT Sales.amount + Sales.localTax + Sales.otherTax where ' +
-        'Sales.paymentTypeID=2) AS cash, (SELECT CardDetails.cardNumber from CardDetails where ' +
+        'Sales.paymentTypeID=1) AS cash, (SELECT CardDetails.cardNumber from CardDetails where ' +
         'Sales.cardDetails=CardDetails.CardID) AS cc, (SELECT ' +
         '((Sales.amount + Sales.localTax + sales.otherTax)/ExchangeRate.exchangeRate) where ' +
-        'Sales.paymentTypeID=1) AS usd, (SELECT Sales.amount + Sales.localTax + Sales.otherTax ' +
-        'where Sales.paymentTypeID=1) AS bgl, (SELECT ' +
+        'Sales.paymentTypeID=2) AS usd, (SELECT Sales.amount + Sales.localTax + Sales.otherTax ' +
+        'where Sales.paymentTypeID=2) AS bgl, (SELECT ' +
         'Sales.amount + Sales.localTax + Sales.otherTax) AS totalPaidAmount, (SELECT Sales.amount) ' +
         'AS commissionable, (sales.commisionRate) AS commissionRate, (SELECT Sales.localTax + Sales.otherTax) AS ' +
         'nonAssessAmounts ' +
         'from Sales inner join ExchangeRate, Blank, BlankType, CardDetails, TypeOfPayment where ' +
         'Sales.exchangeRateCode=ExchangeRate.exchangeRateCode and (Sales.transactionDate ' +
-        'BETWEEN ${req.params.start} AND ${req.params.end}) and Sales.blankNumber=Blank.blankNumber and ' +
+        'BETWEEN ? AND ?) and Sales.blankNumber=Blank.blankNumber and ' +
         'Blank.blankTypeID=BlankType.blankTypeID and BlankType.blankArea="international" and ' +
         'Sales.paymentTypeID=TypeOfPayment.paymentTypeID order by saleID asc;';
-    db.query(interlineReport, (error, results) => {
+    var begin = request.body.start;
+    var end = request.body.end;
+    db.query(interlineReport, [begin, end], (error, results) => {
         if (error) throw error;
         console.log(results);
         response.status(200).send(results);
@@ -1290,17 +1313,29 @@ app.get('/interlineReport', (request, response) => {
 });
 
 // interline global
-app.get('/advisorReport', (request, response) => {
+app.post('/advisorReport', (request, response) => {
     let finalResults = [];
     let tempArray = [];
+    let ids = []
     let advisorReportID = 'select distinct (Sales.staffID) AS staffID from Sales inner join Blank,BlankType where ' +
-        '(Sales.transactionDate BETWEEN ${req.params.start} AND ${req.params.end}) and ' +
+        '(Sales.transactionDate BETWEEN ? AND ? and ' +
         'Sales.blankNumber=Blank.blankNumber and Blank.blankTypeID=BlankType.blankTypeID ' +
-        'and BlankType.blankArea="international" order by Sales.staffID asc;';
-    db.query(advisorReportID, (error, results) => {
+        'and BlankType.blankArea="international") order by Sales.staffID asc;';
+    var begin = request.body.start;
+    var end = request.body.end;
+    console.log("Begin " + begin);
+    console.log("End " + end);
+    db.query(advisorReportID, [begin,end] ,(error, results) => {
         if (error) throw error;
-        console.log(results);
-        results.data.staffID.forEach(() => {
+        var packet = JSON.parse(JSON.stringify(results));
+        var length = Object.keys(packet).length;
+        console.log("Staff ID:" + packet[0].staffID);
+        console.log("Length: " + length);
+        for(var i = 0; i < length; i++) {
+            let id = packet[i].staffID;
+            ids.push([id]);
+          }
+          console.log("IDs: " + ids);
             let docNumACPNS = 0;
             let fareAmount = 0;
             let lz = 0;
@@ -1317,7 +1352,7 @@ app.get('/advisorReport', (request, response) => {
             let advisorReportByID = 'select distinct (Sales.staffID) AS staffID, (Sales.amount) AS amount, ' +
                 '(Sales.localTax) AS localTax, (Sales.otherTax) AS otherTax, (SELECT ' +
                 'Sales.amount + Sales.localTax + Sales.otherTax) AS totalDocumentAmount, (SELECT ' +
-                'Sales.amount + Sales.localTax + Sales.otherTax where Sales.paymentTypeID=2) AS cash, ' +
+                'Sales.amount + Sales.localTax + Sales.otherTax where Sales.paymentTypeID=1) AS cash, ' +
                 '(SELECT (Sales.amount+Sales.localTax+Sales.otherTax)/ExchangeRate.exchangeRate where ' +
                 'Sales.paymentTypeID=1) AS usd, (SELECT Sales.amount + Sales.localTax + Sales.otherTax ' +
                 'where Sales.paymentTypeID=1) AS bgl, (SELECT Sales.amount + Sales.localTax + Sales.otherTax) AS totalPaidAmount, ' +
@@ -1325,27 +1360,29 @@ app.get('/advisorReport', (request, response) => {
                 '(Sales.commisionRate) AS commissionRate from Sales inner join ExchangeRate, Blank, BlankType, CardDetails, ' +
                 'TypeOfPayment where Sales.exchangeRateCode=ExchangeRate.exchangeRateCode and ' +
                 'Sales.blankNumber=Blank.blankNumber and Blank.blankTypeID=BlankType.blankTypeID ' +
-                'and BlankType.blankArea="international" and Sales.paymentTypeID=TypeOfPayment.paymentTypeID and Sales.staffID=${results.data.staffID} and ' +
-                '(Sales.transactionDate BETWEEN ${req.params.start} AND ${req.params.end}) order by saleID ;';
-            db.query(advisorReportByID, (error, tempResults) => {
+                'and BlankType.blankArea="international" and Sales.paymentTypeID=TypeOfPayment.paymentTypeID and Sales.staffID IN (?) and ' +
+                '(Sales.transactionDate BETWEEN ? AND ?) order by saleID ;';
+            db.query(advisorReportByID,[ids,begin, end] ,(error, tempResults) => {
                 if (error) throw error;
                 console.log(tempResults);
-                for (let i = 0; i < tempResults.data.length; i++) {
+                var packet = JSON.parse(JSON.stringify(tempResults));
+                var length = Object.keys(packet).length;
+                for (let i = 0; i < length; i++) {
                     docNumACPNS = docNumACPNS + 1;
-                    fareAmount = fareAmount + tempResults.data[i].amount;
-                    lz = lz + tempResults.data[i].localTax;
-                    oths = oths + tempResults.data[i].otherTax;
-                    totalDocumentAmount = totalDocumentAmount + tempResults.data[i].totalDocumentAmount;
-                    cash = cash + tempResults.data[i].cash;
-                    cardUSD = cardUSD + tempResults.data[i].usd;
-                    cardLocal = cardLocal + tempResults.data[i].bgl;
-                    totalAmountPaid = totalAmountPaid + tempResults.data[i].totalPaidAmount;
-                    commissionableAmount = commissionableAmount + tempResults.data[i].commissionable;
-                    commission = commission + (tempResults.data[i].commissionableAmount * tempResults.data[i].commissionRate/100);
-                    nonAssessableAmounts = nonAssessableAmounts + tempResults.data[i].nonAssessAmount;
+                    fareAmount = fareAmount + packet[i].amount;
+                    lz = lz + packet[i].localTax;
+                    oths = oths + packet[i].otherTax;
+                    totalDocumentAmount = totalDocumentAmount + packet[i].totalDocumentAmount;
+                    cash = cash + packet[i].cash;
+                    cardUSD = cardUSD + packet[i].usd;
+                    cardLocal = cardLocal + packet[i].bgl;
+                    totalAmountPaid = totalAmountPaid + packet[i].totalPaidAmount;
+                    commissionableAmount = commissionableAmount + packet[i].commissionable;
+                    commission = commission + (packet[i].commissionableAmount * packet[i].commissionRate/100);
+                    nonAssessableAmounts = nonAssessableAmounts + packet[i].nonAssessAmount;
                 }
                 tempArray = [{
-                    advisorNum: results.data.staffID,
+                    advisorNum: packet[i].staffID,
                     docNumACPNS: docNumACPNS,
                     fareAmount: fareAmount,
                     lz: lz,
@@ -1358,70 +1395,72 @@ app.get('/advisorReport', (request, response) => {
                     commission: commission,
                     nonAssessableAmounts: nonAssessableAmounts
                 }];
-                finalResults = (finalResults.concat(tempResults));
+                finalResults.push(finalResults.concat(tempResults));
+                console.log("Final Results: " + finalResults);
+                response.send(finalResults).status(200);
+                response.end();
             });
-        });
     });
-    console.log(finalResults);
-    response.status(200).send(finalResults);
-    response.end();
 });
 
 // stock turnover report
-app.get('/stockTurnoverReport', (request, response) => {
-    let agntNewRBlanksResult = null;
-    let subAgntNewABlanksResults = null;
-    let subAgntABlanksResults = null;
-    let subAgntUBlanksResults = null;
-    let agentsAmountsResults = null;
-    let subAgentsAmountsResults = null;
+app.post('/stockTurnoverReport', (request, response) => {
+    let agntNewRBlanksResult = [];
+    let subAgntNewABlanksResults = [];
+    let subAgntABlanksResults = [];
+    let subAgntUBlanksResults = [];
+    let agentsAmountsResults = [];
+    let subAgentsAmountsResults = [];
+    var begin = request.body.start;
+    var end = request.body.end;
 
     let agntNewRBlanksSQL = 'select (Blank.blankNumber) AS blank ' +
-        'FROM Blank where (Blank.recievedDate BETWEEN ${req.params.start} AND ${req.params.end}) order BY Blank.blankNumber asc;';
-    db.query(agntNewRBlanksSQL, (error, results) => {
+        'FROM Blank where (Blank.recievedDate BETWEEN ? AND ?) order BY Blank.blankNumber asc;';
+    db.query(agntNewRBlanksSQL,[begin, end], (error, results) => {
         if (error) throw error;
-        console.log(results);
-        agntNewRBlanksResult = results;
+        //console.log(results);
+        agntNewRBlanksResult = agntNewRBlanksResult.concat(results) ;
     });
     let subAgntNewABlanksSQL = 'select  (BlankAllocation.staffID) AS code, (Blank.blankNumber ) AS blank ' +
         'FROM   Blank inner join BlankAllocation where Blank.blankNumber=BlankAllocation.blankNumber and ' +
-        '(Blank.recievedDate BETWEEN ${req.params.start} AND ${req.params.end}) and Blank.statusID=2 order by Blank.blankNumber asc;';
-    db.query(subAgntNewABlanksSQL, (error, results) => {
+        '(Blank.recievedDate BETWEEN ? AND ?) and Blank.statusID=2 order by Blank.blankNumber asc;';
+    db.query(subAgntNewABlanksSQL, [begin, end], (error, results) => {
         if (error) throw error;
         console.log(results);
         subAgntNewABlanksResults = results;
     });
     let subAgntABlanksSQL = 'select (BlankAllocation.staffID) AS code, (Blank.blankNumber) AS blank ' +
         'FROM Blank inner join BlankAllocation where Blank.blankNumber=BlankAllocation.blankNumber and ' +
-        'blank.statusID=2 and (Blank.assignedDate BETWEEN ${req.params.start} AND ${req.params.end}) order by Blank.blankNumber asc;';
-    db.query(subAgntABlanksSQL, (error, results) => {
+        'blank.statusID=2 and (Blank.assignedDate BETWEEN ? AND ?) order by Blank.blankNumber asc;';
+    db.query(subAgntABlanksSQL, [begin, end], (error, results) => {
         if (error) throw error;
         console.log(results);
-        subAgntABlanksResults = results;
+        subAgntABlanksResults = subAgntABlanksResults.concat(results);
     });
     let subAgntUBlanksSQL = 'select (Blank.blankNumber) AS blank FROM Blank inner join Sales  where ' +
-        '(Sales.transactionDate BETWEEN ${req.params.start} AND ${req.params.end}) and Blank.statusID=1 and ' +
+        '(Sales.transactionDate BETWEEN ? AND ?) and Blank.statusID=1 and ' +
         'Blank.blankNumber=Sales.blankNumber order by Blank.blankNumber asc;';
-    db.query(subAgntUBlanksSQL, (error, results) => {
+    db.query(subAgntUBlanksSQL, [begin, end], (error, results) => {
         if (error) throw error;
         console.log(results);
-        subAgntUBlanksResults = results;
+        subAgntUBlanksResults = subAgntUBlanksResults.concat(results);
     });
     let agentsAmountsSQL = 'select (Blank.blankNumber) AS blank ' +
-        'FROM Blank where (Blank.recievedDate > ${req.params.start})  and Blank.statusID=2 or ' +
+        'FROM Blank where (Blank.recievedDate > ?)  and Blank.statusID=2 or ' +
         'Blank.statusID=3 order BY Blank.blankNumber asc;';
-    db.query(agentsAmountsSQL, (error, results) => {
+    db.query(agentsAmountsSQL, [begin], (error, results) => {
         if (error) throw error;
         console.log(results);
-        agentsAmountsResults = results;
+        agentsAmountsResults = agentsAmountsResults.concat(results);
     });
     let subAgentsAmountsSQL = 'select  distinct (BlankAllocation.staffID) AS code, (Blank.blankNumber) AS blank ' +
         'FROM Blank inner join BlankAllocation, Sales where Blank.blankNumber=BlankAllocation.blankNumber and ' +
-        '(Blank.assignedDate < ${req.params.end}) and  Blank.statusID=2 order by Blank.blankNumber asc;';
-    db.query(subAgentsAmountsSQL, (error, results) => {
+        '(Blank.assignedDate < ?) and  Blank.statusID=2 order by Blank.blankNumber asc;';
+    db.query(subAgentsAmountsSQL, [end], (error, results) => {
         if (error) throw error;
         console.log(results);
-        subAgentsAmountsResults = results;
+        subAgentsAmountsResults = subAgentsAmountsResults.concat(results);
+        console.log("Sub: " + subAgentsAmountsResults);
     });
     let finalData = [
         {

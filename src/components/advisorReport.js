@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Header from './header';
 import { NavLink } from 'react-router-dom';
 import axios from 'axios';
-import GenerateReportPeriod from './components/generateReportPeriod';
+import GenerateReportPeriod from './generateReportPeriod';
 
 function AdvisorReport(props) {
     const [advisorReport, SetAdvisorReport] = useState('');
@@ -22,16 +22,23 @@ function AdvisorReport(props) {
     const [bankRemittence, setBankRemittence] = useState(0);
     const [periodSet, setPeriodSet] = useState(false);
 
+    useEffect(() => {
+      console.log(periodSet);
+      if(periodSet){
+        getAdvisorReportData();
+      }
+    }, [])
+
     const getAdvisorReportData = (start, end) => {
-        axios.get('http://localhost:5000/advisorReport', {params: {start: start, end: end}})
-            .then(response => {
-                console.log(response.data);
-                SetAdvisorReport(response.data);
-            })
-            .catch(function(error) {
-                console.log(error);
-            });
-    }
+        axios.post('http://localhost:5000/advisorReport', {start: start, end: end})
+        .then(response => {
+            console.log(response.data);
+            SetAdvisorReport(response.data);
+        })
+        .catch(function(error) {
+            console.log(error);
+        });
+      }
 
     const sortSums = () => {
         if (Array.isArray(advisorReport) && advisorReport.length > 0){
@@ -57,13 +64,13 @@ function AdvisorReport(props) {
     const body = () => {
         if (!periodSet) {
             return (
-                <GenerateReportPeriod getData={getAdvisorReportData()} setPeriod={setPeriodSet}/>
+                <GenerateReportPeriod getData={getAdvisorReportData} setPeriod={setPeriodSet}/>
             )
-        } else {
+        } else if(periodSet) {
             return (
-                <div id="tablecontainer">
-                    <table>
-                        <tr>
+                <div id="tablecontainerrefund">
+                    <table className="striped responsive-table">
+                        <thead>
                             <th>Advisor Number</th>
                             <th>DOC NMBRS ACPNS</th>
                             <th>Fare Amount</th>
@@ -77,9 +84,10 @@ function AdvisorReport(props) {
                             <th>Commissionable Amounts</th>
                             <th>Commission</th>
                             <th>Non Assessable Amounts</th>
-                        </tr>
+                        </thead>
+                        <tbody>
                         {Array.isArray(advisorReport) && advisorReport.length > 0 && advisorReport.map(r => (
-                            <tr key={advisorReport.indexOf(r)} id={advisorReport.indexOf(r)}>
+                            <tr key={r.advisorNum} id={r.advisorNum}>
                                 <td>{r.advisorNum}</td>
                                 <td>{r.docNumACPNS}</td>
                                 <td>{r.fareAmount}</td>
@@ -95,6 +103,7 @@ function AdvisorReport(props) {
                                 <td>{r.nonAssessableAmounts}</td>
                             </tr>
                         ))}
+                        </tbody>
                     </table>
                     <br/>
                     {sortSums()}

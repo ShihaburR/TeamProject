@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Header from './header';
 import { NavLink } from 'react-router-dom';
 import axios from 'axios';
-import GenerateReportPeriod from './components/generateReportPeriod';
+import GenerateReportPeriod from './generateReportPeriod';
 
 function IndividualReport(props) {
     const [individualReport, SetIndividualReport] = useState('');
@@ -21,10 +21,13 @@ function IndividualReport(props) {
     const [periodSet, setPeriodSet] = useState(false);
 
     const getIndividualReportData = (start, end) => {
-        axios.get('http://localhost:5000/individualReport', {params: {start: start, end: end}})
+
+        axios.post('http://localhost:5000/individualReport', {start: start, end: end})
             .then(response => {
+              if(response.status === 200){
                 console.log(response.data);
-                SetIndividualReport(response.data);
+                SetIndividualReport("hello");
+              }
             })
             .catch(function(error) {
                     console.log(error);
@@ -54,7 +57,8 @@ function IndividualReport(props) {
     const body = () => {
         if (!periodSet) {
             return (
-                <GenerateReportPeriod getData={getIndividualReportData()} setPeriod={setPeriodSet}/>
+                <GenerateReportPeriod getData={getIndividualReportData} setPeriod={setPeriodSet}/>
+
             )
         } else {
             return (
