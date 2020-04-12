@@ -29,30 +29,32 @@ function AdvisorReport(props) {
           console.log("hello");
             SetAdvisorReport(response.data);
             console.log(response.data);
-            sortSums();
+            sortSums(response.data);
         })
         .catch(function(error) {
             console.log(error);
         });
       }
 
-    const sortSums = () => {
-        if (advisorReport.length > 0){
-            for (let i = 0; i < advisorReport.length; i++) {
-                setTotalAgents(totalAgents + 1);
-                setTotalFareAmount(totalFareAmount + advisorReport[i].fareAmount);
-                setTotalLZ(totalLZ + advisorReport[i].lz);
-                setTotalOTHS(totalOTHS + advisorReport[i].oths);
-                setTotalTTLDcmntAmount(totalTTLDcmntAmount + advisorReport[i].totalDocumentAmount)
-                setTotalCash(totalCash + advisorReport[i].cash);
-                setTotalCardUSD(totalCardUSD + advisorReport[i].cardUSD);
-                setTotalCardLocal(totalCardLocal + advisorReport[i].cardLocal);
-                setTotalOfAmountPaid(totalOfAmountPaid + advisorReport[i].totalAmountPaid);
-                setTotalCommissionableAmount(totalCommissionableAmount + advisorReport[i].commissionableAmount);
-                setTotalCommission(totalCommission + advisorReport[i].commission);
-                setNetAmount4AgentsDebits(totalCommissionableAmount - totalCommission);
-                setBankRemittence(totalOfAmountPaid - totalCommission);
+    const sortSums = (dataArray) => {
+        if (Array.isArray(dataArray) && dataArray.length > 0){
+            for (let i = 0; i < dataArray.length; i++) {
+                setTotalFareAmount(totalFareAmount => totalFareAmount + dataArray[i].fareAmount);
+                setTotalLZ(totalLZ => totalLZ + dataArray[i].lz);
+                setTotalOTHS(totalOTHS => totalOTHS + dataArray[i].oths);
+                setTotalTTLDcmntAmount(totalTTLDcmntAmount =>
+                  totalTTLDcmntAmount + dataArray[i].totalDocumentAmount);
+                setTotalCash(totalCash => totalCash + dataArray[i].cash);
+                setTotalCardUSD(totalCardUSD => totalCardUSD + dataArray[i].cardUSD);
+                setTotalCardLocal(totalCardLocal => totalCardLocal + dataArray[i].cardLocal);
+                setTotalOfAmountPaid(totalOfAmountPaid => totalOfAmountPaid + dataArray[i].totalAmountPaid);
+                setTotalCommissionableAmount(totalCommissionableAmount =>
+                  totalCommissionableAmount + dataArray[i].commissionableAmount);
+                setTotalCommission(totalCommission => totalCommission + dataArray[i].commission);
+                //setNetAmount4AgentsDebits(totalCommissionableAmount - totalCommission);
+                //setBankRemittence(totalOfAmountPaid - totalCommission);
             }
+            setTotalAgents(dataArray.length);
         }
     }
 
@@ -113,7 +115,7 @@ function AdvisorReport(props) {
                         <th>Total Card (USD)</th>
                         <th>Total Card (Local)</th>
                         <th>Total of Amount Paid</th>
-                        <th>Total Commissionable Amoun t</th>
+                        <th>Total Commissionable Amount</th>
                         <th>Total Commission</th>
                         <th>Total Non Assesable Amount</th>
                         <th>Net Amount's for Agent Debits</th>
@@ -124,6 +126,7 @@ function AdvisorReport(props) {
                             <td>{totalFareAmount}</td>
                             <td>{totalLZ}</td>
                             <td>{totalOTHS}</td>
+                            <td>{totalTTLDcmntAmount}</td>
                             <td>{totalCash}</td>
                             <td>{totalCardUSD}</td>
                             <td>{totalCardLocal}</td>
@@ -131,8 +134,8 @@ function AdvisorReport(props) {
                             <td>{totalCommissionableAmount}</td>
                             <td>{totalCommission}</td>
                             <td>{totalNonAssessableAmount}</td>
-                            <td>{netAmounts4AgentDebits}</td>
-                            <td>{bankRemittence}</td>
+                            <td>{totalCommissionableAmount - totalCommission}</td>
+                            <td>{totalOfAmountPaid - totalCommission}</td>
                         </tr>
                     </table>
                     <button type="button" className="small-button-right">Done</button>

@@ -32,31 +32,35 @@ function InterlineReport(props) {
         .then(response => {
             console.log(response.data);
             setInterlineReport(response.data);
+            setSums(response.data);
         })
         .catch(function(error) {
             console.log(error);
         });
     }
 
-    const sortSums = () => {
-        if (Array.isArray(interlineReport) && interlineReport.length > 0) {
-            for (let i = 0; i < interlineReport.length; i++) {
-                setNumOfTickets(numOfTickets + 1);
-                setTotalCash(totalCash + interlineReport[i].cash);
-                setTotalAmountUSD(totalAmountUSD + interlineReport[i].amountUSD);
-                setTotalCardUSD(totalCardUSD + interlineReport[i].usd);
-                setTotalCardLocal(totalCardLocal + interlineReport[i].bgl);
-                setTotalCommissionableAmount(totalCommissionableAmount + interlineReport[i].commissionable);
-                setTotalCommissions(totalCommissions + (interlineReport[i].commission * interlineReport[i].commissionRate/100));
-                setNetAmounts4AgentDebits(totalCommissionableAmount - totalCommissions);
-                setBankRemittence(totalOfAmounts - totalCommissions);
-                setTotalLocal(totalLocal + interlineReport[i].amount);
-                setTotalLZ(totalLZ + interlineReport[i].localTax);
-                setTotalOTHS(totalOTHS + interlineReport[i].otherTax);
-                setTotalOfDCMNT(totalOfDCMNT + interlineReport[i].totalDocumentAmount);
-                setTotalOfAmounts(totalOfAmounts + interlineReport[i].totalPaidAmount);
-                setTotalOfNonAssessAmounts(totalOfNonAssessAmounts + interlineReport[i].nonAssessAmounts);
+    const setSums = (dataArray) => {
+        if (Array.isArray(dataArray) && dataArray.length > 0) {
+            for (let i = 0; i < dataArray.length; i++) {
+                setTotalCash(totalCash => totalCash + dataArray[i].cash);
+                setTotalAmountUSD(totalAmountUSD => totalAmountUSD + dataArray[i].amountUSD);
+                setTotalCardUSD(totalCardUSD => totalCardUSD + dataArray[i].usd);
+                setTotalCardLocal(totalCardLocal => totalCardLocal + dataArray[i].bgl);
+                setTotalCommissionableAmount(totalCommissionableAmount =>
+                  totalCommissionableAmount + dataArray[i].commissionable);
+                setTotalCommissions(totalCommissions => totalCommissions
+                  + (dataArray[i].commissionable * dataArray[i].commissionRate/100));
+                //setNetAmounts4AgentDebits(totalCommissionableAmount - totalCommissions);
+                //setBankRemittence(totalOfAmounts - totalCommissions);
+                setTotalLocal(totalLocal => totalLocal + dataArray[i].amount);
+                setTotalLZ(totalLZ => totalLZ + dataArray[i].localTax);
+                setTotalOTHS(totalOTHS => totalOTHS + dataArray[i].otherTax);
+                setTotalOfDCMNT(totalOfDCMNT => totalOfDCMNT + dataArray[i].totalDocumentAmount);
+                setTotalOfAmounts(totalOfAmounts => totalOfAmounts + dataArray[i].totalPaidAmount);
+                setTotalOfNonAssessAmounts(totalOfNonAssessAmounts =>
+                   totalOfNonAssessAmounts + dataArray[i].nonAssessAmounts);
             }
+            setNumOfTickets(dataArray.length);
         }
     }
 
@@ -107,7 +111,7 @@ function InterlineReport(props) {
                         ))}
                     </table>
                     <br/>
-                    {sortSums()}
+
                     <table>
                         <th>NBR of TKTS</th>
                         <th>Total USD</th>
@@ -145,8 +149,8 @@ function InterlineReport(props) {
                         <tr>
                             <td>{totalCommissionableAmount}</td>
                             <td>{totalCommissions}</td>
-                            <td>{netAmouts4AgentDebits}</td>
-                            <td>{bankRemittence}</td>
+                            <td>{totalCommissionableAmount - totalCommissions}</td>
+                            <td>{totalOfAmounts - totalCommissions}</td>
                         </tr>
 
                     </table>

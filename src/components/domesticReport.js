@@ -26,29 +26,33 @@ function DomesticReport(props) {
         .then(response => {
             console.log(response.data);
             SetDomesticReport(response.data);
+            setSums(response.data);
         })
         .catch(function(error) {
             console.log(error);
         });
       }
 
-    const setSums = () => {
-        if (Array.isArray(domesticReport) && domesticReport.length > 0){
-            for (let i = 0; i < domesticReport.length; i++) {
-                setTotalAGNTS(totalAGNTS + 1);
-                setTicketsSold(ticketsSold + 1);
-                setTotalFareBaseLocal(totalFareBaseLocal + domesticReport[i].fareBaseLocal);
-                setTotalFareBaseUSD(totalFareBaseUSD + domesticReport[i].fareBaseUSD);
-                setTotalTax(totalTax + domesticReport[i].tax);
-                setTotalCash(totalCash + domesticReport[i].cash);
-                setTotalCardUSD(totalCardUSD + domesticReport[i].cardUSD);
-                setTotalCardLocal(totalCardLocal + domesticReport[i].cardLocal);
-                setTotalAmountPaid(totalAmountPaid + domesticReport[i].totalAmountPaid);
-                setTotalCommissionableAmount(totalCommissionableAmount + domesticReport[i].totalCommissionableAmount);
-                setTotalCommssions(totalCommissions + domesticReport[i].commission);
-                setNetAmounts4AgentDebits(totalFareBaseLocal - totalCommissions);
-                setBankRemittence(totalAmountPaid - totalCommissions);
+    const setSums = (dataArray) => {
+        if (Array.isArray(dataArray) && dataArray.length > 0){
+            for (let i = 0; i < dataArray.length; i++) {
+                setTicketsSold(ticketsSold => ticketsSold + 1);
+                setTotalFareBaseLocal(totalFareBaseLocal =>
+                  totalFareBaseLocal + dataArray[i].fareBaseLocal);
+                setTotalFareBaseUSD(totalFareBaseUSD =>
+                   totalFareBaseUSD + dataArray[i].fareBaseUSD);
+                setTotalTax(totalTax => totalTax + dataArray[i].tax);
+                setTotalCash(totalCash => totalCash + dataArray[i].cash);
+                setTotalCardUSD(totalCardUSD => totalCardUSD + dataArray[i].cardUSD);
+                setTotalCardLocal(totalCardLocal => totalCardLocal + dataArray[i].cardLocal);
+                setTotalAmountPaid(totalAmountPaid => totalAmountPaid + dataArray[i].totalAmountPaid);
+                setTotalCommissionableAmount(totalCommissionableAmount =>
+                  totalCommissionableAmount + dataArray[i].totalCommissionableAmount);
+                setTotalCommssions(totalCommissions => totalCommissions + dataArray[i].commission);
+                //setNetAmounts4AgentDebits(totalFareBaseLocal - totalCommissions);
+                //setBankRemittence(totalAmountPaid - totalCommissions);
             }
+            setTotalAGNTS(dataArray.length);
         }
     }
 
@@ -104,7 +108,6 @@ function DomesticReport(props) {
                         <th>Total Commission</th>
                         <th>Net Amount's for Agent Debits</th>
                         <th>Bank Remittence</th>
-                        {setSums()}
                         <tr>
                             <td>{totalAGNTS}</td>
                             <td>{ticketsSold}</td>
@@ -117,8 +120,8 @@ function DomesticReport(props) {
                             <td>{totalAmountPaid}</td>
                             <td>{totalCommissionableAmount}</td>
                             <td>{totalCommissions}</td>
-                            <td>{netAmounts4AgentDebits}</td>
-                            <td>{bankRemittence}</td>
+                            <td>{totalFareBaseLocal - totalCommissions}</td>
+                            <td>{totalAmountPaid - totalCommissions}</td>
                         </tr>
                     </table>
                     <button type="button" className="small-button-right">Done</button>

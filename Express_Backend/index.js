@@ -1275,9 +1275,9 @@ app.post('/domesticReport', (request, response) => {
                     commissionableAmount: commissionable,
                     commission: commission
                 }];
-                finalResults = (finalResults.concat(string));
+                finalResults = (finalResults.concat(tempArray));
                 console.log(finalResults);
-                response.status(200).send(finalResults);
+                response.status(200).send(JSON.stringify(results));
                 response.end();
             });
         });
@@ -1398,7 +1398,7 @@ app.post('/advisorReport', (request, response) => {
                 }];
                 finalResults.push(finalResults.concat(tempResults));
                 console.log("Final Results: " + finalResults);
-                response.send(finalResults).status(200);
+                response.send(JSON.stringify(results)).status(200);
                 response.end();
             });
     });
@@ -1478,22 +1478,22 @@ app.post('/stockTurnoverReport', (request, response) => {
     var begin = request.body.start;
     var end = request.body.end;
     let statement = '(select (Blank.blankNumber) AS blank ' +
-        'FROM Blank where (Blank.recievedDate BETWEEN ? AND ?) order BY Blank.blankNumber asc;) AS agntNewRBlanks ' +
-        '(select  (BlankAllocation.staffID) AS code, (Blank.blankNumber ) AS blank ' +
+        'FROM Blank where (Blank.recievedDate BETWEEN ? AND ?) order BY Blank.blankNumber asc) AS agntNewRBlanks, ' +
+        '(select  (BlankAllocation.staffID) AS code, (Blank.blankNumber ) AS blank, ' +
         'FROM   Blank inner join BlankAllocation where Blank.blankNumber=BlankAllocation.blankNumber and ' +
-        '(Blank.recievedDate BETWEEN ? AND ?) and Blank.statusID=2 order by Blank.blankNumber asc;) AS subAgntNewABlanks ' +
-        '(select (BlankAllocation.staffID) AS code, (Blank.blankNumber) AS blank ' +
+        '(Blank.recievedDate BETWEEN ? AND ?) and Blank.statusID=2 order by Blank.blankNumber asc;) AS subAgntNewABlanks, ' +
+        '(select (BlankAllocation.staffID) AS code, (Blank.blankNumber) AS blank, ' +
         'FROM Blank inner join BlankAllocation where Blank.blankNumber=BlankAllocation.blankNumber and ' +
-        'blank.statusID=2 and (Blank.assignedDate BETWEEN ? AND ?) order by Blank.blankNumber asc;) AS subAgntABlanks ' +
+        'blank.statusID=2 and (Blank.assignedDate BETWEEN ? AND ?) order by Blank.blankNumber asc) AS subAgntABlanks, ' +
         '(select (Blank.blankNumber) AS blank FROM Blank inner join Sales  where ' +
         '(Sales.transactionDate BETWEEN ? AND ?) and Blank.statusID=1 and ' +
-        'Blank.blankNumber=Sales.blankNumber order by Blank.blankNumber asc;) AS subAgntUBlanks ' +
-        '(select (Blank.blankNumber) AS blank ' +
+        'Blank.blankNumber=Sales.blankNumber order by Blank.blankNumber asc) AS subAgntUBlanks, ' +
+        '(select (Blank.blankNumber) AS blank, ' +
         'FROM Blank where (Blank.recievedDate > ?) and Blank.statusID=2 or ' +
-        'Blank.statusID=3 order BY Blank.blankNumber asc;) AS agentsAmounts ' +
-        '(select  distinct (BlankAllocation.staffID) AS code, (Blank.blankNumber) AS blank ' +
+        'Blank.statusID=3 order BY Blank.blankNumber asc;) AS agentsAmounts, ' +
+        '(select  distinct (BlankAllocation.staffID) AS code, (Blank.blankNumber) AS blank, ' +
         'FROM Blank inner join BlankAllocation, Sales where Blank.blankNumber=BlankAllocation.blankNumber and ' +
-        '(Blank.assignedDate < ?) and  Blank.statusID=2 order by Blank.blankNumber asc;) AS subAgentsAmounts';
+        '(Blank.assignedDate < ?) and  Blank.statusID=2 order by Blank.blankNumber asc) AS subAgentsAmounts';
     db.query(statement, [begin, end, begin, end, begin, end, begin, end, begin, end], (error, results) => {
         if (error) throw error;
         console.log(results);
