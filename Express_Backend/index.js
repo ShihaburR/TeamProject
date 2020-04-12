@@ -1300,38 +1300,41 @@ app.post('/domesticReport', async (request, response) => {
         console.log(packet[0].staffID);
     });
     console.log(result.length);
-    for (let i = 0; i < result.length; i++) {
-        ids.push(result[i].staffID);
-        console.log("IDs: " + ids);
-        let amount = 0;
-        let amountUSD = 0;
-        let tax = 0;
-        let totalDocumentAmount = 0;
-        let cash = 0;
-        let usd = 0;
-        let bgl = 0;
-        let totalAmountPaid = 0;
-        let commissionable = 0;
-        let nonAssessAmounts = 0;
-        let commission = 0;
-        let domesticReportByID = 'select distinct (Sales.amount) AS amount, (Sales.amountUSD) AS amountUSD, ' +
-            '(Sales.localTax + Sales.otherTax) AS tax, (SELECT ' +
-            'Sales.amount + Sales.localTax + Sales.otherTax) AS totalDocumentAmount, (SELECT ' +
-            'Sales.amount + Sales.localTax + Sales.otherTax where Sales.paymentTypeID=1) AS CASH, ' +
-            '(SELECT ((Sales.amount + Sales.localTax + sales.otherTax)/ExchangeRate.exchangeRate) ' +
-            'where Sales.paymentTypeID=2) AS USD, (SELECT ' +
-            'Sales.amount + Sales.localTax + Sales.otherTax where Sales.paymentTypeID=2) AS BGL, ' +
-            '(SELECT Sales.amount + Sales.localTax + Sales.otherTax) AS totalPaidAmount, (SELECT ' +
-            'Sales.amount) AS commissionable, (SELECT Sales.localTax + Sales.otherTax) AS ' +
-            'nonAssessAmounts, (Sales.commisionRate) AS commissionRate ' +
-            'from Sales inner join ExchangeRate, Blank, BlankType, CardDetails, TypeOfPayment where ' +
-            'Sales.exchangeRateCode=ExchangeRate.exchangeRateCode and (Sales.transactionDate ' +
-            'BETWEEN ? AND ?) and Sales.blankNumber=Blank.blankNumber and ' +
-            'Blank.blankTypeID=BlankType.blankTypeID and BlankType.blankArea="international" and ' +
-            'Sales.paymentTypeID=TypeOfPayment.paymentTypeID and Sales.staffID= ? order by saleID';
-        const tempResults = await db.query(domesticReportByID, [begin, end, result[i].staffID]);
+    if (result.length >= 0) {
+        console.log("if statement works");
+        for (let i = 0; i < result.length; i++) {
+            console.log("loop statement works");
+            ids.push(result[i].staffID);
+            console.log("IDs: " + ids);
+            let amount = 0;
+            let amountUSD = 0;
+            let tax = 0;
+            let totalDocumentAmount = 0;
+            let cash = 0;
+            let usd = 0;
+            let bgl = 0;
+            let totalAmountPaid = 0;
+            let commissionable = 0;
+            let nonAssessAmounts = 0;
+            let commission = 0;
+            let domesticReportByID = 'select distinct (Sales.amount) AS amount, (Sales.amountUSD) AS amountUSD, ' +
+                '(Sales.localTax + Sales.otherTax) AS tax, (SELECT ' +
+                'Sales.amount + Sales.localTax + Sales.otherTax) AS totalDocumentAmount, (SELECT ' +
+                'Sales.amount + Sales.localTax + Sales.otherTax where Sales.paymentTypeID=1) AS CASH, ' +
+                '(SELECT ((Sales.amount + Sales.localTax + sales.otherTax)/ExchangeRate.exchangeRate) ' +
+                'where Sales.paymentTypeID=2) AS USD, (SELECT ' +
+                'Sales.amount + Sales.localTax + Sales.otherTax where Sales.paymentTypeID=2) AS BGL, ' +
+                '(SELECT Sales.amount + Sales.localTax + Sales.otherTax) AS totalPaidAmount, (SELECT ' +
+                'Sales.amount) AS commissionable, (SELECT Sales.localTax + Sales.otherTax) AS ' +
+                'nonAssessAmounts, (Sales.commisionRate) AS commissionRate ' +
+                'from Sales inner join ExchangeRate, Blank, BlankType, CardDetails, TypeOfPayment where ' +
+                'Sales.exchangeRateCode=ExchangeRate.exchangeRateCode and (Sales.transactionDate ' +
+                'BETWEEN ? AND ?) and Sales.blankNumber=Blank.blankNumber and ' +
+                'Blank.blankTypeID=BlankType.blankTypeID and BlankType.blankArea="international" and ' +
+                'Sales.paymentTypeID=TypeOfPayment.paymentTypeID and Sales.staffID= ? order by saleID';
+            const tempResults = await db.query(domesticReportByID, [begin, end, result[i].staffID]);
 
-        for (let j = 0; j < tempResults.length; j++) {
+            for (let j = 0; j < tempResults.length; j++) {
                 amount = amount + tempResults[j].amount;
                 amountUSD = amountUSD + tempResults[j].amountUSD;
                 tax = tax + tempResults[j].tax;
@@ -1357,8 +1360,9 @@ app.post('/domesticReport', async (request, response) => {
                 totalAmountPaid: totalAmountPaid,
                 commissionableAmount: commissionable,
                 commission: commission
-        });
-        console.log("Final after push " + i + ": " + JSON.stringify(finalResults))
+            });
+            console.log("Final after push " + i + ": " + JSON.stringify(finalResults))
+        }
     }
 
     console.log("Final: " + JSON.stringify(finalResults));
