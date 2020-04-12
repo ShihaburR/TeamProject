@@ -1274,7 +1274,7 @@ app.post('/domesticReport', (request, response) => {
                     commissionableAmount: commissionable,
                     commission: commission
                 });
-                console.log("Final on loop "+ j +": " + finalResults);
+                console.log("Final on loop "+ j +": " + JSON.stringify(finalResults));
             });
         };
         console.log("Final: " + finalResults);
