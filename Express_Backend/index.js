@@ -1198,8 +1198,8 @@ app.post('/individualReport', (request, response) => {
 app.post('/domesticReport', (request, response) => {
     let finalResults = [];
     //let tempArray = [];
-    let ids = [];
-    let agntNumber = 0;
+    //let ids = [];
+    let length2 = 0;
     let domesticReportID = 'select distinct (Sales.staffID) AS staffID from Sales inner join Blank,BlankType where ' +
         '(Sales.transactionDate BETWEEN ? AND ? and ' +
         'Sales.blankNumber=Blank.blankNumber and Blank.blankTypeID=BlankType.blankTypeID ' +
@@ -1213,9 +1213,9 @@ app.post('/domesticReport', (request, response) => {
         let length1 = Object.keys(packet).length;
         console.log(packet[0].staffID);
         for (let i = 0; i < length1; i++) {
-            ids.push(packet[i].staffID);
+            //ids.push(packet[i].staffID);
             // ------------------------------------------------------------------------------
-            console.log("IDs: " + ids);
+            console.log("IDs: " + packet[i].staffID);
             let amount = 0;
             let amountUSD = 0;
             let tax = 0;
@@ -1242,38 +1242,40 @@ app.post('/domesticReport', (request, response) => {
                 'BETWEEN ? AND ?) and Sales.blankNumber=Blank.blankNumber and ' +
                 'Blank.blankTypeID=BlankType.blankTypeID and BlankType.blankArea="international" and ' +
                 'Sales.paymentTypeID=TypeOfPayment.paymentTypeID and Sales.staffID= ? order by saleID';
-            db.query(domesticReportByID, [begin, end, ids], (error, tempResults) => {
+            db.query(domesticReportByID, [begin, end, packet[i].staffID], (error, tempResults) => {
                 if (error) throw error;
                 //console.log(tempResults);
-                let packet = JSON.parse(JSON.stringify(tempResults));
-                let length2 = Object.keys(packet).length;
+                let packet2 = JSON.parse(JSON.stringify(tempResults));
+                length2 = Object.keys(packet2).length;
+
                 for (let j = 0; j < length2; j++) {
-                    amount = amount + packet[j].amount;
-                    amountUSD = amountUSD + packet[j].amountUSD;
-                    tax = tax + packet[j].tax;
-                    totalDocumentAmount = totalDocumentAmount + packet[j].totalDocumentAmount;
-                    cash = cash + packet[j].CASH;
-                    usd = usd + packet[j].USD;
-                    bgl = bgl + packet[j].BGL;
-                    totalAmountPaid = totalAmountPaid + packet[j].totalAmountPaid;
-                    commissionable = commissionable + packet[j].commissionable;
-                    nonAssessAmounts = nonAssessAmounts + packet[j].nonAssessAmounts;
-                    commission = commission + (packet[j].commissionable * packet[j].commissionRate / 100);
+                    amount = amount + packet2[j].amount;
+                    amountUSD = amountUSD + packet2[j].amountUSD;
+                    tax = tax + packet2[j].tax;
+                    totalDocumentAmount = totalDocumentAmount + packet2[j].totalDocumentAmount;
+                    cash = cash + packet2[j].CASH;
+                    usd = usd + packet2[j].USD;
+                    bgl = bgl + packet2[j].BGL;
+                    totalAmountPaid = totalAmountPaid + packet2[j].totalAmountPaid;
+                    commissionable = commissionable + packet2[j].commissionable;
+                    nonAssessAmounts = nonAssessAmounts + packet2[j].nonAssessAmounts;
+                    commission = commission + (packet2[j].commissionable * packet2[j].commissionRate / 100);
                 }
-                finalResults.push({
-                    agntNumber: packet[i].staffID,
-                    ticketsSold: length2,
-                    fareBaseUSD: amountUSD,
-                    fareBaseLocal: amount,
-                    tax: tax,
-                    cash: cash,
-                    cardUSD: usd,
-                    cardLocal: bgl,
-                    totalAmountPaid: totalAmountPaid,
-                    commissionableAmount: commissionable,
-                    commission: commission
-                });
             });
+            finalResults.push({
+                agntNumber: packet[i].staffID,
+                ticketsSold: length2,
+                fareBaseUSD: amountUSD,
+                fareBaseLocal: amount,
+                tax: tax,
+                cash: cash,
+                cardUSD: usd,
+                cardLocal: bgl,
+                totalAmountPaid: totalAmountPaid,
+                commissionableAmount: commissionable,
+                commission: commission
+            });
+            console.log("Final after push " + i + ": " + JSON.stringify(finalResults))
         }
         console.log("Final: " + JSON.stringify(finalResults));
         response.status(200).send(JSON.stringify(finalResults));
