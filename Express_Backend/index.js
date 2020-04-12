@@ -1195,7 +1195,7 @@ app.post('/individualReport', (request, response) => {
 });
 
 // global domestic
-app.post('/domesticReport', (request, response) => {
+/*app.post('/domesticReport', (request, response) => {
     let finalResults = [];
     //let tempArray = [];
     //let ids = [];
@@ -1276,12 +1276,98 @@ app.post('/domesticReport', (request, response) => {
                 });
                 console.log("Final after push " + i + ": " + JSON.stringify(finalResults))
             });
-
         }
         console.log("Final: " + JSON.stringify(finalResults));
         response.status(200).send(JSON.stringify(finalResults));
         response.end();
         });
+});*/
+
+app.post('/domesticReport', async (request, response) => {
+    let finalResults = [];
+    //let tempArray = [];
+    let ids = [];
+    let domesticReportID = 'select distinct (Sales.staffID) AS staffID from Sales inner join Blank,BlankType where ' +
+        '(Sales.transactionDate BETWEEN ? AND ? and ' +
+        'Sales.blankNumber=Blank.blankNumber and Blank.blankTypeID=BlankType.blankTypeID ' +
+        'and BlankType.blankArea="domestic") order by Sales.staffID asc;';
+    let begin = request.body.start;
+    let end = request.body.end;
+    const result = await db.query(domesticReportID,[begin, end],(error, results) => {
+        if (error) throw error;
+        console.log(results);
+        let packet = JSON.parse(JSON.stringify(results));
+        console.log(packet[0].staffID);
+    });
+    for (let i = 0; i < result.length; i++) {
+        ids.push(result[i].staffID);
+        console.log("IDs: " + ids);
+
+        let amount = 0;
+        let amountUSD = 0;
+        let tax = 0;
+        let totalDocumentAmount = 0;
+        let cash = 0;
+        let usd = 0;
+        let bgl = 0;
+        let totalAmountPaid = 0;
+        let commissionable = 0;
+        let nonAssessAmounts = 0;
+        let commission = 0;
+        let domesticReportByID = 'select distinct (Sales.amount) AS amount, (Sales.amountUSD) AS amountUSD, ' +
+            '(Sales.localTax + Sales.otherTax) AS tax, (SELECT ' +
+            'Sales.amount + Sales.localTax + Sales.otherTax) AS totalDocumentAmount, (SELECT ' +
+            'Sales.amount + Sales.localTax + Sales.otherTax where Sales.paymentTypeID=1) AS CASH, ' +
+            '(SELECT ((Sales.amount + Sales.localTax + sales.otherTax)/ExchangeRate.exchangeRate) ' +
+            'where Sales.paymentTypeID=2) AS USD, (SELECT ' +
+            'Sales.amount + Sales.localTax + Sales.otherTax where Sales.paymentTypeID=2) AS BGL, ' +
+            '(SELECT Sales.amount + Sales.localTax + Sales.otherTax) AS totalPaidAmount, (SELECT ' +
+            'Sales.amount) AS commissionable, (SELECT Sales.localTax + Sales.otherTax) AS ' +
+            'nonAssessAmounts, (Sales.commisionRate) AS commissionRate ' +
+            'from Sales inner join ExchangeRate, Blank, BlankType, CardDetails, TypeOfPayment where ' +
+            'Sales.exchangeRateCode=ExchangeRate.exchangeRateCode and (Sales.transactionDate ' +
+            'BETWEEN ? AND ?) and Sales.blankNumber=Blank.blankNumber and ' +
+            'Blank.blankTypeID=BlankType.blankTypeID and BlankType.blankArea="international" and ' +
+            'Sales.paymentTypeID=TypeOfPayment.paymentTypeID and Sales.staffID= ? order by saleID';
+        const tempResults = db.query(domesticReportByID, [begin, end, result[i].staffID], (error, tempResults) => {
+            if (error) throw error;
+            let packet2 = JSON.parse(JSON.stringify(tempResults));
+            let length2 = Object.keys(packet2).length;
+            });
+
+        for (let j = 0; j < tempResults.length; j++) {
+                amount = amount + tempResults[j].amount;
+                amountUSD = amountUSD + tempResults[j].amountUSD;
+                tax = tax + tempResults[j].tax;
+                totalDocumentAmount = totalDocumentAmount + tempResults[j].totalDocumentAmount;
+                cash = cash + tempResults[j].CASH;
+                usd = usd + tempResults[j].USD;
+                bgl = bgl + tempResults[j].BGL;
+                totalAmountPaid = totalAmountPaid + tempResults[j].totalAmountPaid;
+                commissionable = commissionable + tempResults[j].commissionable;
+                nonAssessAmounts = nonAssessAmounts + tempResults[j].nonAssessAmounts;
+                commission = commission + (tempResults[j].commissionable * tempResults[j].commissionRate / 100);
+            }
+            console.log("length2: " + tempResults.length + ", amount: " + amount);
+            finalResults.push({
+                agntNumber: result[i].staffID,
+                ticketsSold: tempResults.length,
+                fareBaseUSD: amountUSD,
+                fareBaseLocal: amount,
+                tax: tax,
+                cash: cash,
+                cardUSD: usd,
+                cardLocal: bgl,
+                totalAmountPaid: totalAmountPaid,
+                commissionableAmount: commissionable,
+                commission: commission
+        });
+        console.log("Final after push " + i + ": " + JSON.stringify(finalResults))
+    }
+
+    console.log("Final: " + JSON.stringify(finalResults));
+    response.status(200).send(JSON.stringify(finalResults));
+    response.end();
 });
 
 // interline individual
