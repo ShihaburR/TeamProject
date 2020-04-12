@@ -1293,12 +1293,7 @@ app.post('/domesticReport', async (request, response) => {
         'and BlankType.blankArea="domestic") order by Sales.staffID asc;';
     let begin = request.body.start;
     let end = request.body.end;
-    const result = await db.query(domesticReportID,[begin, end],(error, results) => {
-        if (error) throw error;
-        console.log(results);
-        let packet = JSON.parse(JSON.stringify(results));
-        console.log(packet[0].staffID);
-    });
+    const result = await db.query(domesticReportID,[begin, end]);
     console.log(JSON.stringify(result));
     let length = Object.keys(result).length;
     console.log(length);
