@@ -39,20 +39,21 @@ function IndividualReport(props) {
     const setSums = (dataArray) => {
       console.log('hello there');
       console.log("length: " + dataArray.length);
+      console.log(dataArray);
+      console.log(dataArray[0].amount);
         if (Array.isArray(dataArray) && dataArray.length > 0) {
             for (let i = 0; i < dataArray.length; i++) {
-                setNumOfTickets(numOfTickets + 1);
-                if (dataArray.amount !== null ){setTotalFareBaseLocal(totalFareBaseLocal + dataArray.amount);}
-                if (dataArray.amountUSD !== null ){setTotalFareBaseUSD(totalFareBaseUSD + dataArray.amountUSD);}
-                if (dataArray.localTax !== null ){setTotalTax(totalTax + dataArray.localTax);}
-                if (dataArray.cash  !== null){setTotalCash(totalCash + dataArray.cash);}
-                if (dataArray.usd !== null ){setTotalCardUSD(totalCardUSD + dataArray.usd);}
-                if (dataArray.bgl !== null){setTotalCardLocal(totalCardLocal + dataArray.bgl);}
-                if (dataArray.totalAmountPaid !== null ){setTotalAmountPaid(totalAmountPaid + dataArray.totalAmountPaid);}
-                if (dataArray.commissionable !== null){
-                    setTotalCommissionableAmount(totalCommissionableAmount + dataArray.commissionable);
-                    setTotalCommissions(totalCommissions + (dataArray.commissionable * dataArray.commissionRate/100));
-                }
+                console.log(i);
+                setNumOfTickets(numOfTickets => numOfTickets + 1);
+                setTotalFareBaseLocal(totalFareBaseLocal => totalFareBaseLocal + dataArray[i].amount);
+                setTotalFareBaseUSD(totalFareBaseUSD => totalFareBaseUSD + dataArray[i].amountUSD);
+                setTotalTax(totalTax => totalTax + dataArray[i].localTax);
+                setTotalCash(totalCash => totalCash + dataArray[i].cash);
+                setTotalCardUSD(totalCardUSD => totalCardUSD + dataArray[i].usd);
+                setTotalCardLocal(totalCardLocal => totalCardLocal + dataArray[i].bgl);
+                setTotalAmountPaid(totalAmountPaid => totalAmountPaid + dataArray[i].totalAmountPaid);
+                setTotalCommissionableAmount(totalCommissionableAmount => totalCommissionableAmount + dataArray[i].commissionable);
+                setTotalCommissions(totalCommissions => totalCommissions + (dataArray[i].commissionable * dataArray[i].commissionRate/100));
             }
         setNetAmounts4AgentDebits(totalCommissionableAmount - totalCommissions);
         setBankRemittence(totalAmountPaid - totalCommissions);
