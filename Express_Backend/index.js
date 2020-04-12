@@ -1197,7 +1197,7 @@ app.post('/individualReport', (request, response) => {
 // global domestic
 app.post('/domesticReport', (request, response) => {
     let finalResults = [];
-    let tempArray = [];
+    //let tempArray = [];
     let ids = [];
     let domesticReportID = 'select distinct (Sales.staffID) AS staffID from Sales inner join Blank,BlankType where ' +
         '(Sales.transactionDate BETWEEN ? AND ? and ' +
@@ -1245,7 +1245,7 @@ app.post('/domesticReport', (request, response) => {
                 'Sales.paymentTypeID=TypeOfPayment.paymentTypeID and Sales.staffID= ? order by saleID';
             db.query(domesticReportByID, [begin, end, ids], (error, tempResults) => {
                 if (error) throw error;
-                console.log(tempResults);
+                //console.log(tempResults);
                 var packet = JSON.parse(JSON.stringify(tempResults));
                 var length = Object.keys(packet).length;
                 for (let i = 0; i < length; i++) {
@@ -1260,9 +1260,8 @@ app.post('/domesticReport', (request, response) => {
                     commissionable = commissionable + packet[i].commissionable;
                     nonAssessAmounts = nonAssessAmounts + packet[i].nonAssessAmounts;
                     commission = commission + (packet[i].commissionable * packet[i].commissionRate / 100);
-
                 }
-                finalResults.push([{
+                finalResults.push({
                     agntNumber: results[j].staffID,
                     ticketsSold: length,
                     fareBaseUSD: amountUSD,
@@ -1274,7 +1273,8 @@ app.post('/domesticReport', (request, response) => {
                     totalAmountPaid: totalAmountPaid,
                     commissionableAmount: commissionable,
                     commission: commission
-                }]);
+                });
+                console.log("Final on loop "+ j +": " + finalResults);
             });
         };
         console.log("Final: " + finalResults);
