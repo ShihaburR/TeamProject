@@ -1199,7 +1199,6 @@ app.post('/domesticReport', (request, response) => {
     let finalResults = [];
     //let tempArray = [];
     //let ids = [];
-    let length2 = 0;
     let domesticReportID = 'select distinct (Sales.staffID) AS staffID from Sales inner join Blank,BlankType where ' +
         '(Sales.transactionDate BETWEEN ? AND ? and ' +
         'Sales.blankNumber=Blank.blankNumber and Blank.blankTypeID=BlankType.blankTypeID ' +
@@ -1216,6 +1215,7 @@ app.post('/domesticReport', (request, response) => {
             //ids.push(packet[i].staffID);
             // ------------------------------------------------------------------------------
             console.log("IDs: " + packet[i].staffID);
+            let ticketsSold = 0;
             let amount = 0;
             let amountUSD = 0;
             let tax = 0;
@@ -1246,7 +1246,7 @@ app.post('/domesticReport', (request, response) => {
                 if (error) throw error;
                 //console.log(tempResults);
                 let packet2 = JSON.parse(JSON.stringify(tempResults));
-                length2 = Object.keys(packet2).length;
+                let length2 = Object.keys(packet2).length;
 
                 for (let j = 0; j < length2; j++) {
                     amount = amount + packet2[j].amount;
@@ -1261,10 +1261,11 @@ app.post('/domesticReport', (request, response) => {
                     nonAssessAmounts = nonAssessAmounts + packet2[j].nonAssessAmounts;
                     commission = commission + (packet2[j].commissionable * packet2[j].commissionRate / 100);
                 }
+                ticketsSold = length2;
             });
             finalResults.push({
                 agntNumber: packet[i].staffID,
-                ticketsSold: length2,
+                ticketsSold: ticketsSold,
                 fareBaseUSD: amountUSD,
                 fareBaseLocal: amount,
                 tax: tax,
