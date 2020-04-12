@@ -1215,7 +1215,7 @@ app.post('/domesticReport', (request, response) => {
             let id = packet[i].staffID;
             ids.push([id]);
         }
-        for (let j = 0; j < domesticReportID.length; j++) {
+        for (let j = 0; j < length; j++) {
             console.log("IDs: " + ids);
             let amount = 0;
             let amountUSD = 0;
@@ -1262,7 +1262,7 @@ app.post('/domesticReport', (request, response) => {
                     commission = commission + (packet[i].commissionable * packet[i].commissionRate / 100);
 
                 }
-                tempArray = [{
+                finalResults.push([{
                     agntNumber: results[j].staffID,
                     ticketsSold: length,
                     fareBaseUSD: amountUSD,
@@ -1274,11 +1274,10 @@ app.post('/domesticReport', (request, response) => {
                     totalAmountPaid: totalAmountPaid,
                     commissionableAmount: commissionable,
                     commission: commission
-                }];
-                finalResults = (finalResults.concat(tempArray));
+                }]);
             });
         };
-        console.log(finalResults);
+        console.log("Final: " + finalResults);
         response.status(200).send(JSON.stringify(finalResults));
         response.end();
         });
