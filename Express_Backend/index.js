@@ -1199,6 +1199,7 @@ app.post('/domesticReport', (request, response) => {
     let finalResults = [];
     //let tempArray = [];
     let ids = [];
+    let agntNumber = 0;
     let domesticReportID = 'select distinct (Sales.staffID) AS staffID from Sales inner join Blank,BlankType where ' +
         '(Sales.transactionDate BETWEEN ? AND ? and ' +
         'Sales.blankNumber=Blank.blankNumber and Blank.blankTypeID=BlankType.blankTypeID ' +
@@ -1248,6 +1249,7 @@ app.post('/domesticReport', (request, response) => {
                 var packet = JSON.parse(JSON.stringify(tempResults));
                 var length = Object.keys(packet).length;
                 for (let i = 0; i < length; i++) {
+                    agntNumber = agntNumber + ids[i];
                     amount = amount + packet[i].amount;
                     amountUSD = amountUSD + packet[i].amountUSD;
                     tax = tax + packet[i].tax;
@@ -1259,20 +1261,20 @@ app.post('/domesticReport', (request, response) => {
                     commissionable = commissionable + packet[i].commissionable;
                     nonAssessAmounts = nonAssessAmounts + packet[i].nonAssessAmounts;
                     commission = commission + (packet[i].commissionable * packet[i].commissionRate / 100);
-                    finalResults.push({
-                        agntNumber: ids[i],
-                        ticketsSold: length,
-                        fareBaseUSD: amountUSD,
-                        fareBaseLocal: amount,
-                        tax: tax,
-                        cash: cash,
-                        cardUSD: usd,
-                        cardLocal: bgl,
-                        totalAmountPaid: totalAmountPaid,
-                        commissionableAmount: commissionable,
-                        commission: commission
-                    });
                 }
+                finalResults.push({
+                    agntNumber: agntNumber,
+                    ticketsSold: length,
+                    fareBaseUSD: amountUSD,
+                    fareBaseLocal: amount,
+                    tax: tax,
+                    cash: cash,
+                    cardUSD: usd,
+                    cardLocal: bgl,
+                    totalAmountPaid: totalAmountPaid,
+                    commissionableAmount: commissionable,
+                    commission: commission
+                });
                 console.log("Final: " + JSON.stringify(finalResults));
                 response.status(200).send(JSON.stringify(finalResults));
                 response.end();
