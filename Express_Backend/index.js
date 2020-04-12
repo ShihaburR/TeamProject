@@ -1299,10 +1299,10 @@ app.post('/domesticReport', async (request, response) => {
         let packet = JSON.parse(JSON.stringify(results));
         console.log(packet[0].staffID);
     });
+    console.log(result.length);
     for (let i = 0; i < result.length; i++) {
         ids.push(result[i].staffID);
         console.log("IDs: " + ids);
-
         let amount = 0;
         let amountUSD = 0;
         let tax = 0;
