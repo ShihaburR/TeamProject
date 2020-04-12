@@ -112,6 +112,7 @@ function ViewCustomer(props) {
                 onClick ={() => {reActivate(r.customerID)}}>Activate</button></td>
             </tr>
             ))}
+            {console.log(customers)}
           </tbody>
         </table>
         <br/>

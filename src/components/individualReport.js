@@ -25,8 +25,10 @@ function IndividualReport(props) {
         axios.post('http://localhost:5000/individualReport', {start: start, end: end})
             .then(response => {
               if(response.status === 200){
+                setSums();
                 console.log(response.data);
                 SetIndividualReport(response.data);
+                setSums();
               }
             })
             .catch(function(error) {
@@ -105,7 +107,7 @@ function IndividualReport(props) {
                         <th>Total Commission</th>
                         <th>Net Amount for Agent Debit</th>
                         <th>Bank Remittence</th>
-                        {setSums()}
+
                         <tr>
                             <td>{numOfTickets}</td>
                             <td>{totalFareBaseLocal}</td>

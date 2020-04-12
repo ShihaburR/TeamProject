@@ -5,7 +5,7 @@ import axios from 'axios';
 import GenerateReportPeriod from './generateReportPeriod';
 
 function AdvisorReport(props) {
-    const [advisorReport, SetAdvisorReport] = useState('');
+    const [advisorReport, SetAdvisorReport] = useState([]);
     const [totalAgents, setTotalAgents] = useState(0);
     const [totalFareAmount, setTotalFareAmount] = useState(0);
     const [totalLZ, setTotalLZ] = useState(0);
@@ -26,10 +26,10 @@ function AdvisorReport(props) {
         var stop = 0;
         axios.post('http://localhost:5000/advisorReport', {start: start, end: end})
         .then(response => {
-          if(advisorReport !== response.data){
+          console.log("hello");
             SetAdvisorReport(response.data);
+            console.log(response.data);
             sortSums();
-          }
         })
         .catch(function(error) {
             console.log(error);
@@ -63,7 +63,7 @@ function AdvisorReport(props) {
                 <GenerateReportPeriod getData={getAdvisorReportData} setPeriod={setPeriodSet}/>
             )
         } else if(periodSet) {
-          console.log("Loop?");
+          console.log("The data: " + advisorReport);
             return (
                 <div id="tablecontainerrefund">
                     <table className="striped responsive-table">
