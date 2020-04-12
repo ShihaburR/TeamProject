@@ -110,7 +110,6 @@ function DomesticReport(props) {
                         <th>Bank Remittence</th>
                         <tr>
                             <td>{totalAGNTS}</td>
-                            <td>{ticketsSold}</td>
                             <td>{totalFareBaseLocal}</td>
                             <td>{totalFareBaseUSD}</td>
                             <td>{totalTax}</td>

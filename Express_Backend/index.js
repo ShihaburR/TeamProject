@@ -1204,18 +1204,17 @@ app.post('/domesticReport', (request, response) => {
         '(Sales.transactionDate BETWEEN ? AND ? and ' +
         'Sales.blankNumber=Blank.blankNumber and Blank.blankTypeID=BlankType.blankTypeID ' +
         'and BlankType.blankArea="domestic") order by Sales.staffID asc;';
-    var begin = request.body.start;
-    var end = request.body.end;
+    let begin = request.body.start;
+    let end = request.body.end;
     db.query(domesticReportID,[begin, end],(error, results) => {
         if (error) throw error;
         console.log(results);
-        var packet = JSON.parse(JSON.stringify(results));
-        var length1 = Object.keys(packet).length;
+        let packet = JSON.parse(JSON.stringify(results));
+        let length1 = Object.keys(packet).length;
         console.log(packet[0].staffID);
-        for(var i = 0; i < length1; i++) {
-            let id = packet[i].staffID;
-            ids.push(id);
-        }
+        for (let i = 0; i < length1; i++) {
+            ids.push(packet[i].staffID);
+            // ------------------------------------------------------------------------------
             console.log("IDs: " + ids);
             let amount = 0;
             let amountUSD = 0;
@@ -1246,10 +1245,9 @@ app.post('/domesticReport', (request, response) => {
             db.query(domesticReportByID, [begin, end, ids], (error, tempResults) => {
                 if (error) throw error;
                 //console.log(tempResults);
-                var packet = JSON.parse(JSON.stringify(tempResults));
-                var length2 = Object.keys(packet).length;
+                let packet = JSON.parse(JSON.stringify(tempResults));
+                let length2 = Object.keys(packet).length;
                 for (let i = 0; i < length2; i++) {
-                    agntNumber = ids[i];
                     amount = amount + packet[i].amount;
                     amountUSD = amountUSD + packet[i].amountUSD;
                     tax = tax + packet[i].tax;
@@ -1263,7 +1261,7 @@ app.post('/domesticReport', (request, response) => {
                     commission = commission + (packet[i].commissionable * packet[i].commissionRate / 100);
                 }
                 finalResults.push({
-                    agntNumber: agntNumber,
+                    agntNumber: packet[0].staffID,
                     ticketsSold: length2,
                     fareBaseUSD: amountUSD,
                     fareBaseLocal: amount,
@@ -1279,6 +1277,7 @@ app.post('/domesticReport', (request, response) => {
                 response.status(200).send(JSON.stringify(finalResults));
                 response.end();
             });
+        }
         });
 });
 
