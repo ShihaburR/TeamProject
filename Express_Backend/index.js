@@ -1329,11 +1329,7 @@ app.post('/domesticReport', async (request, response) => {
             'BETWEEN ? AND ?) and Sales.blankNumber=Blank.blankNumber and ' +
             'Blank.blankTypeID=BlankType.blankTypeID and BlankType.blankArea="international" and ' +
             'Sales.paymentTypeID=TypeOfPayment.paymentTypeID and Sales.staffID= ? order by saleID';
-        const tempResults = db.query(domesticReportByID, [begin, end, result[i].staffID], (error, tempResults) => {
-            if (error) throw error;
-            let packet2 = JSON.parse(JSON.stringify(tempResults));
-            let length2 = Object.keys(packet2).length;
-            });
+        const tempResults = await db.query(domesticReportByID, [begin, end, result[i].staffID]);
 
         for (let j = 0; j < tempResults.length; j++) {
                 amount = amount + tempResults[j].amount;
