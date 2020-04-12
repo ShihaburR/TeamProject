@@ -1396,9 +1396,9 @@ app.post('/advisorReport', (request, response) => {
                     commission: commission,
                     nonAssessableAmounts: nonAssessableAmounts
                 }];
-                finalResults.push(finalResults.concat(tempResults));
+                finalResults.push(finalResults.concat(tempArray));
                 console.log("Final Results: " + finalResults);
-                response.send(JSON.stringify(results)).status(200);
+                response.send(finalResults).status(200);
                 response.end();
             });
     });
