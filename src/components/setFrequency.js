@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Header from './header';
 import { NavLink } from 'react-router-dom';
+import axios from 'axios';
 
 function SetFrequency(props) {
     const [period, setPeriod] = useState("");
@@ -8,7 +9,17 @@ function SetFrequency(props) {
     const [time, setTime] = useState("");
 
     const handleSubmit = () => {
-        console.log(period + " " + day + " " + time);
+      axios.post('http://localhost:5000/setSchedule', {
+      schedule: period,
+      day : day,
+      time : time
+    })
+    .then(response => {
+      alert("Backup Service will run as scheduled");
+    })
+    .catch(error => {
+      console.log(error);
+    })
     }
 
   return (

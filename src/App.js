@@ -34,6 +34,8 @@ import IndividualReport from "./components/individualReport";
 import InterlineReport from "./components/interlineReport";
 import StockTurnOverReport from "./components/stockTurnOverTable";
 import DomesticReport from "./components/domesticReport";
+import RestoreSystem from "./components/restoreSystem";
+
 
 // The main App component which determines what is being rendered.
 // No props are being passed into this component so there's no need to pass in a props param.
@@ -124,6 +126,12 @@ function App() {
             </Route>
             <Route exact path="/stockTurnOverReport">
               <StockTurnOverReport staffType={staffType} staffName={staffName} staffID={staffID}/>
+            </Route>
+            <Route exact path="/viewLatePayment">
+              <ViewLatePayment staffType={staffType} staffName={staffName} staffID={staffID}/>
+            </Route>
+            <Route exact path="/restoreSystem">
+              <RestoreSystem staffType={staffType} staffName={staffName} staffID={staffID}/>
             </Route>
             <Route exact path="/404">
               <h1>PAGE DOES NOT EXIST</h1>

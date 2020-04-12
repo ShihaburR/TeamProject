@@ -2,11 +2,12 @@ const fs = require('fs');
 const cors = require('cors');
 const mysql = require('mysql');
 const express = require('express');
+const mysqldump = require('mysqldump');
 const bodyParser = require('body-parser');
 const port = 5000;
 const app = express();
 //global variables to be accessed in other pages
-var username = "", staffType = "", staffID = "", email="";
+var username = "", staffType = "", staffID = "", email="", lates = [], count = 0;
 //compile JSON (in our case mySQL data) to string to be used for our use
 app.use(bodyParser.json());
 //cors allows http requests from front-end to back-end
@@ -30,6 +31,13 @@ db.connect((err) => {
   }
   console.log('Database connected');
 });
+
+//changes to a new db made after deleting previous db.
+function changeConnection(db){
+  db.changeUser({database: 'airticketsales'}, (error) => {
+    if(error){throw error;}
+  })
+}
 
 //unused Express-Sessions code
 /*var session = require('express-session');
@@ -96,7 +104,7 @@ app.get('/auth', function(request, response) {
 //clears staff info and logouts user
 app.get('/logout', function(request, response) {
   console.log("Logout initiatied for User: " + username + "- redirecting to login");
-  username = ""; staffType = ""; staffID = ""; email="";
+  username = "", staffType = "", staffID = "", email="", count = 0, lates = [];
   response.sendStatus(200);
 });
 
@@ -135,40 +143,25 @@ app.get('/staff', function(request, response) {
       response.end();
     });
 });
-//set this up
+//would of created staff based on user input
 app.post('/createStaff', function(request, response) {
-    //issue if discount id is the same it breaks.
     var firstname = request.body.firstname;
     var lastname = request.body.lastname;
     var address = request.body.address;
     var email = request.body.email;
     var staffType = request.body.valued;
-    var insert = "INSERT INTO staff(`name`, `surname`, `address`, `email`,`customerTypeId`," +
-    "`discountAmount` , `discountType`) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    var password = request.body.password;
+    var insert = "INSERT INTO staff(`name`, `surname`, `address`, `email`,`staffTypeID`," +
+    "`email` , `password`, `agencyID`,`active`) VALUES (?, ?, ?, ?, ?, ?, ?, 1, 'yes')";
     //discount values in a seperate sql command
-    var drate = request.body.discountrate;
-    var dtype = request.body.discounttype;
-    var drateID = request.body.drateID;
-    var dtypeID = request.body.dtypeID;
-    var createDiscountType = "INSERT INTO discounttype(`discountTypeID`,`discountType`) VALUES (?,?)";
-    var createDiscountAmount = "INSERT INTO discountamount(`discountId`,`discountPercent`) VALUES (?,?)";
-
-    db.query(createDiscountType, [dtypeID, dtype], (error, result) => {
-        var string = JSON.stringify(result);
-        //console.log(string);
-        db.query(createDiscountAmount, [drateID, drate], (error, result) => {
-          var string = JSON.stringify(result);
-          //console.log(string);
-          db.query(insert, [firstname,lastname,address,email,valued,drateID,dtypeID], (error,result) => {
-             var string = JSON.stringify(result);
-             //console.log(string);
-             if(string.includes('"affectedRows":1')){
-               console.log("Customer created");
-               response.sendStatus(200);
-             }
-          })
-        });
-    });
+    db.query(insert, [firstname,lastname,address,staffType,email,password], (error,result) => {
+       var string = JSON.stringify(result);
+       //console.log(string);
+       if(string.includes('"affectedRows":1')){
+         console.log("Customer created");
+         response.sendStatus(200);
+       }
+    })
 });
 
 app.post('/removeStaff', function(request, response) {
@@ -1024,20 +1017,47 @@ app.post('/logRefund', function(request, response) {
   }
 });
 
+//will alert the office manager on startup
 app.get('/alertLatePayment', function(request, response) {
-  var get = "SELECT payByDate FROM sales WHERE paymentTypeID = 3";
-  db.query(get, (error,result) => {
-    var packet = JSON.parse(JSON.stringify(result));
-    var today = parseInt(new Date());
-    console.log(today);
-    /*
-    for(var i in packet){
-      var date = parseInt(packet[i].payByDate);
-      console.log("Date: " + date);
-    }
-    */
-  });
+  //if the alert was already displayed, it wont display again
+  if(count > 0) {
+    response.sendStatus(200);
+  } else {
+    count++;
+    var get = "SELECT payByDate, blankNumber FROM sales WHERE paymentTypeID = 3 AND isPaid = 'no'";
+    let today = new Date().toISOString().slice(0,10);
+    var now = parseInt(today.slice(0,4) + today.slice(5,-3) + today.slice(8));
+    db.query(get, (error,result) => {
+      var packet = JSON.parse(JSON.stringify(result));
+      for(var i in packet) {
+        var date = packet[i].payByDate.slice(0,10);
+        var value = parseInt(date.slice(0,4) + date.slice(5,-3) + date.slice(8));
+        if(now > value) {
+          //if its passed its payment date it will push the blank number into an array lates.
+          lates.push(packet[i].blankNumber);
+        }
+      }
+      //checks array lates to see if any lates were discovered
+      if(lates.length > 0){
+        console.log("Late Payment found for Blank Number/(s): " + lates);
+        response.sendStatus(401);
+      } else {response.sendStatus(200);}
+    });
+  }
+
 });
+
+//displays late payments
+app.get('/latePayments', function(request, response) {
+  var get = "SELECT S.staffID, customerID, blankNumber, payByDate," +
+  " isPaid, SF.staffID, SF.name, SF.surname FROM sales S, staff SF WHERE isPaid = 'no' " +
+  "AND S.staffID = SF.staffID";
+
+  db.query(get, (error, result) => {
+    response.status(200).send(result);
+    response.end();
+  });
+})
 
 //rates section
 app.post('/commissions', function(request, response) {
@@ -1144,6 +1164,7 @@ app.get('/rateCodes', function(request, response) {
 app.post('/searchBlanks', function(request, response) {
   var num = parseInt(request.body.num);
   var search = "SELECT * FROM blank WHERE blankNumber LIKE ?";
+  //allows blanks to be found via blank number
   db.query(search, ['%' + num + '%'], (error, result) => {
     response.status(200).send(result);
     response.end();
@@ -1153,20 +1174,108 @@ app.post('/searchBlanks', function(request, response) {
 app.post('/searchCustomers', function(request,response) {
   var details = request.body.details;
   var search = "SELECT * FROM customer WHERE name LIKE ? or surname LIKE ? " +
-  "or customerID LIKE ?"
+  "or customerID LIKE ? or CONCAT(name, ' ', surname) LIKE ?"
+  //allow various searches to be performed to remove limitations
   db.query(search,['%'+details+'%','%'+details+'%','%'+details+'%','%'+details+'%',
-  '%'+details+'%'], (error,result) => {
+  '%'+details+'%', '%'+details+'%'], (error,result) => {
       response.status(200).send(result);
       response.end();
   });
 });
 
-app.get('/test', function(request, response) {
-  var get = "SELECT * FROM sales";
-  db.query(get, (error,result) => {
-    response.status(200).send(result);
+app.post('/searchStaff', function(request, response) {
+  var details = request.body.details;
+  var search = "SELECT * FROM staff WHERE name LIKE ? or surname LIKE ? " +
+  "or staffID LIKE ? or CONCAT(name, ' ', surname) LIKE ?"
+  //allow various searches to be performed to remove limitations
+  db.query(search,['%'+details+'%','%'+details+'%','%'+details+'%','%'+details+'%',
+  '%'+details+'%', '%'+details+'%'], (error,result) => {
+      response.status(200).send(result);
+      response.end();
   });
 });
+
+//backup & restore
+app.get('/backup', function(request, response) {
+  let d = new Date().toISOString().slice(0,19)
+  let date = new Date().toISOString().slice(0,10);
+  var time = '_' + d.slice(11,-6) +'_'+ d.slice(-5,-3) +'_'+ d.slice(-2);
+  var filename = 'backups/Backup_' + date + time + '.sql';
+  //create a dump file that stores all data into appropiate sql queries
+  mysqldump({
+    connection: {
+        host: 'localhost',
+        user : 'root',
+        password: 'admin',
+        database: 'airticketsales'
+    },
+    dumpToFile: filename,
+  })
+  .catch(error => {
+    console.log(error);
+    response.sendStatus(401);
+  });
+  console.log("Database backed up as: " + filename);
+  response.sendStatus(200);
+});
+
+//restores the system
+app.post('/restore', function(request, response) {
+  var del = "DROP DATABASE airticketsales";
+  var filename = 'backups/' + request.body.filename;
+  var createNewDB = "CREATE DATABASE airticketsales";
+  var sql = fs.readFileSync(filename).toString();
+  //delete any previous/corrupt data.
+  db.query(del, (error,result) => {
+    if(error){
+      console.log(error);
+      response.sendStatus(401);
+    } else {
+      db.query(createNewDB, (error, result) => {
+        if(error){
+          console.log(error);
+          response.sendStatus(401);
+        } else {
+          //here the db will stop and change in order to restore the database properly
+          changeConnection(db);
+          db.query(sql, (error, result) => {
+            if(error){
+              response.sendStatus(401);
+            } else {
+              response.sendStatus(200);
+            }
+          });
+        }
+      });
+    }
+  });
+
+
+});
+
+//gets all file names in the folder backups to select a backup restore the system
+app.get('/files', function(request, response) {
+  var backups = [];
+  fs.readdirSync('backups').forEach(file => {
+    backups.push({filename: file});
+  });
+  if(backups.length > 0){
+    response.status(200).send(backups);
+  } else {
+    response.sendStatus(401);
+  }
+});
+
+//planned to use nodeCron to setup a schedule for backups
+app.post('/setSchedule', function(request, response) {
+  var schedule = request.body.schedule;
+  var day = request.body.day;
+  var time = request.body.time;
+});
+
+
+
+
 
 //------------------------------------------------------------------------------------------------------------------------
 // individual Report

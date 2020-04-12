@@ -1,8 +1,36 @@
 import React from 'react';
 import Header from './header';
 import { NavLink } from 'react-router-dom';
+import axios from 'axios';
 
 function checkPayments() {}
+
+function checkPayments() {
+  axios.get('http://localhost:5000/alertLatePayment')
+  .then(response => {
+    if(response.status === 200){
+      console.log("No late payments");
+    }
+  })
+  .catch(error => {
+    console.log(error);
+    if(error.response.status === 401){
+      alert("A late payment has been found in the database");
+    }
+  });
+}
+
+function backupSystem() {
+  axios.get('http://localhost:5000/backup')
+  .then(response => {
+    if(response.status === 200){
+      alert("Backup has been created successfully");
+    }
+  })
+  .catch(error => {
+    console.log(error);
+  });
+}
 
 function AdminMenu() {
     return (
@@ -18,8 +46,8 @@ function AdminMenu() {
                   <li><NavLink to="/viewBlankSA"><button type="button" class="menu-button">View Blank Stock</button></NavLink></li>
               </ul>
               <ul>
-                  <li><button type="button" class="menu-button">Backup System</button></li>
-                  <li><button type="button" class="menu-button">Restore System</button></li>
+                  <li><button type="button" class="menu-button" onClick={backupSystem}>Backup System</button></li>
+                  <li><NavLink to="/restoreSystem"><button type="button" class="menu-button">Restore System</button></NavLink></li>
                   <li><NavLink to='/stockTurnOverReport'> <button type="button" class="menu-button">Generate Stock-Turnover Report</button></NavLink></li>
               </ul>
             </div>
@@ -96,6 +124,7 @@ function MainMenu(props) {
                 );
 
         case "Office Manager":
+        checkPayments();
             return (
                 <body class="indexbody">
                     <Header staffType={props.staffType} staffName={props.staffName} staffID={props.staffID}/>
