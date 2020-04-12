@@ -1262,6 +1262,7 @@ app.post('/domesticReport', (request, response) => {
                     commission = commission + (packet2[j].commissionable * packet2[j].commissionRate / 100);
                 }
                 ticketsSold = length2;
+                console.log("length2: " + length2 + ", amount: " + amount);
             });
             finalResults.push({
                 agntNumber: packet[i].staffID,
