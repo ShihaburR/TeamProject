@@ -22,7 +22,7 @@ function StockTurnOverReport(props) {
 
     useEffect(() => {
         sortData();
-    }, [])
+    }, [stockTurnOverReport])
 
     const getStockTurnOverReportData = (start, end) => {
         axios.post('http://localhost:5000/stockTurnOverReport', {start: start, end: end})
