@@ -1275,9 +1275,9 @@ app.post('/domesticReport', (request, response) => {
                     commissionableAmount: commissionable,
                     commission: commission
                 }];
+                finalResults = (finalResults.concat(tempArray));
             });
         };
-        finalResults = (finalResults.concat(tempArray));
         console.log(finalResults);
         response.status(200).send(JSON.stringify(finalResults));
         response.end();
