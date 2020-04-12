@@ -22,18 +22,14 @@ function AdvisorReport(props) {
     const [bankRemittence, setBankRemittence] = useState(0);
     const [periodSet, setPeriodSet] = useState(false);
 
-    useEffect(() => {
-      console.log(periodSet);
-      if(periodSet){
-        getAdvisorReportData();
-      }
-    }, [])
-
     const getAdvisorReportData = (start, end) => {
+        var stop = 0;
         axios.post('http://localhost:5000/advisorReport', {start: start, end: end})
         .then(response => {
-            console.log(response.data);
+          if(advisorReport !== response.data){
             SetAdvisorReport(response.data);
+            sortSums();
+          }
         })
         .catch(function(error) {
             console.log(error);
@@ -41,7 +37,7 @@ function AdvisorReport(props) {
       }
 
     const sortSums = () => {
-        if (Array.isArray(advisorReport) && advisorReport.length > 0){
+        if (advisorReport.length > 0){
             for (let i = 0; i < advisorReport.length; i++) {
                 setTotalAgents(totalAgents + 1);
                 setTotalFareAmount(totalFareAmount + advisorReport[i].fareAmount);
@@ -67,6 +63,7 @@ function AdvisorReport(props) {
                 <GenerateReportPeriod getData={getAdvisorReportData} setPeriod={setPeriodSet}/>
             )
         } else if(periodSet) {
+          console.log("Loop?");
             return (
                 <div id="tablecontainerrefund">
                     <table className="striped responsive-table">
@@ -86,7 +83,7 @@ function AdvisorReport(props) {
                             <th>Non Assessable Amounts</th>
                         </thead>
                         <tbody>
-                        {Array.isArray(advisorReport) && advisorReport.length > 0 && advisorReport.map(r => (
+                        {advisorReport.length > 0 && advisorReport.map(r => (
                             <tr key={r.advisorNum} id={r.advisorNum}>
                                 <td>{r.advisorNum}</td>
                                 <td>{r.docNumACPNS}</td>
@@ -106,7 +103,6 @@ function AdvisorReport(props) {
                         </tbody>
                     </table>
                     <br/>
-                    {sortSums()}
                     <table>
                         <th>Total Agents</th>
                         <th>Total Fare Amount</th>
@@ -141,7 +137,7 @@ function AdvisorReport(props) {
                     </table>
                     <button type="button" className="small-button-right">Done</button>
                 </div>
-            )
+            );
         }
     }
 

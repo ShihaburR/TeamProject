@@ -5,7 +5,7 @@ import axios from 'axios';
 import GenerateReportPeriod from './generateReportPeriod';
 
 function IndividualReport(props) {
-    const [individualReport, SetIndividualReport] = useState('');
+    const [individualReport, SetIndividualReport] = useState([]);
     const [numOfTickets, setNumOfTickets] = useState(0);
     const [totalFareBaseLocal, setTotalFareBaseLocal] = useState(0);
     const [totalFareBaseUSD, setTotalFareBaseUSD] = useState(0);
@@ -26,7 +26,7 @@ function IndividualReport(props) {
             .then(response => {
               if(response.status === 200){
                 console.log(response.data);
-                SetIndividualReport("hello");
+                SetIndividualReport(response.data);
               }
             })
             .catch(function(error) {

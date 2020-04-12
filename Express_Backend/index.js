@@ -1210,6 +1210,7 @@ app.post('/domesticReport', (request, response) => {
         console.log(results);
         var packet = JSON.parse(JSON.stringify(results));
         var length = Object.keys(packet).length;
+        console.log(packet[0].staffID);
         for(var i = 0; i < length; i++) {
             let id = packet[i].staffID;
             ids.push([id]);
