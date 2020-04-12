@@ -1247,21 +1247,21 @@ app.post('/domesticReport', (request, response) => {
                 //console.log(tempResults);
                 let packet = JSON.parse(JSON.stringify(tempResults));
                 let length2 = Object.keys(packet).length;
-                for (let i = 0; i < length2; i++) {
-                    amount = amount + packet[i].amount;
-                    amountUSD = amountUSD + packet[i].amountUSD;
-                    tax = tax + packet[i].tax;
-                    totalDocumentAmount = totalDocumentAmount + packet[i].totalDocumentAmount;
-                    cash = cash + packet[i].CASH;
-                    usd = usd + packet[i].USD;
-                    bgl = bgl + packet[i].BGL;
-                    totalAmountPaid = totalAmountPaid + packet[i].totalAmountPaid;
-                    commissionable = commissionable + packet[i].commissionable;
-                    nonAssessAmounts = nonAssessAmounts + packet[i].nonAssessAmounts;
-                    commission = commission + (packet[i].commissionable * packet[i].commissionRate / 100);
+                for (let j = 0; j < length2; j++) {
+                    amount = amount + packet[j].amount;
+                    amountUSD = amountUSD + packet[j].amountUSD;
+                    tax = tax + packet[j].tax;
+                    totalDocumentAmount = totalDocumentAmount + packet[j].totalDocumentAmount;
+                    cash = cash + packet[j].CASH;
+                    usd = usd + packet[j].USD;
+                    bgl = bgl + packet[j].BGL;
+                    totalAmountPaid = totalAmountPaid + packet[j].totalAmountPaid;
+                    commissionable = commissionable + packet[j].commissionable;
+                    nonAssessAmounts = nonAssessAmounts + packet[j].nonAssessAmounts;
+                    commission = commission + (packet[j].commissionable * packet[j].commissionRate / 100);
                 }
                 finalResults.push({
-                    agntNumber: packet[0].staffID,
+                    agntNumber: packet[i].staffID,
                     ticketsSold: length2,
                     fareBaseUSD: amountUSD,
                     fareBaseLocal: amount,
@@ -1273,11 +1273,11 @@ app.post('/domesticReport', (request, response) => {
                     commissionableAmount: commissionable,
                     commission: commission
                 });
-                console.log("Final: " + JSON.stringify(finalResults));
-                response.status(200).send(JSON.stringify(finalResults));
-                response.end();
             });
         }
+        console.log("Final: " + JSON.stringify(finalResults));
+        response.status(200).send(JSON.stringify(finalResults));
+        response.end();
         });
 });
 
