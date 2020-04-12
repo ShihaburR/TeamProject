@@ -1215,7 +1215,6 @@ app.post('/domesticReport', (request, response) => {
             let id = packet[i].staffID;
             ids.push([id]);
         }
-        for (let j = 0; j < length; j++) {
             console.log("IDs: " + ids);
             let amount = 0;
             let amountUSD = 0;
@@ -1260,26 +1259,24 @@ app.post('/domesticReport', (request, response) => {
                     commissionable = commissionable + packet[i].commissionable;
                     nonAssessAmounts = nonAssessAmounts + packet[i].nonAssessAmounts;
                     commission = commission + (packet[i].commissionable * packet[i].commissionRate / 100);
+                    finalResults.push({
+                        agntNumber: ids[i],
+                        ticketsSold: length,
+                        fareBaseUSD: amountUSD,
+                        fareBaseLocal: amount,
+                        tax: tax,
+                        cash: cash,
+                        cardUSD: usd,
+                        cardLocal: bgl,
+                        totalAmountPaid: totalAmountPaid,
+                        commissionableAmount: commissionable,
+                        commission: commission
+                    });
                 }
-                finalResults.push({
-                    agntNumber: results[j].staffID,
-                    ticketsSold: length,
-                    fareBaseUSD: amountUSD,
-                    fareBaseLocal: amount,
-                    tax: tax,
-                    cash: cash,
-                    cardUSD: usd,
-                    cardLocal: bgl,
-                    totalAmountPaid: totalAmountPaid,
-                    commissionableAmount: commissionable,
-                    commission: commission
-                });
-                console.log("Final on loop "+ j +": " + finalResults);
+                console.log("Final: " + JSON.stringify(finalResults));
+                response.status(200).send(JSON.stringify(finalResults));
+                response.end();
             });
-        };
-        console.log("Final: " + finalResults);
-        response.status(200).send(JSON.stringify(finalResults));
-        response.end();
         });
 });
 
