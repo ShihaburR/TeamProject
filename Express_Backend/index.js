@@ -1264,20 +1264,20 @@ app.post('/domesticReport', (request, response) => {
                 }
                 tempArray = [{
                     agntNumber: packet[i].staffID,
-                    ticketsSold: ticketsSold,
-                    fareBaseUSD: amountUSD,
-                    fareBaseLocal: amount,
-                    tax: tax,
-                    cash: cash,
-                    cardUSD: usd,
-                    cardLocal: bgl,
-                    totalAmountPaid: totalAmountPaid,
-                    commissionableAmount: commissionable,
-                    commission: commission
+                    ticketsSold: packet[i].ticketsSold,
+                    fareBaseUSD: packet[i].amountUSD,
+                    fareBaseLocal: packet[i].amount,
+                    tax: packet[i].tax,
+                    cash: packet[i].cash,
+                    cardUSD: packet[i].usd,
+                    cardLocal: packet[i].bgl,
+                    totalAmountPaid: packet[i].totalAmountPaid,
+                    commissionableAmount: packet[i].commissionable,
+                    commission: packet[i].commission
                 }];
                 finalResults = (finalResults.concat(tempArray));
                 console.log(finalResults);
-                response.status(200).send(JSON.stringify(results));
+                response.status(200).send(JSON.stringify(finalResults));
                 response.end();
             });
         });
@@ -1384,21 +1384,21 @@ app.post('/advisorReport', (request, response) => {
                 }
                 tempArray = [{
                     advisorNum: packet[i].staffID,
-                    docNumACPNS: docNumACPNS,
-                    fareAmount: fareAmount,
-                    lz: lz,
-                    oths: oths,
-                    totalDocumentAmount: totalDocumentAmount,
-                    cardUSD: cardUSD,
-                    cardLocal: cardLocal,
-                    totalAmountPaid: totalAmountPaid,
-                    commissionableAmount: commissionableAmount,
-                    commission: commission,
-                    nonAssessableAmounts: nonAssessableAmounts
+                    docNumACPNS: packet[i].docNumACPNS,
+                    fareAmount: packet[i].fareAmount,
+                    lz: packet[i].lz,
+                    oths: packet[i].oths,
+                    totalDocumentAmount: packet[i].totalDocumentAmount,
+                    cardUSD: packet[i].cardUSD,
+                    cardLocal: packet[i].cardLocal,
+                    totalAmountPaid: packet[i].totalAmountPaid,
+                    commissionableAmount: packet[i].commissionableAmount,
+                    commission: packet[i].commission,
+                    nonAssessableAmounts: packet[i].nonAssessableAmounts
                 }];
                 finalResults.push(finalResults.concat(tempArray));
                 console.log("Final Results: " + finalResults);
-                response.send(finalResults).status(200);
+                response.status(200).send(JSON.stringify(finalResults));
                 response.end();
             });
     });
