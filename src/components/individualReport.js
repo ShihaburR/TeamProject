@@ -44,7 +44,6 @@ function IndividualReport(props) {
         if (Array.isArray(dataArray) && dataArray.length > 0) {
             for (let i = 0; i < dataArray.length; i++) {
                 console.log(i);
-                //setNumOfTickets(numOfTickets => numOfTickets + 1);
                 setTotalFareBaseLocal(totalFareBaseLocal => totalFareBaseLocal + dataArray[i].amount);
                 setTotalFareBaseUSD(totalFareBaseUSD => totalFareBaseUSD + dataArray[i].amountUSD);
                 setTotalTax(totalTax => totalTax + dataArray[i].localTax);
@@ -56,8 +55,6 @@ function IndividualReport(props) {
                 setTotalCommissions(totalCommissions => totalCommissions + (dataArray[i].commissionable * dataArray[i].commissionRate/100));
             }
         setNumOfTickets(dataArray.length);
-        //setNetAmounts4AgentDebits(totalCommissionableAmount - totalCommissions);
-        //setBankRemittence(totalAmountPaid - totalCommissions);
         }
     }
 

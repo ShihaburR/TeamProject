@@ -1406,21 +1406,19 @@ app.post('/advisorReport', (request, response) => {
 
 // stock turnover report
 app.post('/stockTurnoverReport', (request, response) => {
-    let agntNewRBlanksResult = [];
-    let subAgntNewABlanksResults = [];
-    let subAgntABlanksResults = [];
-    let subAgntUBlanksResults = [];
-    let agentsAmountsResults = [];
-    let subAgentsAmountsResults = [];
     var begin = request.body.start;
     var end = request.body.end;
+    var finalData = [];
 
     let agntNewRBlanksSQL = 'select (Blank.blankNumber) AS blank ' +
         'FROM Blank where (Blank.recievedDate BETWEEN ? AND ?) order BY Blank.blankNumber asc;';
     db.query(agntNewRBlanksSQL,[begin, end], (error, results) => {
         if (error) throw error;
         //console.log(results);
-        agntNewRBlanksResult = agntNewRBlanksResult.concat(results) ;
+        let agntNewRBlanksResult = results;
+        console.log("Array: " + agntNewRBlanksResult);
+        finalData.push({agntNewRBlanks: agntNewRBlanksResult});
+
     });
     let subAgntNewABlanksSQL = 'select  (BlankAllocation.staffID) AS code, (Blank.blankNumber ) AS blank ' +
         'FROM   Blank inner join BlankAllocation where Blank.blankNumber=BlankAllocation.blankNumber and ' +
@@ -1428,7 +1426,9 @@ app.post('/stockTurnoverReport', (request, response) => {
     db.query(subAgntNewABlanksSQL, [begin, end], (error, results) => {
         if (error) throw error;
         console.log(results);
-        subAgntNewABlanksResults = results;
+        let subAgntNewABlanksResults = results;
+        console.log("Array: " + subAgntNewABlanksResults);
+        finalData.push({subAgntNewABlanks: subAgntNewABlanksResults});
     });
     let subAgntABlanksSQL = 'select (BlankAllocation.staffID) AS code, (Blank.blankNumber) AS blank ' +
         'FROM Blank inner join BlankAllocation where Blank.blankNumber=BlankAllocation.blankNumber and ' +
@@ -1436,7 +1436,9 @@ app.post('/stockTurnoverReport', (request, response) => {
     db.query(subAgntABlanksSQL, [begin, end], (error, results) => {
         if (error) throw error;
         console.log(results);
-        subAgntABlanksResults = subAgntABlanksResults.concat(results);
+        let subAgntABlanksResults = results;
+        console.log("Array: " + subAgntABlanksResults);
+        finalData.push({subAgntABlanks: subAgntABlanksResults});
     });
     let subAgntUBlanksSQL = 'select (Blank.blankNumber) AS blank FROM Blank inner join Sales  where ' +
         '(Sales.transactionDate BETWEEN ? AND ?) and Blank.statusID=1 and ' +
@@ -1444,7 +1446,9 @@ app.post('/stockTurnoverReport', (request, response) => {
     db.query(subAgntUBlanksSQL, [begin, end], (error, results) => {
         if (error) throw error;
         console.log(results);
-        subAgntUBlanksResults = subAgntUBlanksResults.concat(results);
+        let subAgntUBlanksResults = results;
+        console.log("Array: " + subAgntUBlanksResults);
+
     });
     let agentsAmountsSQL = 'select (Blank.blankNumber) AS blank ' +
         'FROM Blank where (Blank.recievedDate > ?)  and Blank.statusID=2 or ' +
@@ -1452,7 +1456,9 @@ app.post('/stockTurnoverReport', (request, response) => {
     db.query(agentsAmountsSQL, [begin], (error, results) => {
         if (error) throw error;
         console.log(results);
-        agentsAmountsResults = agentsAmountsResults.concat(results);
+        let agentsAmountsResults = results;
+        console.log("Array: " + agentsAmountsResults);
+        finalData.push({agentsAmounts: agentsAmountsResults});
     });
     let subAgentsAmountsSQL = 'select  distinct (BlankAllocation.staffID) AS code, (Blank.blankNumber) AS blank ' +
         'FROM Blank inner join BlankAllocation, Sales where Blank.blankNumber=BlankAllocation.blankNumber and ' +
@@ -1460,19 +1466,10 @@ app.post('/stockTurnoverReport', (request, response) => {
     db.query(subAgentsAmountsSQL, [end], (error, results) => {
         if (error) throw error;
         console.log(results);
-        subAgentsAmountsResults = subAgentsAmountsResults.concat(results);
-        console.log("Sub: " + subAgentsAmountsResults);
+        let subAgentsAmountsResults = results;
+        console.log("Array: " + subAgentsAmountsResults);
     });
-    let finalData = [
-        {
-            agntNewRBlanks: agntNewRBlanksResult,
-            subAgntNewABlanks: subAgntNewABlanksResults,
-            subAgntABlanks: subAgntABlanksResults,
-            subAgntUBlanks: subAgntUBlanksResults,
-            agentsAmounts: agentsAmountsResults,
-            subAgentsAmounts: subAgentsAmountsResults
-        }
-    ]
+    console.log("Final: " + finalData);
     response.status(200).send(finalData);
     response.end();
 });
