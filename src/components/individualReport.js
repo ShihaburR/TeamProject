@@ -25,9 +25,9 @@ function IndividualReport(props) {
         axios.post('http://localhost:5000/individualReport', {start: start, end: end})
             .then(response => {
               if(response.status === 200){
-                setSums();
                 console.log(response.data);
                 SetIndividualReport(response.data);
+                setSums();
               }
             })
             .catch(function(error) {
@@ -37,16 +37,18 @@ function IndividualReport(props) {
     }
 
     const setSums = () => {
+      console.log('hello there');
+      console.log("length: " + individualReport.length);
         if (Array.isArray(individualReport) && individualReport.length > 0) {
             for (let i = 0; i < individualReport.length; i++) {
                 setNumOfTickets(numOfTickets + 1);
-                if (individualReport.amount !== null){setTotalFareBaseLocal(totalFareBaseLocal + individualReport.amount);}
-                if (individualReport.amountUSD !== null){setTotalFareBaseUSD(totalFareBaseUSD + individualReport.amountUSD);}
-                if (individualReport.localTax !== null){setTotalTax(totalTax + individualReport.localTax);}
-                if (individualReport.cash !== null){setTotalCash(totalCash + individualReport.cash);}
-                if (individualReport.usd !== null){setTotalCardUSD(totalCardUSD + individualReport.usd);}
+                if (individualReport.amount !== null ){setTotalFareBaseLocal(totalFareBaseLocal + individualReport.amount);}
+                if (individualReport.amountUSD !== null ){setTotalFareBaseUSD(totalFareBaseUSD + individualReport.amountUSD);}
+                if (individualReport.localTax !== null ){setTotalTax(totalTax + individualReport.localTax);}
+                if (individualReport.cash  !== null){setTotalCash(totalCash + individualReport.cash);}
+                if (individualReport.usd !== null ){setTotalCardUSD(totalCardUSD + individualReport.usd);}
                 if (individualReport.bgl !== null){setTotalCardLocal(totalCardLocal + individualReport.bgl);}
-                if (individualReport.totalAmountPaid !== null){setTotalAmountPaid(totalAmountPaid + individualReport.totalAmountPaid);}
+                if (individualReport.totalAmountPaid !== null ){setTotalAmountPaid(totalAmountPaid + individualReport.totalAmountPaid);}
                 if (individualReport.commissionable !== null){
                     setTotalCommissionableAmount(totalCommissionableAmount + individualReport.commissionable);
                     setTotalCommissions(totalCommissions + (individualReport.commissionable * individualReport.commissionRate/100));

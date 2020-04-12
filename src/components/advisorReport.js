@@ -5,7 +5,7 @@ import axios from 'axios';
 import GenerateReportPeriod from './generateReportPeriod';
 
 function AdvisorReport(props) {
-    const [advisorReport, SetAdvisorReport] = useState([]);
+    const [advisorReport, SetAdvisorReport] = useState('');
     const [totalAgents, setTotalAgents] = useState(0);
     const [totalFareAmount, setTotalFareAmount] = useState(0);
     const [totalLZ, setTotalLZ] = useState(0);
