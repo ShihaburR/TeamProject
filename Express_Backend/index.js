@@ -1215,8 +1215,8 @@ app.post('/domesticReport', (request, response) => {
             let id = packet[i].staffID;
             ids.push([id]);
         }
-        console.log("IDs: " + ids);
-            let ticketsSold = 0;
+        for (let j = 0; j < domesticReportID.length; j++) {
+            console.log("IDs: " + ids);
             let amount = 0;
             let amountUSD = 0;
             let tax = 0;
@@ -1243,13 +1243,12 @@ app.post('/domesticReport', (request, response) => {
                 'BETWEEN ? AND ?) and Sales.blankNumber=Blank.blankNumber and ' +
                 'Blank.blankTypeID=BlankType.blankTypeID and BlankType.blankArea="international" and ' +
                 'Sales.paymentTypeID=TypeOfPayment.paymentTypeID and Sales.staffID= ? order by saleID';
-            db.query(domesticReportByID,[begin, end, ids],(error, tempResults) => {
+            db.query(domesticReportByID, [begin, end, ids], (error, tempResults) => {
                 if (error) throw error;
                 console.log(tempResults);
                 var packet = JSON.parse(JSON.stringify(tempResults));
                 var length = Object.keys(packet).length;
                 for (let i = 0; i < length; i++) {
-                    ticketsSold = ticketsSold + 1;
                     amount = amount + packet[i].amount;
                     amountUSD = amountUSD + packet[i].amountUSD;
                     tax = tax + packet[i].tax;
@@ -1260,26 +1259,28 @@ app.post('/domesticReport', (request, response) => {
                     totalAmountPaid = totalAmountPaid + packet[i].totalAmountPaid;
                     commissionable = commissionable + packet[i].commissionable;
                     nonAssessAmounts = nonAssessAmounts + packet[i].nonAssessAmounts;
-                    commission = commission + (packet[i].commissionable * packet[i].commissionRate/100);
+                    commission = commission + (packet[i].commissionable * packet[i].commissionRate / 100);
+
                 }
                 tempArray = [{
-                    agntNumber: packet[i].staffID,
-                    ticketsSold: packet[i].ticketsSold,
-                    fareBaseUSD: packet[i].amountUSD,
-                    fareBaseLocal: packet[i].amount,
-                    tax: packet[i].tax,
-                    cash: packet[i].cash,
-                    cardUSD: packet[i].usd,
-                    cardLocal: packet[i].bgl,
-                    totalAmountPaid: packet[i].totalAmountPaid,
-                    commissionableAmount: packet[i].commissionable,
-                    commission: packet[i].commission
+                    agntNumber: results[j].staffID,
+                    ticketsSold: length,
+                    fareBaseUSD: amountUSD,
+                    fareBaseLocal: amount,
+                    tax: tax,
+                    cash: cash,
+                    cardUSD: usd,
+                    cardLocal: bgl,
+                    totalAmountPaid: totalAmountPaid,
+                    commissionableAmount: commissionable,
+                    commission: commission
                 }];
-                finalResults = (finalResults.concat(tempArray));
-                console.log(finalResults);
-                response.status(200).send(JSON.stringify(finalResults));
-                response.end();
             });
+        };
+        finalResults = (finalResults.concat(tempArray));
+        console.log(finalResults);
+        response.status(200).send(JSON.stringify(finalResults));
+        response.end();
         });
 });
 

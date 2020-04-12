@@ -17,8 +17,8 @@ function DomesticReport(props) {
     const [totalAmountPaid, setTotalAmountPaid] = useState(0);
     const [totalCommissionableAmount, setTotalCommissionableAmount] = useState(0);
     const [totalCommissions, setTotalCommssions] = useState(0);
-    const [netAmounts4AgentDebits, setNetAmounts4AgentDebits] = useState(0);
-    const [bankRemittence, setBankRemittence] = useState(0);
+    //const [netAmounts4AgentDebits, setNetAmounts4AgentDebits] = useState(0);
+    //const [bankRemittence, setBankRemittence] = useState(0);
     const [periodSet, setPeriodSet] = useState(false);
 
     const getDomesticReportData = (start, end) => {
