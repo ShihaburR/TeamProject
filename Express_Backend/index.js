@@ -1215,7 +1215,6 @@ app.post('/domesticReport', (request, response) => {
             //ids.push(packet[i].staffID);
             // ------------------------------------------------------------------------------
             console.log("IDs: " + packet[i].staffID);
-            let ticketsSold = 0;
             let amount = 0;
             let amountUSD = 0;
             let tax = 0;
@@ -1261,23 +1260,23 @@ app.post('/domesticReport', (request, response) => {
                     nonAssessAmounts = nonAssessAmounts + packet2[j].nonAssessAmounts;
                     commission = commission + (packet2[j].commissionable * packet2[j].commissionRate / 100);
                 }
-                ticketsSold = length2;
                 console.log("length2: " + length2 + ", amount: " + amount);
+                finalResults.push({
+                    agntNumber: packet[i].staffID,
+                    ticketsSold: length2,
+                    fareBaseUSD: amountUSD,
+                    fareBaseLocal: amount,
+                    tax: tax,
+                    cash: cash,
+                    cardUSD: usd,
+                    cardLocal: bgl,
+                    totalAmountPaid: totalAmountPaid,
+                    commissionableAmount: commissionable,
+                    commission: commission
+                });
+                console.log("Final after push " + i + ": " + JSON.stringify(finalResults))
             });
-            finalResults.push({
-                agntNumber: packet[i].staffID,
-                ticketsSold: ticketsSold,
-                fareBaseUSD: amountUSD,
-                fareBaseLocal: amount,
-                tax: tax,
-                cash: cash,
-                cardUSD: usd,
-                cardLocal: bgl,
-                totalAmountPaid: totalAmountPaid,
-                commissionableAmount: commissionable,
-                commission: commission
-            });
-            console.log("Final after push " + i + ": " + JSON.stringify(finalResults))
+
         }
         console.log("Final: " + JSON.stringify(finalResults));
         response.status(200).send(JSON.stringify(finalResults));
