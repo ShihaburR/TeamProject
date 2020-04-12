@@ -1300,9 +1300,11 @@ app.post('/domesticReport', async (request, response) => {
         console.log(packet[0].staffID);
     });
     console.log(result.length);
-    if (result.length >= 0) {
+    let length = Object.keys(result).length;
+    console.log(length);
+    if (length >= 0) {
         console.log("if statement works");
-        for (let i = 0; i < result.length; i++) {
+        for (let i = 0; i < length; i++) {
             console.log("loop statement works");
             ids.push(result[i].staffID);
             console.log("IDs: " + ids);
