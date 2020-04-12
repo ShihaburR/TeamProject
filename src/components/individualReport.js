@@ -27,7 +27,7 @@ function IndividualReport(props) {
               if(response.status === 200){
                 console.log(response.data);
                 SetIndividualReport(response.data);
-                setSums();
+                setSums(response.data);
               }
             })
             .catch(function(error) {
@@ -36,22 +36,22 @@ function IndividualReport(props) {
             );
     }
 
-    const setSums = () => {
+    const setSums = (dataArray) => {
       console.log('hello there');
-      console.log("length: " + individualReport.length);
-        if (Array.isArray(individualReport) && individualReport.length > 0) {
-            for (let i = 0; i < individualReport.length; i++) {
+      console.log("length: " + dataArray.length);
+        if (Array.isArray(dataArray) && dataArray.length > 0) {
+            for (let i = 0; i < dataArray.length; i++) {
                 setNumOfTickets(numOfTickets + 1);
-                if (individualReport.amount !== null ){setTotalFareBaseLocal(totalFareBaseLocal + individualReport.amount);}
-                if (individualReport.amountUSD !== null ){setTotalFareBaseUSD(totalFareBaseUSD + individualReport.amountUSD);}
-                if (individualReport.localTax !== null ){setTotalTax(totalTax + individualReport.localTax);}
-                if (individualReport.cash  !== null){setTotalCash(totalCash + individualReport.cash);}
-                if (individualReport.usd !== null ){setTotalCardUSD(totalCardUSD + individualReport.usd);}
-                if (individualReport.bgl !== null){setTotalCardLocal(totalCardLocal + individualReport.bgl);}
-                if (individualReport.totalAmountPaid !== null ){setTotalAmountPaid(totalAmountPaid + individualReport.totalAmountPaid);}
-                if (individualReport.commissionable !== null){
-                    setTotalCommissionableAmount(totalCommissionableAmount + individualReport.commissionable);
-                    setTotalCommissions(totalCommissions + (individualReport.commissionable * individualReport.commissionRate/100));
+                if (dataArray.amount !== null ){setTotalFareBaseLocal(totalFareBaseLocal + dataArray.amount);}
+                if (dataArray.amountUSD !== null ){setTotalFareBaseUSD(totalFareBaseUSD + dataArray.amountUSD);}
+                if (dataArray.localTax !== null ){setTotalTax(totalTax + dataArray.localTax);}
+                if (dataArray.cash  !== null){setTotalCash(totalCash + dataArray.cash);}
+                if (dataArray.usd !== null ){setTotalCardUSD(totalCardUSD + dataArray.usd);}
+                if (dataArray.bgl !== null){setTotalCardLocal(totalCardLocal + dataArray.bgl);}
+                if (dataArray.totalAmountPaid !== null ){setTotalAmountPaid(totalAmountPaid + dataArray.totalAmountPaid);}
+                if (dataArray.commissionable !== null){
+                    setTotalCommissionableAmount(totalCommissionableAmount + dataArray.commissionable);
+                    setTotalCommissions(totalCommissions + (dataArray.commissionable * dataArray.commissionRate/100));
                 }
             }
         setNetAmounts4AgentDebits(totalCommissionableAmount - totalCommissions);
