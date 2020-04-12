@@ -16,8 +16,8 @@ function IndividualReport(props) {
     const [totalAmountPaid, setTotalAmountPaid] = useState(0);
     const [totalCommissionableAmount, setTotalCommissionableAmount] = useState(0);
     const [totalCommissions, setTotalCommissions] = useState(0);
-    const [netAmounts4AgentDebits, setNetAmounts4AgentDebits] = useState(0);
-    const [bankRemittence, setBankRemittence] = useState(0);
+    //const [netAmounts4AgentDebits, setNetAmounts4AgentDebits] = useState(0);
+    //const [bankRemittence, setBankRemittence] = useState(0);
     const [periodSet, setPeriodSet] = useState(false);
 
     const getIndividualReportData = (start, end) => {
@@ -44,7 +44,7 @@ function IndividualReport(props) {
         if (Array.isArray(dataArray) && dataArray.length > 0) {
             for (let i = 0; i < dataArray.length; i++) {
                 console.log(i);
-                setNumOfTickets(numOfTickets => numOfTickets + 1);
+                //setNumOfTickets(numOfTickets => numOfTickets + 1);
                 setTotalFareBaseLocal(totalFareBaseLocal => totalFareBaseLocal + dataArray[i].amount);
                 setTotalFareBaseUSD(totalFareBaseUSD => totalFareBaseUSD + dataArray[i].amountUSD);
                 setTotalTax(totalTax => totalTax + dataArray[i].localTax);
@@ -55,8 +55,9 @@ function IndividualReport(props) {
                 setTotalCommissionableAmount(totalCommissionableAmount => totalCommissionableAmount + dataArray[i].commissionable);
                 setTotalCommissions(totalCommissions => totalCommissions + (dataArray[i].commissionable * dataArray[i].commissionRate/100));
             }
-        setNetAmounts4AgentDebits(totalCommissionableAmount - totalCommissions);
-        setBankRemittence(totalAmountPaid - totalCommissions);
+        setNumOfTickets(dataArray.length);
+        //setNetAmounts4AgentDebits(totalCommissionableAmount - totalCommissions);
+        //setBankRemittence(totalAmountPaid - totalCommissions);
         }
     }
 
@@ -122,8 +123,8 @@ function IndividualReport(props) {
                             <td>{totalAmountPaid}</td>
                             <td>{totalCommissionableAmount}</td>
                             <td>{totalCommissions}</td>
-                            <td>{netAmounts4AgentDebits}</td>
-                            <td>{bankRemittence}</td>
+                            <td>{totalCommissionableAmount - totalCommissions}</td>
+                            <td>{totalAmountPaid - totalCommissions}</td>
                         </tr>
                     </table>
                     <button type="button" className="small-button-right">Done</button>
