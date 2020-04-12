@@ -3,8 +3,6 @@ import Header from './header';
 import { NavLink } from 'react-router-dom';
 import axios from 'axios';
 
-function checkPayments() {}
-
 function checkPayments() {
   axios.get('http://localhost:5000/alertLatePayment')
   .then(response => {
