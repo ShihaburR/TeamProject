@@ -1210,11 +1210,11 @@ app.post('/domesticReport', (request, response) => {
         if (error) throw error;
         console.log(results);
         var packet = JSON.parse(JSON.stringify(results));
-        var length = Object.keys(packet).length;
+        var length1 = Object.keys(packet).length;
         console.log(packet[0].staffID);
-        for(var i = 0; i < length; i++) {
+        for(var i = 0; i < length1; i++) {
             let id = packet[i].staffID;
-            ids.push([id]);
+            ids.push(id);
         }
             console.log("IDs: " + ids);
             let amount = 0;
@@ -1247,9 +1247,9 @@ app.post('/domesticReport', (request, response) => {
                 if (error) throw error;
                 //console.log(tempResults);
                 var packet = JSON.parse(JSON.stringify(tempResults));
-                var length = Object.keys(packet).length;
-                for (let i = 0; i < length; i++) {
-                    agntNumber = agntNumber + ids[i];
+                var length2 = Object.keys(packet).length;
+                for (let i = 0; i < length2; i++) {
+                    agntNumber = ids[i];
                     amount = amount + packet[i].amount;
                     amountUSD = amountUSD + packet[i].amountUSD;
                     tax = tax + packet[i].tax;
@@ -1264,7 +1264,7 @@ app.post('/domesticReport', (request, response) => {
                 }
                 finalResults.push({
                     agntNumber: agntNumber,
-                    ticketsSold: length,
+                    ticketsSold: length2,
                     fareBaseUSD: amountUSD,
                     fareBaseLocal: amount,
                     tax: tax,
