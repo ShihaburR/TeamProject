@@ -1299,7 +1299,7 @@ app.post('/domesticReport', async (request, response) => {
         let packet = JSON.parse(JSON.stringify(results));
         console.log(packet[0].staffID);
     });
-    console.log(result.length);
+    console.log(JSON.stringify(result));
     let length = Object.keys(result).length;
     console.log(length);
     if (length >= 0) {
